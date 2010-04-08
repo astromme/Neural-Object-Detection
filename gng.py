@@ -105,7 +105,7 @@ class GrowingNeuralGas:
     neighborLearnRate Used to adjust other neighbors towards input point
     maxAge            Edges older than maxAge are removed
     reduceError       All errors are reduced by this amount each GNG step
-    stepsToInsert     A new unit is added periodically based on this
+    stepsToInsert     Min steps before inserting a new node
     insertError       Error of every new unit is reduced by this amount
     
     NOTE: The default values are taken from the paper.
@@ -132,7 +132,8 @@ class GrowingNeuralGas:
         self.neighborLearnRate = 0.006
         self.maxAge = 50
         self.reduceError = 0.995
-        self.stepsToInsert = 100
+        self.stepsToInsert = 300
+        self.lastInsertedStep = 0
         self.insertError = 0.5
         self.verbose = verbose
         self.stepCount = 0
@@ -331,11 +332,13 @@ class GrowingNeuralGas:
         self.removeStaleEdges()
 
         #if self.stepCount % self.stepsToInsert == 0:
-        if self.averageError() > 1.0:
+        if self.averageError() > 0.5 and self.lastInsertedStep > self.stepsToInsert:
           print "Creating new unit at timestep %d and error %.3f" % (self.stepCount, self.averageError())
+          self.lastInsertedStep = 0
           self.insertUnit()
         self.reduceAllErrors()
         self.stepCount += 1
+        self.lastInsertedStep += 1
 
     #----------------------------------------------------------------------
     # graphics support
@@ -616,37 +619,3 @@ class GrowingNeuralGas:
 # >>> show()
 # >>> sstep()
 
-# this creates directory gng_data/ to store GNG data (use keyword
-# argument dir='whatever' to specify a different directory name)
-gng = GrowingNeuralGas(dim=3, seed=1247751676, dir=sys.argv[1])
-
-# run this first to create the data
-def main():
-    # run the GNG for 300 time steps on the given distribution and
-    # record data in the directory gng_data
-    gng.run(300, planes)
-    print "Number of units:" + str(len(gng.units))
-    # create the movie
-    gng.saveMovie()
-    # view the saved data as a 3-D movie at medium speed
-    gng.view('3d')
-    # view the saved data as a 2-D movie at fast speed
-    gng.view('2d', speed='fast')
-
-def show():
-    print 'showing frame number 250 in 2-D and 3-D'
-    gng.view('2d3d', frame=250)
-
-def sstep():
-    print 'single-stepping frames 200 to 250 in 2-D and 3-D'
-    gng.view('2d3d', start=200, end=250, speed='pause')
-
-# Data distribution points are plotted in green, GNG model vectors and
-# edges in blue.  Click and drag in the 3-D gnuplot window to rotate
-# the graph.  Option-Click (on a Mac; probably Shift-Click or
-# Control-Click on Linux) in the 3-D gnuplot window and slide the
-# mouse left or right to zoom in or out.
-
-# Note: to be able to rotate 3-D gnuplot windows with the mouse on a
-# Mac, you must run Gnuplot or Python in X11 through an xterm window.
-# Unfortunately, Gnuplot mouse support is not available in AquaTerm.
