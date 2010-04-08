@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Graphical support for viewing GNG networks
 # Jim Marshall
 # Version 7/16/09
@@ -6,7 +7,7 @@
 # "cluster" installed on your system (and visible in your PATH), and
 # the Gnuplot python module installed.
 
-import random, math, time, commands, os.path, Gnuplot, sys
+import random, math, time, commands, os.path, sys
 from gngdists import *
 
 """
@@ -112,9 +113,6 @@ class GrowingNeuralGas:
 
     The GNG always begins with two randomly placed units.
 
-    Every GNG object has an associated directory where data files for
-    plotting the network in 2-D and 3-D are stored, as well as the
-    random seed value used to create the data.
     """
     def __init__(self, dim=2, dir='gng_data', seed=None, verbose=0, \
                  minimum = -1, maximum = 1):
@@ -147,19 +145,6 @@ class GrowingNeuralGas:
         self.edge_vectors = [[]]
         # dist_points[t-1] is the distribution point generated at time t
         self.dist_points = []
-        # 2-D plot
-        self.gplot2 = Gnuplot.Gnuplot()
-        self.gplot2('set term x11')
-        self.gplot2('set size ratio -1')
-        self.gplot2('set key off')
-        # 3-D plot
-        self.gplot3 = Gnuplot.Gnuplot()
-        self.gplot3('set term x11')
-        self.gplot3('set size ratio -1')
-        self.gplot3('set key off')
-        self.gplot3('set ticslevel 0')
-        self.plot_edges = []
-        self.plot_units = []
 
     def __str__(self):
         result = "GNG step %d\nNumber of units: %d\nAverage error: %s\n" % \
@@ -224,7 +209,6 @@ class GrowingNeuralGas:
         b.edges.append(newEdge2)
         # only need to add one edge to unique_edges
         self.unique_edges.append(newEdge1)
-        self.addPlotEdge(newEdge1)
 
     def disconnectUnits(self, a, b):
         """
@@ -264,7 +248,6 @@ class GrowingNeuralGas:
             if len(self.units[i].edges) == 0:
                 if self.verbose >= 1:
                     print "Removing disconnected unit:", unit.vectorStr()
-                self.removePlotUnit(self.units[i])
                 self.units.pop(i)
 
     def maxErrorUnit(self, unitList):
@@ -298,7 +281,6 @@ class GrowingNeuralGas:
         self.units.append(newUnit)
         if self.verbose > 0:
             print "Insert unit: %s\nTotal units: %d" % (newUnit.vectorStr(), len(self.units))
-        self.addPlotUnit(newUnit)
         self.connectUnits(newUnit, worst)
         self.connectUnits(newUnit, worstNeighbor)
         self.disconnectUnits(worst, worstNeighbor)
@@ -340,36 +322,6 @@ class GrowingNeuralGas:
         self.stepCount += 1
         self.lastInsertedStep += 1
 
-    #----------------------------------------------------------------------
-    # graphics support
-
-    def addPlotUnit(self, unit):
-        self.plot_units.append(unit)
-        if self.verbose > 0:
-            print 'Added plot unit (now %d units)' % len(self.plot_units)
-
-    def addPlotEdge(self, edge):
-        self.plot_edges.append(edge)
-        if self.verbose > 0:
-            print 'Added plot edge (now %d edges)' % len(self.plot_edges)
-
-    def removePlotUnit(self, unit):
-        for i in range(len(self.plot_units)):
-            if self.plot_units[i] is unit:
-                self.plot_units.pop(i)
-                if self.verbose > 0:
-                    print 'Removed plot unit (now %d units)' % len(self.plot_units)
-                return
-
-    def removeUniqueEdge(self, edge):
-        for i in range(len(self.unique_edges)):
-            if self.unique_edges[i] is edge:
-                self.unique_edges.pop(i)
-                if self.verbose > 0:
-                    print 'Removed plot edge (now %d edges)' % len(self.plot_edges)
-                return True
-        return False
-
     def run(self, cycles, dist):
         assert cycles > 0
         assert dist.dimension == self.dimension, \
@@ -391,231 +343,4 @@ class GrowingNeuralGas:
         self.model_vectors.append(currentModelVectors)
         self.edge_vectors.append(currentEdges)
         self.dist_points.append(nextPoint)
-
-    def clearDirectory(self, dir):
-        if os.path.exists(dir):
-            answer = raw_input('Clear directory %s? ' % dir)
-            if answer not in ('y', 'Y'):
-                print 'Aborted - no files deleted'
-                return False
-            print 'Clearing directory %s' % dir
-            commands.getoutput('rm -f %s/basis' % dir)
-            if os.path.exists('%s/dist/' % dir):
-                commands.getoutput('rm -f %s/dist/*' % dir)
-            else:
-                commands.getoutput('mkdir %s/dist/' % dir)
-            if os.path.exists('%s/frames/' % dir):
-                commands.getoutput('rm -f %s/frames/*' % dir)
-            else:
-                commands.getoutput('mkdir %s/frames/' % dir)
-            if not os.path.exists('%s/empty' % dir):
-                commands.getoutput('touch %s/empty' % dir) # gnuplot hack. see plotFrame3D
-        else:
-            print 'Creating directory %s to store movie frames' % dir
-            commands.getoutput('mkdir %s/' % dir)
-            commands.getoutput('mkdir %s/frames/' % dir)
-            commands.getoutput('mkdir %s/dist/' % dir)
-            commands.getoutput('touch %s/empty' % dir) # gnuplot hack. see plotFrame3D
-        return True
-
-    def saveGNGData(self, dir, timeStep):
-        filename = '%s/frames/gng_%05d.dat' % (dir, timeStep)
-        f = open(filename, 'w')
-        # to plot the model vectors and edges correctly in 3-D in
-        # Gnuplot using linespoints, each pair of points representing
-        # an edge must be separated from the others by two blank lines
-        for v in self.model_vectors[timeStep]:
-            writeVector(f, v)
-            writeSeparator(f)
-        for (v1, v2) in self.edge_vectors[timeStep]:
-            writeVector(f, v1)
-            writeVector(f, v2)
-            writeSeparator(f)
-        f.close()
-
-    def saveGNGProjections(self, dimension, frame, basis):
-        if dimension == 2:
-            commands.getoutput('cluster -p -e%s -c1,2 %s.dat > %s.tmp' % (basis, frame, frame))
-        else:
-            commands.getoutput('cluster -p -e%s -c1,2,3 %s.dat > %s.tmp' % (basis, frame, frame))
-        # cluster does not preserve blank lines, so we must first
-        # create a .tmp file of the transformed vectors and then
-        # create the final .2d or .3d file from the .tmp file by
-        # manually adding blank lines to match the original file
-        src = open('%s.dat' % frame)
-        tmp = open('%s.tmp' % frame)
-        dst = open('%s.%dd' % (frame, dimension), 'w')
-        for line in src:
-            if line == '\n':
-                dst.write('\n')
-            else:
-                dst.write(tmp.readline())
-        src.close()
-        tmp.close()
-        dst.close()
-        commands.getoutput('rm -f %s.tmp' % frame)
-
-    def saveDistProjections(self, dimension, frame, basis):
-        # assert cluster program exists
-        if dimension == 2:
-            commands.getoutput('cluster -p -e%s -c1,2 %s.dat > %s.2d' % (basis, frame, frame))
-        else:
-            commands.getoutput('cluster -p -e%s -c1,2,3 %s.dat > %s.3d' % (basis, frame, frame))
-
-    def saveMovie(self, dir=None, stepSize=1):
-        # assert cluster program exists
-        # initialize data directory to store movie frames
-        if dir is None:
-            dir = self.dataDir
-        if not self.clearDirectory(dir):
-            return
-
-        print 'saving GNG data'
-        for timeStep in range(self.stepCount+1):
-            self.saveGNGData(dir, timeStep)
-        print 'saving distribution data'
-        for timeStep in range(self.stepCount+1):
-            dataFile = '%s/dist/dist_%05d.dat' % (dir, timeStep)
-            savePoints(dataFile, self.dist_points[:timeStep])
-            
-        # create eigenbasis using model vectors from last time step
-        basis = '%s/basis' % dir
-        lastFrame = '%s/frames/gng_%05d.dat' % (dir, self.stepCount)
-        commands.getoutput('cluster -p -e%s -c1,2 %s > /dev/null' % (basis, lastFrame))
-
-        print 'creating projections of GNG vectors/edges'
-        for timeStep in range(self.stepCount+1):
-            frame = '%s/frames/gng_%05d' % (dir, timeStep)
-            self.saveGNGProjections(2, frame, basis)
-            self.saveGNGProjections(3, frame, basis)
-            if timeStep > 0 and timeStep % 100 == 0 or timeStep == self.stepCount:
-                print '  %d/%d complete' % (timeStep, self.stepCount)
-
-        print 'creating projections of distribution points'
-        for timeStep in range(self.stepCount+1):
-            frame = '%s/dist/dist_%05d' % (dir, timeStep)
-            self.saveDistProjections(2, frame, basis)
-            self.saveDistProjections(3, frame, basis)
-            commands.getoutput('tail -1 %s.2d > %s.last.2d' % (frame, frame))
-            commands.getoutput('tail -1 %s.3d > %s.last.3d' % (frame, frame))
-            if timeStep > 0 and timeStep % 100 == 0 or timeStep == self.stepCount:
-                print '  %d/%d complete' % (timeStep, self.stepCount)
-
-#-------------------------------------------------------------------------------------------
-
-    def view(self, mode='2d', speed='medium', dir=None, frame=None, start=0, end=None):
-        # verify the arguments
-        assert mode in ('2d', '3d', '2d3d', '3d2d'), 'bad mode argument: %s' % mode
-        delay = {'fast': 0.001, 'medium': 0.05, 'slow': 0.3, 'pause': 0}
-        assert speed in delay, 'bad speed argument: %s' % speed
-        if dir is None:
-            dir = self.dataDir
-        if not os.path.exists(dir):
-            print 'directory does not exist: %s' % dir
-            return
-        assert frame is None or type(frame) is int, 'bad frame argument: %s' % frame
-        assert type(start) is int, 'bad start argument: %s' % start
-        assert end is None or type(end) is int, 'bad end argument: %s' % end
-        # figure out last frame
-        gngFrames = commands.getoutput('ls %s/frames/gng_*.dat' % dir).split()
-        distFrames = commands.getoutput('ls %s/dist/dist_*.dat' % dir).split()
-        gngFrames.sort()
-        distFrames.sort()
-        lastFrame = int(gngFrames[-1][-9:-4])
-
-        if frame is not None:
-            if not 0 <= frame <= lastFrame:
-                print 'no such frame: %d' % frame
-                return
-            start = frame
-            end = frame
-        elif not 0 <= start <= lastFrame:
-            print 'no such frame: %d' % start
-            return
-        elif end is None:
-            end = lastFrame
-        elif not 0 <= end <= lastFrame:
-            print 'no such frame: %d' % end
-            return
-        elif end < start:
-            end = start
-
-        # plot the frames
-        for timeStep in range(start, end+1):
-            if '2d' in mode:
-                self.plotFrame2D(dir, timeStep)
-            if '3d' in mode:
-                self.plotFrame3D(dir, timeStep)
-            time.sleep(delay[speed])
-            if speed == 'pause' and timeStep != end:
-                if raw_input('Press RETURN to continue (q to quit)...') in ('q', 'Q'):
-                    return
-
-    def plotFrame2D(self, dir, timeStep):
-        gng_2d = '%s/frames/gng_%05d.2d' % (dir, timeStep)
-        dist_2d = '%s/dist/dist_%05d.2d' % (dir, timeStep)
-        last_2d = '%s/dist/dist_%05d.last.2d' % (dir, timeStep)
-        if not os.path.exists(gng_2d):
-            print 'WARNING: %s does not exist' % gng_2d
-            return
-        cmd = 'plot [-1:2][-1:2] '
-        # plot complains about plotting empty files, so we need to
-        # avoid plotting the distribution files on time step 0, which
-        # contain no points.  splot, however, is fine with empty files.
-        if timeStep == 0:
-            cmd += '"%s" with linespoints lc 3 pt 7 ps 2' % gng_2d   # model vectors/edges (lc 3=blue)
-        else:
-            cmd += '"%s" with points lc 1 pt 6 ps 2' % last_2d       # current sample point (lc 1=red)
-            cmd += ',"%s" with points lc 2 pt 7 ps 1' % dist_2d      # distribution points (lc 2=green)
-            cmd += ',"%s" with linespoints lc 3 pt 7 ps 2' % gng_2d  # model vectors/edges (lc 3=blue)
-        self.gplot2('set title "GNG: time step %d' % timeStep)
-        self.gplot2(cmd)
-            
-    def plotFrame3D(self, dir, timeStep):
-        gng_3d = '%s/frames/gng_%05d.3d' % (dir, timeStep)
-        dist_3d = '%s/dist/dist_%05d.3d' % (dir, timeStep)
-        last_3d = '%s/dist/dist_%05d.last.3d' % (dir, timeStep)
-        if not os.path.exists(gng_3d):
-            print 'WARNING: %s does not exist' % gng_3d
-            return
-        cmd = 'splot [-1:2][-1:2][-1:2] '
-        cmd += '"%s" with points pt 6 ps 1.75' % last_3d       # current sample point (red)
-        cmd += ',"%s" with points pt 7 ps 0.75' % dist_3d      # distribution points (green)
-        cmd += ',"%s" with linespoints pt 7 ps 1' % gng_3d     # model vectors/edges (blue)
-        self.gplot3('set title "GNG: time step %d' % timeStep)
-        self.gplot3(cmd)
-
-#-------------------------------------------------------------------
-# Example distributions (defined in gngdists.py)
-#
-# All Distribution objects have a generateNext() method that returns a
-# new point chosen at random from the distribution, represented as a
-# list of numbers.
-#
-# continuous:
-#   largeSphere, smallSphere, largeCircle, smallCircle, rect, galaxy,
-#   blobs, clover, planes
-#
-# discrete:
-#   latt, dplanes
-#
-# discrete/continuous:
-#   mixed
-
-# To view distributions with a sample of N points:
-# % python -i gng.py
-# >>> largeSphere.view(2000)
-# >>> galaxy.view(2000)
-# >>> latt.view(10000)
-# >>> mixed.view(10000)
-# etc.
-
-#-------------------------------------------------------------------
-# GNG example
-
-# To run:
-# % python -i gng.py
-# >>> main()
-# >>> show()
-# >>> sstep()
 

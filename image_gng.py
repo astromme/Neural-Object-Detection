@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from gng import GrowingNeuralGas
 from gngdists import Distribution
 from PIL import Image
@@ -34,18 +35,18 @@ reader = ImageReader("images/rgb.png")
 reader.generateNext()
 
 
-gng = GrowingNeuralGas(dim=5, seed=1247751676, dir="/local/astromme/" + sys.argv[1])
+gng = GrowingNeuralGas(dim=5, dir=sys.argv[1])
 
 # run the GNG for 300 time steps on the given distribution and
 # record data in the directory gng_data
-gng.run(100000, reader)
+gng.run(10000, reader)
 print "Number of units:" + str(len(gng.units))
 # create the movie
-gng.saveMovie()
+#gng.saveMovie()
 # view the saved data as a 3-D movie at medium speed
-gng.view('3d')
+#gng.view('3d')
 # view the saved data as a 2-D movie at fast speed
-gng.view('2d', speed='fast')
+#gng.view('2d', speed='fast')
 
 
 #gng.view('2d3d', frame=250)
