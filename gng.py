@@ -126,12 +126,12 @@ class GrowingNeuralGas:
         random.seed(self.seed)
         print 'Random seed is', self.seed
         # GNG parameters
-        self.winnerLearnRate = 0.2
-        self.neighborLearnRate = 0.006
+        self.winnerLearnRate = 0.3
+        self.neighborLearnRate = 0.01
         self.maxAge = 50
         self.reduceError = 0.995
-        self.stepsToInsert = 300
-        self.lastInsertedStep = 0
+        self.stepsToInsert = 100
+        self.lastInsertedStep = 101 # Allow a unit to be inserted immedately
         self.insertError = 0.5
         self.verbose = verbose
         self.stepCount = 0
@@ -314,7 +314,7 @@ class GrowingNeuralGas:
         self.removeStaleEdges()
 
         #if self.stepCount % self.stepsToInsert == 0:
-        if self.averageError() > 0.5 and self.lastInsertedStep > self.stepsToInsert:
+        if self.averageError() > 0.05 and self.lastInsertedStep > self.stepsToInsert:
           print "Creating new unit at timestep %d and error %.3f" % (self.stepCount, self.averageError())
           self.lastInsertedStep = 0
           self.insertUnit()

@@ -10,8 +10,9 @@ import random, sys
 class ImageReader(Distribution):
   """
   """
-  def __init__(self, imagefile):
+  def __init__(self, imagefile, background=[255, 255, 255]):
     self.image = Image.open(imagefile)
+    self.background = background	
     self.width, self.height = self.image.size
     self.pixels = self.image.load()
     dimension = 5
@@ -21,29 +22,40 @@ class ImageReader(Distribution):
     return 2.0*value/maxvalue - 1
 
   def generateNext(self):
-    x = random.randint(0, self.width-1)
-    y = random.randint(0, self.height-1)
+    x, y, colors = 0, 0, [0]
+    backgroundPoint = True
+    
+    # rand points until one isn't a background point
+    while backgroundPoint:
+      x = random.randint(0, self.width-1)
+      y = random.randint(0, self.height-1)
 
-    colors = list(self.pixels[x, y])
+      colors = list(self.pixels[x, y])
+      
+      for i in range(len(self.background)):
+	if abs(colors[i] - self.background[i]) > 50:
+	  backgroundPoint = False
     
     for i in range(len(colors)):
       colors[i] = self.normalize(colors[i], 255)
+      
+    # Remove alpha channel + others if we find them.
+    while len(colors) > 3:
+      colors.pop(len(colors)-1)
 
     point = [self.normalize(x, self.width), self.normalize(y, self.width)] + colors
 
     return point
 
-reader = ImageReader("images/rgb.png")
-reader.generateNext()
-
-
 gng = GrowingNeuralGas(dim=5)
 
-gng.run(10000, reader)
-print "Number of units:" + str(len(gng.units))
+for i in range(1, 12):
+  reader = ImageReader("images/rgb/rgb%s.png" % i)
+  gng.run(2000, reader)
+  print "Number of units:" + str(len(gng.units))  
 
 application = QApplication([])
-view = GNGPlotter(200, 200)
+view = GNGPlotter(reader.width, reader.height)
 view.gng = gng
 view.show()
 application.exec_()
