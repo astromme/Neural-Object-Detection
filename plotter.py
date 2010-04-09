@@ -36,6 +36,21 @@ class GNGPlotter(QWidget):
           c = QColor(r, g, b)
           p.setBrush(c)
           p.drawEllipse(x, y, 10, 10)
+          
+        for edge in self.gng.unique_edges:
+          x1, y1, b, c, d = edge.fromUnit.vector
+          x2, y2, b, c, d = edge.toUnit.vector
+          
+          x1 = self.unNormalize(x1, self.w)
+          y1 = self.unNormalize(y1, self.h)
+          x2 = self.unNormalize(x2, self.w)
+          y2 = self.unNormalize(y2, self.h)
+          
+          c = QColor(0, 0, 0)
+          p.setBrush(c)
+          p.drawLine(x1, y1, x2, y2)
+          
+          
         
         
 
