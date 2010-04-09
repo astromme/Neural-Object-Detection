@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from gng import GrowingNeuralGas
 from gngdists import Distribution
+from plotter import GNGPlotter
 from PIL import Image
+from PyQt4.Qt import *
 import random, sys
 
 
@@ -37,18 +39,11 @@ reader.generateNext()
 
 gng = GrowingNeuralGas(dim=5, dir=sys.argv[1])
 
-# run the GNG for 300 time steps on the given distribution and
-# record data in the directory gng_data
 gng.run(10000, reader)
 print "Number of units:" + str(len(gng.units))
-# create the movie
-#gng.saveMovie()
-# view the saved data as a 3-D movie at medium speed
-#gng.view('3d')
-# view the saved data as a 2-D movie at fast speed
-#gng.view('2d', speed='fast')
 
-
-#gng.view('2d3d', frame=250)
-#gng.view('2d3d', start=200, end=250, speed='pause')
-
+application = QApplication([])
+view = GNGPlotter(200, 200)
+view.gng = gng
+view.show()
+application.exec_()
