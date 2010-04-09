@@ -37,7 +37,7 @@ reader = ImageReader("images/rgb.png")
 reader.generateNext()
 
 
-gng = GrowingNeuralGas(dim=5, dir=sys.argv[1])
+gng = GrowingNeuralGas(dim=5)
 
 gng.run(10000, reader)
 print "Number of units:" + str(len(gng.units))
