@@ -22,6 +22,7 @@ class GNGPlotter(QWidget):
 
     def paintEvent(self, ev):
         p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
         if not self.gng:
           return
           
