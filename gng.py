@@ -299,6 +299,8 @@ class GrowingNeuralGas:
         """
         Processes one input point at a time through the GNG.
         """
+        if (self.stepCount % 1000) == 0:
+	  print "Step ", self.stepCount
         best, second = self.computeDistances(nextPoint)
         self.incrementEdgeAges(best)
         best.error += self.distance(best.vector, nextPoint)**2
