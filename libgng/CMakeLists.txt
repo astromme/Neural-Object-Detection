@@ -13,5 +13,16 @@ set(libgng_sources
 	gng.cpp
 	)
 
-add_library(gng SHARED ${libgng_sources})
+set(libgng_headers
+#     point.h
+#     imagegenerator.h
+#     node.h
+#     edge.h
+    gng.h
+    )
+
+qt4_wrap_cpp(libgng_mocs ${libgng_headers})
+
+
+add_library(gng SHARED ${libgng_sources} ${libgng_mocs})
 target_link_libraries(gng ${QT_LIBRARIES})

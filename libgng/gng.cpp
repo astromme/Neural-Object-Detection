@@ -8,8 +8,12 @@
 
 #include <QDebug>
 
-GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
+GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, int updateInterval)
+  : currentCycles(0),
+    currentPointGenerator(0)
 {
+  dataAccess = new QMutex();
+  
   // Hardcoded values from paper
   m_dimension = dimension;
   m_winnerLearnRate = 0.3;
@@ -20,6 +24,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   m_stepsSinceLastInsert = m_stepsToInsert + 1;
   m_insertError = 0.5;
   m_stepCount = 0;
+  m_updateInterval = updateInterval;
   
   //The GNG always begins with two randomly placed units.
   m_nodes.append(new Node(Point(), dimension, minimum, maximum));
@@ -32,7 +37,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
 
 GrowingNeuralGas::~GrowingNeuralGas()
 {
-
+  delete dataAccess;
 }
 
 QString GrowingNeuralGas::toString()
@@ -213,20 +218,38 @@ void GrowingNeuralGas::step(const Point& nextPoint)
 
 void GrowingNeuralGas::run(int cycles, PointGenerator* pointGenerator)
 {
-  Q_ASSERT(cycles > 0);
-  Q_ASSERT(pointGenerator->dimension() == m_dimension);
+  currentCycles = cycles;
+  currentPointGenerator = pointGenerator;
+  start(QThread::LowestPriority);
+}
+
+void GrowingNeuralGas::run()
+{
+  Q_ASSERT(currentCycles > 0);
+  Q_ASSERT(currentPointGenerator->dimension() == m_dimension);
   
   if (m_stepCount == 0) {
-    qDebug() << "Running the GNG for " << cycles << " cycles";
+    qDebug() << "Running the GNG for " << currentCycles << " cycles";
   } else {
-    qDebug() << "Running the GNG for " << cycles << " additional cycles";
+    qDebug() << "Running the GNG for " << currentCycles << " additional cycles";
   }
   
-  for (int i=0; i<cycles; i++) {
-    Point nextPoint = pointGenerator->generatePoint();
+  for (int i=0; i<currentCycles; i++) {
+    dataAccess->lock();
+    if (m_stepCount % m_updateInterval == 0) {
+      emit updated();
+    }
+    Point nextPoint = currentPointGenerator->generatePoint();
     step(nextPoint);
+    dataAccess->unlock();
   }
 }
+
+QMutex* GrowingNeuralGas::mutex() const
+{
+  return dataAccess;
+}
+
 
 QList< Node* > GrowingNeuralGas::nodes() const
 {

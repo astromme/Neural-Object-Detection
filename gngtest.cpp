@@ -14,9 +14,8 @@ int main(int argc, char* argv[]) {
   
   QString imagePath = argv[1];
   
-  GrowingNeuralGas gng = GrowingNeuralGas(5);
+  GrowingNeuralGas gng(5);
   ImageGenerator generator = ImageGenerator(imagePath);
-  //gng.run(100000, &generator);
   
   QApplication app(argc, argv);
   GngViewer view(generator.width(), generator.height());
@@ -25,5 +24,9 @@ int main(int argc, char* argv[]) {
   img.load(imagePath);
   view.setSource(img);
   view.show();
+  
+  QObject::connect(&gng, SIGNAL(updated()), &view, SLOT(update()));
+  
+  gng.run(100000, &generator);
   app.exec();
 }

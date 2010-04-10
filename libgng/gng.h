@@ -11,10 +11,14 @@ class PointGenerator;
 #include <QPair>
 #include <QList>
 #include <QString>
+#include <QThread>
+#include <QMutex>
 
-class GrowingNeuralGas {
+class GrowingNeuralGas : public QThread {
+  Q_OBJECT
+ 
   public:
-    GrowingNeuralGas(int dimension, qreal minimum = -1, qreal maximum = 1);
+    GrowingNeuralGas(int dimension, qreal minimum = -1, qreal maximum = 1, int updateInterval = 1000);
     ~GrowingNeuralGas();
     
     QString toString();
@@ -60,6 +64,19 @@ class GrowingNeuralGas {
     QList<Node*> nodes() const;
     QList<Edge*> uniqueEdges() const;
     
+    void setUpdateInterval(int steps);
+    
+    QMutex* mutex() const;
+    
+  signals:
+    void updated();    
+    
+  private:
+    virtual void run();
+    int currentCycles;
+    PointGenerator *currentPointGenerator;
+    QMutex *dataAccess;
+    
   private:
     int m_dimension;
     //int m_seed;
@@ -73,6 +90,7 @@ class GrowingNeuralGas {
     int m_stepCount;
     QList<Node*> m_nodes;
     QList<Edge*> m_uniqueEdges;
+    int m_updateInterval;
 };
       
 

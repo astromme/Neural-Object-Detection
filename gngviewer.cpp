@@ -33,13 +33,13 @@ void GngViewer::setGng(GrowingNeuralGas* gng)
 
 void GngViewer::setSource(const QPixmap& background)
 {
-  //setAttribute(Qt::WA_OpaquePaintEvent);
+  setAttribute(Qt::WA_OpaquePaintEvent);
   m_background = background;
-  //m_paintBackground = true;
+  m_paintBackground = true;
   
-  QPalette palette;
-  palette.setBrush(backgroundRole(), QBrush(background));
-  //	setPalette(palette);
+//   QPalette palette;
+//   palette.setBrush(backgroundRole(), QBrush(background));
+//   //	setPalette(palette);
 }
 
 qreal GngViewer::unNormalize(qreal value, qreal maxValue)
@@ -53,10 +53,15 @@ void GngViewer::paintEvent(QPaintEvent* e)
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   
+  if (m_paintBackground) {
+    painter.drawPixmap(rect(), m_background);
+  }
+  
   if (!m_gng) {
     return;
   }
   
+  m_gng->mutex()->lock();
   foreach(Edge *edge, m_gng->uniqueEdges()) {
     Point p1 = edge->from()->location();
     Point p2 = edge->to()->location();
@@ -83,6 +88,8 @@ void GngViewer::paintEvent(QPaintEvent* e)
     painter.setBrush(c);
     painter.drawEllipse(p[0]-5, p[1]-5, 10, 10);
   }
+  
+  m_gng->mutex()->unlock();
 }
 
           
