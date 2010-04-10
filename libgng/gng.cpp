@@ -178,7 +178,7 @@ void GrowingNeuralGas::reduceAllErrors()
 
 void GrowingNeuralGas::step(const Point& nextPoint)
 {
-  if (m_stepCount % 1000) {
+  if (m_stepCount % 1000 == 0) {
     qDebug() << "Step " << m_stepCount;
   }
   QPair<Node*, Node*> winner = computeDistances(nextPoint);
@@ -200,7 +200,7 @@ void GrowingNeuralGas::step(const Point& nextPoint)
   removeStaleEdges();;
   
   if (averageError() > 0.05 && (m_stepsSinceLastInsert > m_stepsToInsert)) {
-    qDebug() << QString("Creating new Node at timestep %1 and error %2").arg(m_stepCount).arg(averageError());
+    qDebug() << "Creating new Node at timestep " << m_stepCount << " and error " << averageError();
     m_stepsSinceLastInsert = 0;
     insertNode();
   }
@@ -223,11 +223,7 @@ void GrowingNeuralGas::run(int cycles, PointGenerator* pointGenerator)
   }
   
   for (int i=0; i<cycles; i++) {
-    foreach(Node *node, m_nodes) {
-      qDebug() << node->location()[0] << node->location()[1];
-    }
     Point nextPoint = pointGenerator->generatePoint();
-    qDebug() << nextPoint.size();
     step(nextPoint);
   }
 }

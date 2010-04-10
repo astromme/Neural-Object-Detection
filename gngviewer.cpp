@@ -59,7 +59,6 @@ void GngViewer::paintEvent(QPaintEvent* e)
   }
   foreach(Node *node, m_gng->nodes()) {
     Point p = node->location();
-    qDebug() << p[0] << p[1];
     
     p[0] = unNormalize(p[0], m_width);
     p[1] = unNormalize(p[1], m_height);

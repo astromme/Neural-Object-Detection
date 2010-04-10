@@ -35,7 +35,7 @@ class Node {
     qreal error() const;
     void setError(qreal error);
     
-    void moveTowards(const Point &point, int learningRate);
+    void moveTowards(const Point &point, qreal learningRate);
 
   private:
     int m_dimension;

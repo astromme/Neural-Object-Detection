@@ -28,7 +28,6 @@ Node::Node(Point location, int dimension, qreal min, qreal max)
       m_location[i] = realRand(min, max);
     }
   }
-  qDebug() << "Created new node at " << m_location[0] << m_location[1];
 }
     
 Node::~Node()
@@ -105,8 +104,7 @@ void Node::setError(qreal error)
   m_error = error;
 }
 
-
-void Node::moveTowards(const Point &point, int learningRate)
+void Node::moveTowards(const Point& point, qreal learningRate)
 {
   for (int i=0; i<point.size(); i++) {
     m_location[i] += learningRate*(point[i]-m_location[i]);

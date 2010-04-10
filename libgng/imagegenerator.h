@@ -20,6 +20,7 @@ class ImageGenerator : public PointGenerator {
     
   private:
     QImage m_image;
+    qreal normalize(qreal value, qreal maxValue);
 };
 
 #endif // _IMAGEGENERATOR_H
