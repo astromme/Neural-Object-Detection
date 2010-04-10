@@ -12,14 +12,18 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   
+  QString imagePath = argv[1];
+  
   GrowingNeuralGas gng = GrowingNeuralGas(5);
-
-  ImageGenerator generator = ImageGenerator(argv[1]);
-  gng.run(100000, &generator);
+  ImageGenerator generator = ImageGenerator(imagePath);
+  //gng.run(100000, &generator);
   
   QApplication app(argc, argv);
   GngViewer view(generator.width(), generator.height());
   view.setGng(&gng);
+  QPixmap img;
+  img.load(imagePath);
+  view.setSource(img);
   view.show();
   app.exec();
 }

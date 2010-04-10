@@ -18,6 +18,7 @@ GngViewer::GngViewer(int width, int height, QWidget* parent)
   m_width = width;
   m_height = height;
   m_gng = 0;
+  m_paintBackground = false;
 }
 
 GngViewer::~GngViewer()
@@ -30,19 +31,31 @@ void GngViewer::setGng(GrowingNeuralGas* gng)
   m_gng = gng;
 }
 
+void GngViewer::setSource(const QPixmap& background)
+{
+  //setAttribute(Qt::WA_OpaquePaintEvent);
+  m_background = background;
+  //m_paintBackground = true;
+  
+  QPalette palette;
+  palette.setBrush(backgroundRole(), QBrush(background));
+  //	setPalette(palette);
+}
+
 qreal GngViewer::unNormalize(qreal value, qreal maxValue)
 {
   return maxValue*(value + 1.0)/2.0;
 }
 
 void GngViewer::paintEvent(QPaintEvent* e)
-{
+{ 
+  //QWidget::paintEvent(e);
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::Antialiasing);
+  
   if (!m_gng) {
     return;
   }
-  
-  QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing);
   
   foreach(Edge *edge, m_gng->uniqueEdges()) {
     Point p1 = edge->from()->location();
