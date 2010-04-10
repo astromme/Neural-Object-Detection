@@ -122,8 +122,8 @@ void GrowingNeuralGas::removeStaleEdges()
 
 Node* GrowingNeuralGas::maxErrorNode(QList< Node* > nodeList)
 {
-  Node* highestError = m_nodes.first();
-  foreach(Node *node, m_nodes) {
+  Node* highestError = nodeList.first();
+  foreach(Node *node, nodeList) {
     if (node->error() > highestError->error()) {
       highestError = node;
     }
