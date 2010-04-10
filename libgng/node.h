@@ -5,7 +5,8 @@
 #include <QList>
 #include <QString>
 #include <QPointF>
-#include <QVector>
+
+#include "point.h"
 
 class Edge;
 
@@ -16,24 +17,32 @@ class Edge;
 class Node {
   
   public:
-    Node(QVector<qreal> vector = QVector<qreal>(), int dimension=2, int min=-1, int max=1);
+    Node(Point location = Point(), int dimension=2, int min=-1, int max=1);
     ~Node();
+    
+    Point location();
     
     QString toString() const;
     
     bool hasEdgeTo(const Node *other) const;
     Edge* getEdgeTo(const Node *other) const;
+    void appendEdge(Edge *edge);
+    void removeEdge(Edge *edge);
     
     QList<Node*> neighbors() const;
+    QList<Edge*> edges() const;
     
-    void moveTowards(const QVector<qreal> &point, int learningRate);
+    qreal error() const;
+    void setError(qreal error);
+    
+    void moveTowards(const Point &point, int learningRate);
 
   private:
     int m_dimension;
     qreal m_min;
     qreal m_max;
     qreal m_error;
-    QVector<qreal> m_vector;
+    Point m_location;
     QList<Edge*> m_edges;
 };
 

@@ -27,6 +27,11 @@ int Edge::age() const
   return m_age;
 }
 
+void Edge::resetAge()
+{
+  m_age = 0;
+}
+
 void Edge::incrementAge()
 {
   m_age++;

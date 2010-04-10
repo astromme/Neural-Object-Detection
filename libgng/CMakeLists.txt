@@ -6,6 +6,7 @@ include(${QT_USE_FILE})
 
 set(libgng_sources
 	point.cpp
+	imagegenerator.cpp
 	node.cpp
 	edge.cpp
 	gng.cpp

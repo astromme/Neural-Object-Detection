@@ -4,10 +4,10 @@
 
 #include <QVector>
 
-class Point : QVector<qreal> {
+class Point : public QVector<qreal> {
   
   public:
-    distanceTo(const Point &other);
+    qreal distanceTo(const Point &other);
     
 };
 

@@ -22,6 +22,7 @@ class Edge {
     
     void incrementAge();
     int age() const;
+    void resetAge();
         
   private:
     Node *m_from;

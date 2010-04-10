@@ -3,24 +3,39 @@
 
 #include "edge.h"
 
-Node::Node(QVector<qreal> vector, int dimension, int min, int max)
+Node::Node(Point location, int dimension, int min, int max)
 {
   m_dimension = dimension;
   m_min = min;
   m_max = max;
-  m_vector = vector;
+  m_location = location;
   m_error = 0;
   
-  if (m_vector.isEmpty()) {
-    m_vector.resize(dimension);
+  if (m_location.isEmpty()) {
+    m_location.resize(dimension);
     for (int i=0; i<dimension; i++) {
-      m_vector[i] = min + ((qrand()-min) % max);
+      m_location[i] = min + ((qrand()-min) % max);
     }
   }
 }
     
 Node::~Node()
 {
+}
+
+Point Node::location()
+{
+  return m_location;
+}
+
+QString Node::toString() const
+{
+  QString string = "[";
+  foreach(qreal part, m_location) {
+    string.append(QString::number(part) + ", ");
+  }
+  string.append("]\n");
+  return string;
 }
 
 bool Node::hasEdgeTo(const Node* other) const
@@ -43,6 +58,17 @@ Edge* Node::getEdgeTo(const Node* other) const
   return 0;
 }
 
+void Node::appendEdge(Edge* edge)
+{
+  m_edges.append(edge);
+}
+
+void Node::removeEdge(Edge* edge)
+{
+  m_edges.removeAll(edge);
+}
+
+
 QList<Node*> Node::neighbors() const
 {
   QList<Node*> neighbors;
@@ -52,9 +78,25 @@ QList<Node*> Node::neighbors() const
   return neighbors;
 }
 
-void Node::moveTowards(const QVector<qreal> &point, int learningRate)
+QList< Edge* > Node::edges() const
+{
+  return m_edges;
+}
+
+qreal Node::error() const
+{
+  return m_error;
+}
+
+void Node::setError(qreal error)
+{
+  m_error = error;
+}
+
+
+void Node::moveTowards(const Point &point, int learningRate)
 {
   for (int i=0; i<point.size(); i++) {
-    m_vector[i] += learningRate*(point[i]-m_vector[i]);
+    m_location[i] += learningRate*(point[i]-m_location[i]);
   }
 }

@@ -1,249 +1,227 @@
+#include "gng.h"
 
-class GrowingNeuralGas:
-    """
-    Parameters:
+#include "node.h"
+#include "edge.h"
+#include "pointgenerator.h"
 
-    winnerLearnRate   Used to adjust closest unit towards input point
-    neighborLearnRate Used to adjust other neighbors towards input point
-    maxAge            Edges older than maxAge are removed
-    reduceError       All errors are reduced by this amount each GNG step
-    stepsToInsert     Min steps before inserting a new node
-    insertError       Error of every new unit is reduced by this amount
+#include <math.h>
+
+#include <QDebug>
+
+GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
+{
+  // Hardcoded values from paper
+  m_dimension = dimension;
+  m_winnerLearnRate = 0.3;
+  m_neighborLearnRate = 0.01;
+  m_maxAge = 50;
+  m_reduceError = 0.995;
+  m_stepsToInsert = 100;
+  m_stepsSinceLastInsert = m_stepsToInsert + 1;
+  m_insertError = 0.5;
+  m_stepCount = 0;
+  
+  //The GNG always begins with two randomly placed units.
+  m_nodes.append(new Node(Point(), dimension, minimum, maximum));
+  m_nodes.append(new Node(Point(), dimension, minimum, maximum));
+  
+  m_uniqueEdges = QList<Edge*>();
+}
+
+GrowingNeuralGas::~GrowingNeuralGas()
+{
+
+}
+
+QString GrowingNeuralGas::toString()
+{
+  return QString("GNG step %1\nNumber of units: %2\nAverage error: %3\n")
+		.arg(m_stepCount).arg(m_nodes.length()).arg(averageError());
+}
+
+bool GrowingNeuralGas::unitOfInterest(Node* node, qreal cutoff)
+{
+  foreach(qreal part, node->location()) {
+    if (abs(part) > cutoff) {
+      return true;
+    }
+  }
+  return false;
+}
+
+typedef QPair<qreal, Node*> DistNodePair;
+  
+bool pairLessThan(const DistNodePair &s1, const DistNodePair &s2)
+{
+    return s1.first < s2.first;
+}
     
-    NOTE: The default values are taken from the paper.
+QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
+{
+  QList<DistNodePair> dists;
+  foreach(Node *node, m_nodes) {
+    dists.append(DistNodePair(node->location().distanceTo(point), node));
+    qSort(dists.begin(), dists.end(), pairLessThan);
+    return QPair<Node*, Node*>(dists[0].second, dists[1].second);
+  }
+}
 
-    The GNG always begiQPointFns with two randomly placed units.
+void GrowingNeuralGas::incrementEdgeAges(Node* node)
+{
+  foreach(Edge* edge, node->edges()) {
+    edge->incrementAge();
+    edge->to()->getEdgeTo(node)->incrementAge();
+  }
+}
 
-    """
-    def __init__(self, dim=2, dir='gng_data', seed=None, verbose=0, \
-                 minimum = -1, maximum = 1):
-        self.dimension = dim
-        self.dataDir = dir
-        # set and store random seed
-        if seed is None:
-            self.seed = int(time.time())
-        else:
-            self.seed = seed
-        random.seed(self.seed)
-        print 'Random seed is', self.seed
-        # GNG parameters
-        self.winnerLearnRate = 0.3
-        self.neighborLearnRate = 0.01
-        self.maxAge = 50
-        self.reduceError = 0.995
-        self.stepsToInsert = 100
-        self.lastInsertedStep = 101 # Allow a unit to be inserted immedately
-        self.insertError = 0.5
-        self.verbose = verbose
-        self.stepCount = 0
-        self.units = [Unit(dimension=dim, minVal = minimum, maxVal = maximum),\
-                      Unit(dimension=dim, minVal = minimum, maxVal = maximum)]
-        self.unique_edges = []
-        # model_vectors[t] is a list of the model vectors at time t
-        self.model_vectors = [[u.vector[:] for u in self.units]]
-        # edge_vectors[t] is a list [(u,v), ...] of model vector pairs
-        # representing the edges at time t
-        self.edge_vectors = [[]]
-        # dist_points[t-1] is the distribution point generated at time t
-        self.dist_points = []
+void GrowingNeuralGas::connectNodes(Node* a, Node* b)
+{
+  Edge* e1 = new Edge(a, b);
+  Edge* e2 = new Edge(b, a);
+  
+  a->appendEdge(e1);
+  b->appendEdge(e2);
+  
+  m_uniqueEdges.append(e1);
+}
 
-    def __str__(self):
-        result = "GNG step %d\nNumber of units: %d\nAverage error: %s\n" % \
-            (self.stepCount, len(self.units), self.averageError())
-        if self.verbose > 1:
-            for unit in self.units:
-                result += str(unit)
-        return result
+void GrowingNeuralGas::disconnectNodes(Node* a, Node* b)
+{
+  Edge *e1 = a->getEdgeTo(b);
+  Edge *e2 = b->getEdgeTo(a);
+  
+  a->removeEdge(e1);
+  b->removeEdge(e2);
+  
+  m_uniqueEdges.removeAll(e1);
+  m_uniqueEdges.removeAll(e2);
+}
 
-    def distance(self, v1, v2):
-        """
-        Returns the Euclidean distance between two vectors.
-        """
-        return math.sqrt(sum([(v1[i]-v2[i])**2 for i in range(len(v1))]))
+void GrowingNeuralGas::removeStaleEdges()
+{
+  foreach(Node *node, m_nodes) {
+    foreach(Edge *edge, node->edges()) {
+      if (edge->age() > m_maxAge) {
+	m_uniqueEdges.removeAll(edge);
+	node->removeEdge(edge);
+	delete edge;
+      }
+    }
+  }
+  
+  for (int i=m_nodes.length()-1; i>=0; i--) {
+    Node *node = m_nodes[i];
+    if (node->edges().isEmpty()) {
+      m_nodes.removeAll(node);
+      delete node;
+    }
+  }
+}
 
-    def unitOfInterest(self, unit, cutoff):
-        """
-        Used to focus on particular units when debugging.
-        """
-        for value in unit.vector:
-            if abs(value) > cutoff:
-                return True
-        return False
+Node* GrowingNeuralGas::maxErrorNode(QList< Node* > nodeList)
+{
+  Node* highestError = m_nodes.first();
+  foreach(Node *node, m_nodes) {
+    if (node->error() > highestError->error()) {
+      highestError = node;
+    }
+  }
+  return highestError;
+}
 
-    def computeDistances(self, point):
-        """
-        Computes the distances between the given point and every unit
-        in the GNG.  Returns the closest and next closest units.
-        """
-        dists = []
-        for i in range(len(self.units)):
-            dists.append((self.distance(self.units[i].vector, point), i))
-        dists.sort()
-        best = dists[0][1]
-        second = dists[1][1]
-        if self.verbose > 1:
-            print "Processing:", point
-            print "Closest:", self.units[best].vectorStr()
-            print "Second:", self.units[second].vectorStr()
-            print
-        return self.units[best], self.units[second]
+qreal GrowingNeuralGas::averageError()
+{
+  qreal error = 0;
+  foreach(Node *node, m_nodes) {
+    error += node->error();
+  }
+  return error/m_nodes.length();
+}
 
-    def incrementEdgeAges(self, unit):
-        """
-        Increments the ages of every unit directly connected to the
-        given unit.
-        """
-        for outgoing in unit.edges:
-            outgoing.age += 1
-            incoming = outgoing.toUnit.getEdgeTo(unit)
-            incoming.age += 1
+Point midpoint(Point *p1, Point *p2) {
+  Point p3;
+  p3.resize(p1->size());
+  
+  for (int i=0; i<p1->size(); i++) {
+    p3[i] = (p1->at(i) + p2->at(i))/2;
+  }
+  return p3;
+}
 
-    def connectUnits(self, a, b):
-        """
-        Adds the appropriate edges to connect units a and b.
-        """
-        if self.verbose >= 1:
-            print "Add edge:", a.vectorStr(), b.vectorStr()
-        newEdge1 = Edge(a, b)
-        newEdge2 = Edge(b, a)
-        a.edges.append(newEdge1)
-        b.edges.append(newEdge2)
-        # only need to add one edge to unique_edges
-        self.unique_edges.append(newEdge1)
+void GrowingNeuralGas::insertNode()
+{
+  Node *worst = maxErrorNode(m_nodes);
+  Node *worstNeighbor = maxErrorNode(worst->neighbors());
+  
+  Point newPoint = midpoint(&worst->location(), &worstNeighbor->location());
+  Node *newNode = new Node(newPoint);
+  m_nodes.append(newNode);
 
-    def disconnectUnits(self, a, b):
-        """
-        Removes the appropriate edges to disconnect units a and b.
-        """
-        if self.verbose >= 1:
-            print "Remove edge:", a.vectorStr(), b.vectorStr()
-        edge1 = a.getEdgeTo(b)
-        edge2 = b.getEdgeTo(a)
-        a.edges.remove(edge1)
-        b.edges.remove(edge2)
-        # remove whichever one is in self.unique_edges
-        if edge1 in self.unique_edges:
-            self.unique_edges.remove(edge1)
-        else:
-            self.unique_edges.remove(edge2)
+  connectNodes(newNode, worst);
+  connectNodes(newNode, worstNeighbor);
 
-    def removeStaleEdges(self):
-        """
-        Checks all edges in the GNG and removes any with an age exceeding
-        the maxAge parameter.  Also removes any unit that is completely
-        disconnected.
-        """
-        for unit in self.units:
-            for i in range(len(unit.edges)-1, -1, -1):
-                edge = unit.edges[i]
-                if edge.age > self.maxAge:
-                    if self.verbose >= 1:
-                        adjacent = edge.toUnit
-                        print "Removing stale edge: %s %s" % \
-                              (unit.vectorStr(), adjacent.vectorStr())
-                    if edge in self.unique_edges:
-                        self.unique_edges.remove(edge)
-                    unit.edges.pop(i)
+  disconnectNodes(worst, worstNeighbor);
+  
+  worst->setError(worst->error() * m_insertError);
+  worstNeighbor->setError(worstNeighbor->error() * m_insertError);
+  newNode->setError(worst->error());
+}
 
-        for i in range(len(self.units)-1, -1, -1):
-            if len(self.units[i].edges) == 0:
-                if self.verbose >= 1:
-                    print "Removing disconnected unit:", unit.vectorStr()
-                self.units.pop(i)
+void GrowingNeuralGas::reduceAllErrors()
+{
+  foreach(Node *node, m_nodes) {
+    node->setError(node->error() * m_reduceError);
+  }
+}
 
-    def maxErrorUnit(self, unitList):
-        """
-        Given a list of units, returns the unit with the highest error.
-        """
-        highest = unitList[0]
-        for i in range(1, len(unitList)):
-            if unitList[i].error > highest.error:
-                highest = unitList[i]
-        return highest
+void GrowingNeuralGas::step(const Point& nextPoint)
+{
+  if (m_stepCount % 1000) {
+    qDebug() << "Step " << m_stepCount;
+  }
+  QPair<Node*, Node*> winner = computeDistances(nextPoint);
+  incrementEdgeAges(winner.first);
+  winner.first->setError(winner.first->error() + pow(winner.first->location().distanceTo(nextPoint), 2));
+  winner.first->moveTowards(nextPoint, m_winnerLearnRate);
+  
+  foreach(Node *node, winner.first->neighbors()) {
+    node->moveTowards(nextPoint, m_neighborLearnRate);
+  }
+  
+  if (winner.first->hasEdgeTo(winner.second)) {
+    winner.first->getEdgeTo(winner.second)->resetAge();
+    winner.second->getEdgeTo(winner.first)->resetAge();
+  } else {
+    connectNodes(winner.first, winner.second);
+  }
+  
+  removeStaleEdges();;
+  
+  if (averageError() > 0.05 && (m_stepsSinceLastInsert > m_stepsToInsert)) {
+    qDebug() << QString("Creating new Node at timestep %1 and error %2").arg(m_stepCount).arg(averageError());
+    m_stepsSinceLastInsert = 0;
+    insertNode();
+  }
+  
+  reduceAllErrors();
+  m_stepCount++;
+  m_stepsSinceLastInsert++;
+  
+}
 
-    def averageError(self):
-        """
-        Returns the average error across all units in the GNG.
-        """
-        return sum([u.error for u in self.units]) / float(len(self.units))
-
-    def insertUnit(self):
-        """
-        Inserts a new unit into the GNG.  Finds the unit with the highest
-        error and then finds its topological neighbor with the highest
-        error and inserts the new unit between the two. 
-        """
-        worst = self.maxErrorUnit(self.units)
-        if self.verbose > 1:
-            print "Max error %s" % worst
-        worstNeighbor = self.maxErrorUnit(worst.getNeighbors())
-        newVector = map(average, worst.vector, worstNeighbor.vector)
-        newUnit = Unit(newVector)
-        self.units.append(newUnit)
-        if self.verbose > 0:
-            print "Insert unit: %s\nTotal units: %d" % (newUnit.vectorStr(), len(self.units))
-        self.connectUnits(newUnit, worst)
-        self.connectUnits(newUnit, worstNeighbor)
-        self.disconnectUnits(worst, worstNeighbor)
-        worst.error *= self.insertError
-        worstNeighbor.error *= self.insertError
-        newUnit.error = worst.error
-
-    def reduceAllErrors(self):
-        """
-        Decays the error at all units.
-        """
-        for unit in self.units:
-            unit.error *= self.reduceError
-                
-    def step(self, nextPoint):
-        """
-        Processes one input point at a time through the GNG.
-        """
-        if (self.stepCount % 1000) == 0:
-	  print "Step ", self.stepCount
-        best, second = self.computeDistances(nextPoint)
-        self.incrementEdgeAges(best)
-        best.error += self.distance(best.vector, nextPoint)**2
-        best.moveVector(nextPoint, self.winnerLearnRate)
-        for unit in best.getNeighbors():
-            unit.moveVector(nextPoint, self.neighborLearnRate)
-        edgeExists = best.getEdgeTo(second)
-        if edgeExists:
-            edgeExists.age = 0
-            second.getEdgeTo(best).age = 0
-        else:
-            self.connectUnits(best, second)
-        self.removeStaleEdges()
-
-        #if self.stepCount % self.stepsToInsert == 0:
-        if self.averageError() > 0.05 and self.lastInsertedStep > self.stepsToInsert:
-          print "Creating new unit at timestep %d and error %.3f" % (self.stepCount, self.averageError())
-          self.lastInsertedStep = 0
-          self.insertUnit()
-        self.reduceAllErrors()
-        self.stepCount += 1
-        self.lastInsertedStep += 1
-
-    def run(self, cycles, dist):
-        assert cycles > 0
-        assert dist.dimension == self.dimension, \
-            'distribution dimensionality does not match GNG dimensionality'
-
-        # run the GNG
-        if self.stepCount == 0:
-            print 'running GNG for %d cycles' % cycles
-        else:
-            print 'running GNG for %d additional cycles' % cycles
-        for i in range(cycles):
-            nextPoint = dist.generateNext()
-            self.step(nextPoint)
-            self.saveCurrentData(nextPoint)
-            
-    def saveCurrentData(self, nextPoint):
-        currentModelVectors = [u.vector[:] for u in self.units]
-        currentEdges = [(e.fromUnit.vector[:], e.toUnit.vector[:]) for e in self.unique_edges]
-        self.model_vectors.append(currentModelVectors)
-        self.edge_vectors.append(currentEdges)
-        self.dist_points.append(nextPoint)
-
+void GrowingNeuralGas::run(int cycles, PointGenerator* pointGenerator)
+{
+  Q_ASSERT(cycles > 0);
+  Q_ASSERT(pointGenerator->dimension() == m_dimension);
+  
+  if (m_stepCount == 0) {
+    qDebug() << "Running the GNG for " << cycles << " cycles";
+  } else {
+    qDebug() << "Running the GNG for " << cycles << " additional cycles";
+  }
+  
+  for (int i=0; i<cycles; i++) {
+    Point nextPoint = pointGenerator->generatePoint();
+    step(nextPoint);
+  }
+}
