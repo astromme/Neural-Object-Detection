@@ -1,6 +1,8 @@
 
 #include "imagegenerator.h"
 
+#include <QDebug>
+
 ImageGenerator::ImageGenerator(const QString& filePath)
   : PointGenerator(),
   m_image(filePath)
@@ -22,6 +24,7 @@ Point ImageGenerator::generatePoint()
   int y = qrand() % m_image.height();
   
   Point p;
+  p.resize(5);
   p[0] = x;
   p[1] = y;
   
@@ -30,6 +33,15 @@ Point ImageGenerator::generatePoint()
   p[3] = qGreen(colors);
   p[4] = qBlue(colors);
   
+  qDebug() << p[0] << p[1];
   return p;
 }
 
+int ImageGenerator::width() const
+{
+  return m_image.width();
+}
+int ImageGenerator::height() const
+{
+  return m_image.height();
+}

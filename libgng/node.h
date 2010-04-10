@@ -17,7 +17,7 @@ class Edge;
 class Node {
   
   public:
-    Node(Point location = Point(), int dimension=2, int min=-1, int max=1);
+    Node(Point location = Point(), int dimension=2, qreal min=-1, qreal max=1);
     ~Node();
     
     Point location();

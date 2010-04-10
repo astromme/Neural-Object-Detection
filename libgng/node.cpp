@@ -3,7 +3,18 @@
 
 #include "edge.h"
 
-Node::Node(Point location, int dimension, int min, int max)
+#include <QDebug>
+#include <cstdlib>
+
+qreal realRand(qreal minimum, qreal maximum) {
+  qreal rand = ((float)qrand())/RAND_MAX;
+  rand *= maximum-minimum;
+  rand += minimum;
+  
+  return rand;
+}
+
+Node::Node(Point location, int dimension, qreal min, qreal max)
 {
   m_dimension = dimension;
   m_min = min;
@@ -14,9 +25,10 @@ Node::Node(Point location, int dimension, int min, int max)
   if (m_location.isEmpty()) {
     m_location.resize(dimension);
     for (int i=0; i<dimension; i++) {
-      m_location[i] = min + ((qrand()-min) % max);
+      m_location[i] = realRand(min, max);
     }
   }
+  qDebug() << "Created new node at " << m_location[0] << m_location[1];
 }
     
 Node::~Node()

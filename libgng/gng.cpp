@@ -24,8 +24,10 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   //The GNG always begins with two randomly placed units.
   m_nodes.append(new Node(Point(), dimension, minimum, maximum));
   m_nodes.append(new Node(Point(), dimension, minimum, maximum));
-  
+
   m_uniqueEdges = QList<Edge*>();
+  
+  connectNodes(m_nodes[0], m_nodes[1]);
 }
 
 GrowingNeuralGas::~GrowingNeuralGas()
@@ -62,8 +64,8 @@ QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
   foreach(Node *node, m_nodes) {
     dists.append(DistNodePair(node->location().distanceTo(point), node));
     qSort(dists.begin(), dists.end(), pairLessThan);
-    return QPair<Node*, Node*>(dists[0].second, dists[1].second);
   }
+  return QPair<Node*, Node*>(dists[0].second, dists[1].second);
 }
 
 void GrowingNeuralGas::incrementEdgeAges(Node* node)
@@ -221,7 +223,22 @@ void GrowingNeuralGas::run(int cycles, PointGenerator* pointGenerator)
   }
   
   for (int i=0; i<cycles; i++) {
+    foreach(Node *node, m_nodes) {
+      qDebug() << node->location()[0] << node->location()[1];
+    }
     Point nextPoint = pointGenerator->generatePoint();
+    qDebug() << nextPoint.size();
     step(nextPoint);
   }
 }
+
+QList< Node* > GrowingNeuralGas::nodes() const
+{
+  return m_nodes;
+}
+
+QList< Edge* > GrowingNeuralGas::uniqueEdges() const
+{
+  return m_uniqueEdges;
+}
+

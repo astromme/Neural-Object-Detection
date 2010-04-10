@@ -7,7 +7,7 @@
 class PointGenerator { 
   public:
     PointGenerator() {}
-    virtual ~PointGenerator() = 0;
+    virtual ~PointGenerator() {};
     virtual int dimension() = 0;
     virtual Point generatePoint() = 0;
 };

@@ -14,7 +14,7 @@ class PointGenerator;
 
 class GrowingNeuralGas {
   public:
-    GrowingNeuralGas(int dimension, qreal minimum, qreal maximum);
+    GrowingNeuralGas(int dimension, qreal minimum = -1, qreal maximum = 1);
     ~GrowingNeuralGas();
     
     QString toString();
@@ -55,8 +55,10 @@ class GrowingNeuralGas {
     
     /** Processes one input point at a time through the GNG. */
     void step(const Point &nextPoint);
-    void run(int cycles, PointGenerator *pointGenerator); //FIXME            
-    void saveCurrentData(const Point &nextPoint);
+    void run(int cycles, PointGenerator *pointGenerator);
+    
+    QList<Node*> nodes() const;
+    QList<Edge*> uniqueEdges() const;
     
   private:
     int m_dimension;
