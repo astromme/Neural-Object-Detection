@@ -10,9 +10,9 @@
 
 GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, int updateInterval)
   : currentCycles(0),
-    currentPointGenerator(0)
+    m_pointGenerator(0)
 {
-  dataAccess = new QMutex();
+  m_dataAccess = new QMutex();
   
   // Hardcoded values from paper
   m_dimension = dimension;
@@ -37,7 +37,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, 
 
 GrowingNeuralGas::~GrowingNeuralGas()
 {
-  delete dataAccess;
+  delete m_dataAccess;
 }
 
 QString GrowingNeuralGas::toString()
@@ -216,17 +216,21 @@ void GrowingNeuralGas::step(const Point& nextPoint)
   
 }
 
-void GrowingNeuralGas::run(int cycles, PointGenerator* pointGenerator)
+void GrowingNeuralGas::setPointGenerator(PointGenerator* pointGenerator)
+{
+  m_pointGenerator = pointGenerator;
+}
+
+void GrowingNeuralGas::run(int cycles)
 {
   currentCycles = cycles;
-  currentPointGenerator = pointGenerator;
   start(QThread::LowestPriority);
 }
 
 void GrowingNeuralGas::run()
 {
   Q_ASSERT(currentCycles > 0);
-  Q_ASSERT(currentPointGenerator->dimension() == m_dimension);
+  Q_ASSERT(m_pointGenerator->dimension() == m_dimension);
   
   if (m_stepCount == 0) {
     qDebug() << "Running the GNG for " << currentCycles << " cycles";
@@ -235,19 +239,19 @@ void GrowingNeuralGas::run()
   }
   
   for (int i=0; i<currentCycles; i++) {
-    dataAccess->lock();
+    m_dataAccess->lock();
     if (m_stepCount % m_updateInterval == 0) {
       emit updated();
     }
-    Point nextPoint = currentPointGenerator->generatePoint();
+    Point nextPoint = m_pointGenerator->generatePoint();
     step(nextPoint);
-    dataAccess->unlock();
+    m_dataAccess->unlock();
   }
 }
 
 QMutex* GrowingNeuralGas::mutex() const
 {
-  return dataAccess;
+  return m_dataAccess;
 }
 
 

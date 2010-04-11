@@ -13,6 +13,13 @@ set(gngtest_sources
 	gngviewer.cpp
 	)
 
-add_executable(gngtest ${gngtest_sources})
+
+set(gngtest_headers
+#    gngtest.h
+    )
+
+qt4_wrap_cpp(gngtest_mocs ${gngtest_headers})
+
+add_executable(gngtest ${gngtest_sources} ${gngtest_mocs})
 target_link_libraries(gngtest ${QT_LIBRARIES} gng)
 

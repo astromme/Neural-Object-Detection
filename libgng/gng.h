@@ -23,6 +23,25 @@ class GrowingNeuralGas : public QThread {
     
     QString toString();
     
+    void setPointGenerator(PointGenerator *pointGenerator);
+    void run(int cycles);
+    
+    QList<Node*> nodes() const;
+    QList<Edge*> uniqueEdges() const;
+    
+    void setUpdateInterval(int steps);
+    
+    QMutex* mutex() const;
+    
+  signals:
+    void updated();    
+    
+  private:
+    virtual void run();
+    int currentCycles;
+    PointGenerator *m_pointGenerator;
+    QMutex *m_dataAccess;
+    
     bool unitOfInterest(Node *node, qreal cutoff);
     
     /** Computes the distances between the given point and every unit
@@ -59,23 +78,6 @@ class GrowingNeuralGas : public QThread {
     
     /** Processes one input point at a time through the GNG. */
     void step(const Point &nextPoint);
-    void run(int cycles, PointGenerator *pointGenerator);
-    
-    QList<Node*> nodes() const;
-    QList<Edge*> uniqueEdges() const;
-    
-    void setUpdateInterval(int steps);
-    
-    QMutex* mutex() const;
-    
-  signals:
-    void updated();    
-    
-  private:
-    virtual void run();
-    int currentCycles;
-    PointGenerator *currentPointGenerator;
-    QMutex *dataAccess;
     
   private:
     int m_dimension;
