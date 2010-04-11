@@ -39,7 +39,7 @@ Point Node::location()
   return m_location;
 }
 
-QString Node::toString() // const // TODO: Ryan took this out because it gave an "invalid use of incomplete type 'struct Node' error
+QString Node::toString() const
 {
   QString string = "[";
   foreach(qreal part, m_location) {
@@ -79,7 +79,6 @@ void Node::removeEdge(Edge* edge)
   m_edges.removeAll(edge);
 }
 
-
 QList<Node*> Node::neighbors() const
 {
   QList<Node*> neighbors;
@@ -104,6 +103,7 @@ void Node::setError(qreal error)
   m_error = error;
 }
 
+// adjust position of node towards a given point and a learningRate
 void Node::moveTowards(const Point& point, qreal learningRate)
 {
   for (int i=0; i<point.size(); i++) {

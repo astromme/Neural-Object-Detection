@@ -22,7 +22,7 @@ class Node {
     
     Point location();
     
-    QString toString(); // const; // TODO Ryan did this. See node in node.cpp
+    QString toString() const; 
     
     bool hasEdgeTo(const Node *other) const;
     Edge* getEdgeTo(const Node *other) const;

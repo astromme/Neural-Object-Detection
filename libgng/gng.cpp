@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QHash>
 
+// constructor
 GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, int updateInterval)
   : currentCycles(0),
     m_pointGenerator(0)
@@ -37,17 +38,20 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, 
   connectNodes(m_nodes[0], m_nodes[1]);
 }
 
+// destructor
 GrowingNeuralGas::~GrowingNeuralGas()
 {
   delete m_dataAccess;
 }
 
+// converts gng to a string to print out
 QString GrowingNeuralGas::toString()
 {
   return QString("GNG step %1\nNumber of units: %2\nAverage error: %3\n")
 		.arg(m_stepCount).arg(m_nodes.length()).arg(averageError());
 }
 
+// FIXME: never called
 bool GrowingNeuralGas::unitOfInterest(Node* node, qreal cutoff)
 {
   foreach(qreal part, node->location()) {
@@ -58,13 +62,14 @@ bool GrowingNeuralGas::unitOfInterest(Node* node, qreal cutoff)
   return false;
 }
 
+// sort function used by qSort in gng.cpp 
 typedef QPair<qreal, Node*> DistNodePair;
-  
 bool pairLessThan(const DistNodePair &s1, const DistNodePair &s2)
 {
     return s1.first < s2.first;
 }
-    
+   
+// TODO: no idea what this does
 QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
 {
   QList<DistNodePair> dists;
@@ -76,6 +81,7 @@ QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
   return QPair<Node*, Node*>(dists[0].second, dists[1].second);
 }
 
+// increments all edges of a node
 void GrowingNeuralGas::incrementEdgeAges(Node* node)
 {
   foreach(Edge* edge, node->edges()) {
@@ -84,6 +90,12 @@ void GrowingNeuralGas::incrementEdgeAges(Node* node)
   }
 }
 
+/*****************************
+ * Function: connectNodes
+ * ----------------------
+ * Adds edges between two nodes. Since bidirectional edges in graph are
+ * represented as two directed edges, we have to connect a-->b and b-->a
+ */
 void GrowingNeuralGas::connectNodes(Node* a, Node* b)
 {
   Edge* e1 = new Edge(a, b);
@@ -95,6 +107,12 @@ void GrowingNeuralGas::connectNodes(Node* a, Node* b)
   m_uniqueEdges.append(e1);
 }
 
+/*****************************
+ * Function: disconnectNodes
+ * -------------------------
+ * Removes edges between two nodes. Since bidirectional edges in graph are
+ * represented as two directed edges, we have to remove a-->b and b-->a
+ */
 void GrowingNeuralGas::disconnectNodes(Node* a, Node* b)
 {
   Edge *e1 = a->getEdgeTo(b);
@@ -107,18 +125,26 @@ void GrowingNeuralGas::disconnectNodes(Node* a, Node* b)
   m_uniqueEdges.removeAll(e2);
 }
 
+/*****************************
+ * Function: removeStaleEdges
+ * --------------------------
+ * Removes all edges that are older than m_maxAge. Any nodes without any
+ * connecting edges are culled as well
+ */
 void GrowingNeuralGas::removeStaleEdges()
 {
+  // remove edges
   foreach(Node *node, m_nodes) {
     foreach(Edge *edge, node->edges()) {
       if (edge->age() > m_maxAge) {
-	m_uniqueEdges.removeAll(edge);
-	node->removeEdge(edge);
-	delete edge;
+        m_uniqueEdges.removeAll(edge);
+        node->removeEdge(edge);
+        delete edge;
       }
     }
   }
-  
+
+  // remove nodes
   for (int i=m_nodes.length()-1; i>=0; i--) {
     Node *node = m_nodes[i];
     if (node->edges().isEmpty()) {
@@ -128,6 +154,7 @@ void GrowingNeuralGas::removeStaleEdges()
   }
 }
 
+// get node with the highest error
 Node* GrowingNeuralGas::maxErrorNode(QList< Node* > nodeList)
 {
   Node* highestError = nodeList.first();
@@ -139,6 +166,7 @@ Node* GrowingNeuralGas::maxErrorNode(QList< Node* > nodeList)
   return highestError;
 }
 
+// get the average error over all nodes
 qreal GrowingNeuralGas::averageError()
 {
   qreal error = 0;
@@ -148,6 +176,7 @@ qreal GrowingNeuralGas::averageError()
   return error/m_nodes.length();
 }
 
+// returns a point object located at the midpoint between two points
 Point midpoint(Point *p1, Point *p2) {
   Point p3;
   p3.resize(p1->size());
@@ -158,6 +187,7 @@ Point midpoint(Point *p1, Point *p2) {
   return p3;
 }
 
+// TODO: describe this shit
 void GrowingNeuralGas::insertNode()
 {
   Node *worst = maxErrorNode(m_nodes);
@@ -177,6 +207,7 @@ void GrowingNeuralGas::insertNode()
   newNode->setError(worst->error());
 }
 
+// reduces error for every node. TODO: why do we want this?
 void GrowingNeuralGas::reduceAllErrors()
 {
   foreach(Node *node, m_nodes) {
@@ -184,6 +215,7 @@ void GrowingNeuralGas::reduceAllErrors()
   }
 }
 
+// umm... steps TODO: wtf?
 void GrowingNeuralGas::step(const Point& nextPoint)
 {
   if (m_stepCount % 10000 == 0) {
@@ -219,23 +251,21 @@ void GrowingNeuralGas::step(const Point& nextPoint)
   
 }
 
-void GrowingNeuralGas::setPointGenerator(PointGenerator* pointGenerator)
-{
-  m_pointGenerator = pointGenerator;
-}
-
-void GrowingNeuralGas::run(int cycles)
-{
-  currentCycles = cycles;
-  start(QThread::LowestPriority);
-}
-
+// single threaded run TODO more
 void GrowingNeuralGas::synchronousRun(int cycles)
 {
   currentCycles = cycles;
   run();
 }
 
+// TODO not really sure what's going on here
+void GrowingNeuralGas::run(int cycles)
+{
+  currentCycles = cycles;
+  start(QThread::LowestPriority);
+}
+
+// multithreaded run TODO more
 void GrowingNeuralGas::run()
 {
   Q_ASSERT(currentCycles > 0);
@@ -259,6 +289,13 @@ void GrowingNeuralGas::run()
   }
 }
 
+/*****************************
+ * Function: getSubgraphs
+ * ----------------------
+ * After running the GNG, we can calculate which subgraphs are disjoint using
+ * this method. It returns a list of such subgraphs. Each subgraph is a list
+ * of points.
+ */
 QList<NodeList> GrowingNeuralGas::getSubgraphs()
 {
   QHash<Node*, bool> nodeDict;
@@ -304,6 +341,8 @@ QList<NodeList> GrowingNeuralGas::getSubgraphs()
   return subgraphList;
 }
 
+// prints subgraphs in a human-readable format
+// should be called using result from getSubgraphs
 void GrowingNeuralGas::printSubgraphs(
     QList<NodeList> &subgraphs, bool printNodes)
 {
@@ -312,13 +351,12 @@ void GrowingNeuralGas::printSubgraphs(
 
   int nodesInSubgraph;
   int numSubgraphs = subgraphs.size();
-  //foreach (NodeList subgraph, subgraphs){
   for (int i=0; i<numSubgraphs; i++){
     nodesInSubgraph = subgraphs[i].size();
     qDebug() << "==> Subgraph" << i+1 << "of" << numSubgraphs << 
       "contains" << nodesInSubgraph << "nodes";
     
-    // only print nodes out if user asks for it
+    // only print node details out if user asks for it
     if (printNodes){
       foreach(Node* node, subgraphs[i]){
         qDebug() << " " << node->toString();
@@ -327,6 +365,7 @@ void GrowingNeuralGas::printSubgraphs(
   }
 }
 
+// accessors
 QMutex* GrowingNeuralGas::mutex() const
 {
   return m_dataAccess;
@@ -342,4 +381,11 @@ QList< Edge* > GrowingNeuralGas::uniqueEdges() const
 {
   return m_uniqueEdges;
 }
+
+// mutator
+void GrowingNeuralGas::setPointGenerator(PointGenerator* pointGenerator)
+{
+  m_pointGenerator = pointGenerator;
+}
+
 
