@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   gng.synchronousRun(10000);
 
   // get subgraphs // TODO better comment
-  QList<NodeList> subgraphs = gng.getSubgraphs();
+  QList<NodeList> subgraphs = gng.subgraphs();
   gng.printSubgraphs(subgraphs);
 
   // Execute the Qt mainloop. Needed for widgets to update themselves/for events to happen

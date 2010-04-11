@@ -296,7 +296,7 @@ void GrowingNeuralGas::run()
  * this method. It returns a list of such subgraphs. Each subgraph is a list
  * of points.
  */
-QList<NodeList> GrowingNeuralGas::getSubgraphs()
+QList<NodeList> GrowingNeuralGas::subgraphs()
 {
   QHash<Node*, bool> nodeDict;
   foreach(Node* node, m_nodes){
