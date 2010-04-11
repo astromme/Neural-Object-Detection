@@ -92,6 +92,7 @@ class GrowingNeuralGas : public QThread {
     int m_stepCount;
     QList<Node*> m_nodes;
     QList<Edge*> m_uniqueEdges;
+    qreal m_targetError;
     int m_updateInterval;
 };
       

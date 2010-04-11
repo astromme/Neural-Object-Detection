@@ -24,6 +24,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, 
   m_stepsSinceLastInsert = m_stepsToInsert + 1;
   m_insertError = 0.5;
   m_stepCount = 0;
+  m_targetError = 0.1;
   m_updateInterval = updateInterval;
   
   //The GNG always begins with two randomly placed units.
@@ -66,10 +67,11 @@ bool pairLessThan(const DistNodePair &s1, const DistNodePair &s2)
 QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
 {
   QList<DistNodePair> dists;
+  
   foreach(Node *node, m_nodes) {
     dists.append(DistNodePair(node->location().distanceTo(point), node));
-    qSort(dists.begin(), dists.end(), pairLessThan);
   }
+  qSort(dists.begin(), dists.end(), pairLessThan);
   return QPair<Node*, Node*>(dists[0].second, dists[1].second);
 }
 
@@ -183,7 +185,7 @@ void GrowingNeuralGas::reduceAllErrors()
 
 void GrowingNeuralGas::step(const Point& nextPoint)
 {
-  if (m_stepCount % 1000 == 0) {
+  if (m_stepCount % 10000 == 0) {
     qDebug() << "Step " << m_stepCount;
   }
   QPair<Node*, Node*> winner = computeDistances(nextPoint);
@@ -204,7 +206,7 @@ void GrowingNeuralGas::step(const Point& nextPoint)
   
   removeStaleEdges();;
   
-  if (averageError() > 0.05 && (m_stepsSinceLastInsert > m_stepsToInsert)) {
+  if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_stepsToInsert)) {
     qDebug() << "Creating new Node at timestep " << m_stepCount << " and error " << averageError();
     m_stepsSinceLastInsert = 0;
     insertNode();
@@ -239,6 +241,7 @@ void GrowingNeuralGas::run()
   }
   
   for (int i=0; i<currentCycles; i++) {
+    //usleep(1000);
     m_dataAccess->lock();
     if (m_stepCount % m_updateInterval == 0) {
       emit updated();

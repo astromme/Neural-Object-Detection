@@ -21,6 +21,7 @@ class ImageGenerator : public PointGenerator {
   private:
     QImage m_image;
     qreal normalize(qreal value, qreal maxValue);
+    void nextPixel(int *x, int *y);
 };
 
 #endif // _IMAGEGENERATOR_H

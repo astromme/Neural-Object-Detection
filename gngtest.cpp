@@ -17,10 +17,9 @@ int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
   
     
-  QString templateImagePath = "../images/rgb/rgb%1.png";
+   QString templateImagePath = "../images/rgb/rgb%1.png";
 
-  GrowingNeuralGas gng(5);
-  GngViewer view(400, 400);
+  GrowingNeuralGas gng(5, -1, 1, 5000);
   QList<ImageGenerator> generators;
   QList<QString> imagePaths;
   
@@ -30,12 +29,20 @@ int main(int argc, char* argv[]) {
     imagePaths.append(imagePath);
   }
   
+
+  generators.append(ImageGenerator("../images/laptop-desk.jpg"));
+  imagePaths.append("../images/laptop-desk.jpg");
+  
+  int frame = QString(argv[1]).toInt();  
+  
+  GngViewer view(generators[frame].width(), generators[frame].height());
+
   view.setGng(&gng);
   view.show();
   
   QObject::connect(&gng, SIGNAL(updated()), &view, SLOT(update()));
   
-  int frame = QString(argv[1]).toInt();  
+  
   
   QPixmap img;
   img.load(imagePaths[frame]);
