@@ -25,6 +25,7 @@ class GrowingNeuralGas : public QThread {
     
     void setPointGenerator(PointGenerator *pointGenerator);
     void run(int cycles);
+    void synchronousRun(int cycles);
     
     QList<Node*> nodes() const;
     QList<Edge*> uniqueEdges() const;

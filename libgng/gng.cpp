@@ -229,6 +229,12 @@ void GrowingNeuralGas::run(int cycles)
   start(QThread::LowestPriority);
 }
 
+void GrowingNeuralGas::synchronousRun(int cycles)
+{
+  currentCycles = cycles;
+  run();
+}
+
 void GrowingNeuralGas::run()
 {
   Q_ASSERT(currentCycles > 0);
