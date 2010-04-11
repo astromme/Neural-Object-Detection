@@ -39,13 +39,13 @@ Point Node::location()
   return m_location;
 }
 
-QString Node::toString() const
+QString Node::toString() // const // TODO: Ryan took this out because it gave an "invalid use of incomplete type 'struct Node' error
 {
   QString string = "[";
   foreach(qreal part, m_location) {
     string.append(QString::number(part) + ", ");
   }
-  string.append("]\n");
+  string.append("]");
   return string;
 }
 

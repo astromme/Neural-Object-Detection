@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include <QDebug>
+#include <QHash>
 
 GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, int updateInterval)
   : currentCycles(0),
@@ -255,6 +256,74 @@ void GrowingNeuralGas::run()
     Point nextPoint = m_pointGenerator->generatePoint();
     step(nextPoint);
     m_dataAccess->unlock();
+  }
+}
+
+QList<NodeList> GrowingNeuralGas::getSubgraphs()
+{
+  QHash<Node*, bool> nodeDict;
+  foreach(Node* node, m_nodes){
+    nodeDict.insert(node, true);
+  }
+
+  QList<NodeList> subgraphList;
+  while (!nodeDict.empty()){
+    NodeList subgraph;
+    NodeList searchList;
+
+    // get node in dictionary
+    Node* initNode = nodeDict.begin().key();
+
+    searchList.append(initNode);
+    while (!searchList.empty()){
+      // remove current node from search list
+      Node* searchNode = searchList.takeFirst(); 
+
+      // add node to subgraph since we can reach it
+      subgraph.append(searchNode); 
+
+      // by removing node from dictionary we effectively mark it as 'visited'
+      nodeDict.remove(searchNode);
+
+      // add all neighbors that can be reached and have not been visited
+      QList<Node*> neighbors = searchNode->neighbors();
+      foreach (Node* node, neighbors){
+        // Breadth First Search
+        if (nodeDict.contains(node)){
+          searchList.append(node);
+          nodeDict.remove(node);
+        }
+      }
+    }
+    // searchList now empty, which means subgraph has been populated with all
+    // elements reachable in the given subgraph. So add that to subgraphList
+    // and clear subgraph
+    subgraphList.append(subgraph);
+    subgraph.clear();
+  }
+  return subgraphList;
+}
+
+void GrowingNeuralGas::printSubgraphs(
+    QList<NodeList> &subgraphs, bool printNodes)
+{
+  qDebug() << "Printing Subgraphs";
+  qDebug() << "------------------";
+
+  int nodesInSubgraph;
+  int numSubgraphs = subgraphs.size();
+  //foreach (NodeList subgraph, subgraphs){
+  for (int i=0; i<numSubgraphs; i++){
+    nodesInSubgraph = subgraphs[i].size();
+    qDebug() << "==> Subgraph" << i+1 << "of" << numSubgraphs << 
+      "contains" << nodesInSubgraph << "nodes";
+    
+    // only print nodes out if user asks for it
+    if (printNodes){
+      foreach(Node* node, subgraphs[i]){
+        qDebug() << " " << node->toString();
+      }
+    }
   }
 }
 

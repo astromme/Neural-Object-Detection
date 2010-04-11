@@ -2,6 +2,7 @@
 #include "gngviewer.h"
 #include "libgng/gng.h"
 #include "libgng/imagegenerator.h"
+#include "libgng/node.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -44,7 +45,11 @@ int main(int argc, char* argv[]) {
   
   // Run the GNG synchronously for 10,000 cycles. 
   gng.synchronousRun(10000);
-  
+
+  // get subgraphs // TODO better comment
+  QList<NodeList> subgraphs = gng.getSubgraphs();
+  gng.printSubgraphs(subgraphs);
+
   // Execute the Qt mainloop. Needed for widgets to update themselves/for events to happen
   app.exec();
   // This area is never reached by the program
