@@ -29,6 +29,9 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   setTargetError(0.001); // TODO was 0.1
   setUpdateInterval(5000);
   
+  m_min = minimum;
+  m_max = maximum;
+  
   //The GNG always begins with two randomly placed units.
   m_nodes.append(new Node(Point(), dimension, minimum, maximum));
   m_nodes.append(new Node(Point(), dimension, minimum, maximum));
@@ -213,7 +216,7 @@ void GrowingNeuralGas::insertNode()
   Node *worstNeighbor = maxErrorNode(worst->neighbors());
   
   Point newPoint = midpoint(worst->location(), worstNeighbor->location());
-  Node *newNode = new Node(newPoint);
+  Node *newNode = new Node(newPoint, m_dimension, m_min, m_max);
   m_nodes.append(newNode);
 
   connectNodes(newNode, worst);

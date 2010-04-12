@@ -33,17 +33,17 @@ Point ImageGenerator::generatePoint()
   while (backgroundPoint) {
     x = qrand() % width();
     y = qrand() % height();
-    //qDebug() << lastX << lastY;	
     colors = m_image.pixel(x, y);
+    colors = colors.toHsv();
 
     backgroundPoint = false;
     
     //     if ((abs(colors.hue() - backgroundColor[0]) > 50)
     //      || (abs(colors.saturation() - backgroundColor[1]) > 50)
     //      || (abs(colors.value() - backgroundColor[2]) > 50)) {
-    if ((abs(colors.saturation() - backgroundColor[0]) > 10)) {
-      backgroundPoint = false;
-    }
+    //if ((abs(colors.saturation() - backgroundColor[0]) > 10)) {
+    //  backgroundPoint = false;
+    //}
   }
 
   Point p;
@@ -51,16 +51,18 @@ Point ImageGenerator::generatePoint()
   p[0] = normalize(x, width());
   p[1] = normalize(y, height());
 
-  p[2] = normalize(colors.hue(), 255);
-  p[3] = normalize(colors.saturation(), 255);
-  p[4] = normalize(colors.value(), 255);
+  colors.getHsvF(&p[2], &p[3], &p[4]);
+  
+  if (p[2] < 0) {
+    p[2] = 0; // qt returns hue == -1 if the color is a gray/black/white
+  }
 
   return p;
   }
 
   qreal ImageGenerator::normalize(qreal value, qreal maxValue)
   {
-    return 2.0*value/maxValue-1;
+    return value/maxValue;
   }
 
   int ImageGenerator::width() const

@@ -10,7 +10,7 @@ qreal realRand(qreal minimum, qreal maximum) {
   qreal rand = ((float)qrand())/RAND_MAX;
   rand *= maximum-minimum;
   rand += minimum;
-
+  
   return rand;
 }
 
@@ -21,6 +21,7 @@ Node::Node(Point location, int dimension, qreal min, qreal max)
   m_max = max;
   m_location = location;
   m_error = 0;
+  
 
   if (m_location.isEmpty()) {
     m_location.resize(dimension);

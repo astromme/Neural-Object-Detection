@@ -45,7 +45,7 @@ void GngViewer::setSource(const QPixmap& background)
 
 qreal GngViewer::unNormalize(qreal value, qreal maxValue)
 {
-  return maxValue*(value + 1.0)/2.0;
+  return maxValue*value;
 }
 
 void GngViewer::paintEvent(QPaintEvent* e)
@@ -81,11 +81,8 @@ void GngViewer::paintEvent(QPaintEvent* e)
     
     p[0] = unNormalize(p[0], m_width);
     p[1] = unNormalize(p[1], m_height);
-    p[2] = unNormalize(p[2], 255);
-    p[3] = unNormalize(p[3], 255);
-    p[4] = unNormalize(p[4], 255);
     
-    QColor c = QColor::fromHsv(p[2], p[3], p[4]);
+    QColor c = QColor::fromHsvF(p[2], p[3], p[4]);
     painter.setBrush(c);
     painter.drawEllipse(p[0]-5, p[1]-5, 10, 10);
   }
