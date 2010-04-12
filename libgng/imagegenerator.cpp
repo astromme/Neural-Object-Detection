@@ -20,27 +20,8 @@ int ImageGenerator::dimension()
   return 5;
 }
 
-void ImageGenerator::nextPixel(int* x, int* y)
-{
-  if (*x < width()-1) {
-    (*x)++;
-    return;
-  } else {
-    *x = 0;
-    if (*y < height()-1) {
-      (*y)++;
-      return;
-    } else {
-      *y = 0;
-    }
-  }
-}
-
 Point ImageGenerator::generatePoint()
 {
-  static int lastX = 1;
-  static int lastY = 1;
-
   int x, y;
   QColor colors;
   bool backgroundPoint = true;
@@ -55,6 +36,8 @@ Point ImageGenerator::generatePoint()
     //qDebug() << lastX << lastY;	
     colors = m_image.pixel(x, y);
 
+    backgroundPoint = false;
+    
     //     if ((abs(colors.hue() - backgroundColor[0]) > 50)
     //      || (abs(colors.saturation() - backgroundColor[1]) > 50)
     //      || (abs(colors.value() - backgroundColor[2]) > 50)) {

@@ -83,7 +83,7 @@ class GrowingNeuralGas : public QThread {
     void reduceAllErrors();
     
     /** Processes one input point at a time through the GNG. */
-    void step(const Point &nextPoint);
+    void step(const Point& trainingPoint);
     
   private:
     int m_dimension;
