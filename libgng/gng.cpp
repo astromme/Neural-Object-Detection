@@ -19,14 +19,14 @@
   // Hardcoded values from paper
   m_dimension = dimension;
   m_winnerLearnRate = 0.3;
-  m_neighborLearnRate = 0.01;
+  m_neighborLearnRate = 0.1; // TODO was .01
   m_maxAge = 50;
-  m_reduceError = 0.995;
+  m_reduceError = 0.90; // TODO was 0.995
   m_stepsToInsert = 100;
   m_stepsSinceLastInsert = m_stepsToInsert + 1;
   m_insertError = 0.5;
   m_stepCount = 0;
-  m_targetError = 0.1;
+  m_targetError = 0.05; // TODO was 0.1
   m_updateInterval = updateInterval;
 
   //The GNG always begins with two randomly placed units.
@@ -278,7 +278,7 @@ void GrowingNeuralGas::run()
   }
 
   for (int i=0; i<currentCycles; i++) {
-    //usleep(1000);
+    usleep(1000);
     m_dataAccess->lock();
     if (m_stepCount % m_updateInterval == 0) {
       emit updated();
