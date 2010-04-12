@@ -299,8 +299,10 @@ void GrowingNeuralGas::run()
     qDebug() << "Running the GNG for" << currentCycles << "additional cycles";
   }
   
+  //sleep(5); // TODO: Remove
+  
   for (int i=0; i<currentCycles; i++) {
-    usleep(1000);
+    usleep(1000); // TODO: Remove
     m_dataAccess->lock();
     if (m_stepCount % m_updateInterval == 0) {
       emit updated();
