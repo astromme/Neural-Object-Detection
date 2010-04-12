@@ -60,8 +60,6 @@ class GrowingNeuralGas : public QThread {
     PointGenerator *m_pointGenerator;
     QMutex *m_dataAccess;
     
-    bool unitOfInterest(Node *node, qreal cutoff);
-    
     /** Computes the distances between the given point and every unit
         in the GNG.  Returns the closest and next closest units. */
     QPair<Node*, Node*> computeDistances(const Point& point); // find 2 best nodes
@@ -99,19 +97,25 @@ class GrowingNeuralGas : public QThread {
     
   private:
     int m_dimension;
-    //int m_seed;
-    qreal m_winnerLearnRate; /**< Used to adjust closest unit towards input point */
-    qreal m_neighborLearnRate; /**< Used to adjust other neighbors towards input point */
-    int m_maxAge; /**< Edges older than maxAge are removed */
-    qreal m_reduceError; /**< All errors are reduced by this amount each GNG step */
-    int m_stepsToInsert; /**< Min steps before inserting a new node */
-    int m_stepsSinceLastInsert;
-    qreal m_insertError; /**< Error of every new unit is reduced by this amount */
     int m_stepCount;
+    
+    int m_updateInterval;
+    
+    qreal m_winnerLearnRate;
+    qreal m_neighborLearnRate;
+    
+    int m_maxEdgeAge;
+    int m_minStepsBetweenInsertions;
+    int m_stepsSinceLastInsert;
+    
+    qreal m_reduceErrorMultiplier;
+    qreal m_insertErrorMultiplier;
+    qreal m_targetError;
+    
     QList<Node*> m_nodes;
     QList<Edge*> m_uniqueEdges;
-    qreal m_targetError;
-    int m_updateInterval;
+    
+    
 };
       
 

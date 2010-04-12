@@ -18,15 +18,15 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, 
   
   // Hardcoded values from paper
   m_dimension = dimension;
-  m_winnerLearnRate = 0.3;
-  m_neighborLearnRate = 0.1; // TODO was .01
-  m_maxAge = 50;
-  m_reduceError = 0.90; // TODO was 0.995
-  m_stepsToInsert = 100;
-  m_stepsSinceLastInsert = m_stepsToInsert + 1;
-  m_insertError = 0.5;
+  setWinnerLearnRate(0.1);
+  m_neighborLearnRate = 0.01; // TODO was .01
+  m_maxEdgeAge = 50;
+  m_reduceErrorMultiplier = 0.90; // TODO was 0.995
+  m_minStepsBetweenInsertions = 100;
+  m_stepsSinceLastInsert = m_minStepsBetweenInsertions + 1;
+  m_insertErrorMultiplier = 0.5;
   m_stepCount = 0;
-  m_targetError = 0.05; // TODO was 0.1
+  m_targetError = 0.001; // TODO was 0.1
   m_updateInterval = updateInterval;
   
   //The GNG always begins with two randomly placed units.
@@ -51,16 +51,35 @@ QString GrowingNeuralGas::toString()
 		.arg(m_stepCount).arg(m_nodes.length()).arg(averageError());
 }
 
-// FIXME: never called
-bool GrowingNeuralGas::unitOfInterest(Node* node, qreal cutoff)
-{
-  foreach(qreal part, node->location()) {
-    if (abs(part) > cutoff) {
-      return true;
-    }
-  }
-  return false;
+// Setting Parameters
+void GrowingNeuralGas::setUpdateInterval(int steps) {
+  m_updateInterval = steps;
 }
+
+void GrowingNeuralGas::setWinnerLearnRate(qreal learnRate) {
+  m_winnerLearnRate = learnRate;
+}
+void GrowingNeuralGas::setNeighborLearnRate(qreal learnRate) {
+  m_neighborLearnRate = learnRate;
+}
+
+void GrowingNeuralGas::setMaxEdgeAge(int steps) {
+  m_maxEdgeAge = steps;
+}
+void GrowingNeuralGas::setNodeInsertionDelay(int minStepsBetweenInsertions) {
+  m_minStepsBetweenInsertions = minStepsBetweenInsertions;
+}
+void GrowingNeuralGas::setTargetError(qreal targetAverageError) {
+  m_targetError = targetAverageError;
+}
+
+void GrowingNeuralGas::setErrorReduction(qreal reduceErrorBy) {
+  m_reduceErrorMultiplier = 1-reduceErrorBy;
+}
+void GrowingNeuralGas::setInsertErrorReduction(qreal reduceErrorBy) {
+  m_insertErrorMultiplier = 1-reduceErrorBy;
+}
+
 
 // sort function used by qSort in gng.cpp 
 typedef QPair<qreal, Node*> DistNodePair;
@@ -136,7 +155,7 @@ void GrowingNeuralGas::removeStaleEdges()
   // remove edges
   foreach(Node *node, m_nodes) {
     foreach(Edge *edge, node->edges()) {
-      if (edge->age() > m_maxAge) {
+      if (edge->age() > m_maxEdgeAge) {
         m_uniqueEdges.removeAll(edge);
         node->removeEdge(edge);
         delete edge;
@@ -202,8 +221,8 @@ void GrowingNeuralGas::insertNode()
 
   disconnectNodes(worst, worstNeighbor);
   
-  worst->setError(worst->error() * m_insertError);
-  worstNeighbor->setError(worstNeighbor->error() * m_insertError);
+  worst->setError(worst->error() * m_insertErrorMultiplier);
+  worstNeighbor->setError(worstNeighbor->error() * m_insertErrorMultiplier);
   newNode->setError(worst->error());
 }
 
@@ -211,7 +230,7 @@ void GrowingNeuralGas::insertNode()
 void GrowingNeuralGas::reduceAllErrors()
 {
   foreach(Node *node, m_nodes) {
-    node->setError(node->error() * m_reduceError);
+    node->setError(node->error() * m_reduceErrorMultiplier);
   }
 }
 
@@ -239,7 +258,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
   
   removeStaleEdges();;
   
-  if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_stepsToInsert)) {
+  if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_minStepsBetweenInsertions)) {
     qDebug() << "Creating new Node at timestep " << m_stepCount << " and error " << averageError();
     m_stepsSinceLastInsert = 0;
     insertNode();
