@@ -7,6 +7,7 @@
 
 #include <QPainter>
 #include <QDebug>
+#include <QApplication>
 
 GngViewer::GngViewer(int width, int height, QWidget* parent)
   : QWidget(parent)
@@ -88,6 +89,17 @@ void GngViewer::paintEvent(QPaintEvent* e)
     painter.setBrush(c);
     painter.drawEllipse(p[0]-5, p[1]-5, 10, 10);
   }
+  
+  // Draw framecount
+  QColor white(Qt::white);
+  white.setAlphaF(0.6);
+  painter.setBrush(white);
+  painter.setPen(Qt::black);
+  QString stepString = QString("Frame %1").arg(m_gng->step());
+  int width = QApplication::fontMetrics().width(stepString);
+  int height = QApplication::fontMetrics().height();
+  painter.drawRect(5, 5, 10+width, 10+height);
+  painter.drawText(QPoint(10, 10+height), stepString);
   
   m_gng->mutex()->unlock();
 }
