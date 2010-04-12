@@ -11,4 +11,5 @@ qreal Point::distanceTo(const Point &other) {
   }
   
   return sqrt(dist);
+  //return dist;
 }
