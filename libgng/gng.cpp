@@ -382,6 +382,11 @@ QList< Edge* > GrowingNeuralGas::uniqueEdges() const
   return m_uniqueEdges;
 }
 
+int GrowingNeuralGas::step() const
+{
+  return m_stepCount;
+}
+
 // mutator
 void GrowingNeuralGas::setPointGenerator(PointGenerator* pointGenerator)
 {

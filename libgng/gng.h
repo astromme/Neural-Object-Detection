@@ -35,7 +35,19 @@ class GrowingNeuralGas : public QThread {
     QList<Node*> nodes() const;
     QList<Edge*> uniqueEdges() const;
     
-    void setUpdateInterval(int steps);
+    int step() const; /**< Returns the current step of the computation. Reset when run() or runSynchronous() is called */
+    
+    void setUpdateInterval(int steps); /**< Emit signal updated() once per this number of steps */
+    
+    void setWinnerLearnRate(qreal learnRate); /**< Used to adjust closest unit towards input point */
+    void setNeighborLearnRate(qreal learnRate); /**< Used to adjust other neighbors towards input point */
+    
+    void setMaxEdgeAge(int steps); /**< Edges older than maxAge are removed */
+    void setNodeInsertionDelay(int minStepsBetweenInsertions); /**< Min steps before inserting a new node */
+    void setTargetError(qreal targetAverageError); /**< Continue inserting nodes until the average error has reached this threshold */
+    
+    void setErrorReduction(qreal reduceErrorBy); /**< All errors are reduced by this amount each GNG step */
+    void setInsertErrorReduction(qreal reduceErrorBy); /**< Reduce new unit's error by this much */
     
     QMutex* mutex() const;
     
