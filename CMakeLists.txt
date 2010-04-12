@@ -6,6 +6,10 @@ find_package(Qt4 REQUIRED)
 include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+find_package(Boost COMPONENTS program_options REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
+
 add_subdirectory(libgng)
 
 set(gngtest_sources
@@ -22,4 +26,5 @@ qt4_wrap_cpp(gngtest_mocs ${gngtest_headers})
 
 add_executable(gngtest ${gngtest_sources} ${gngtest_mocs})
 target_link_libraries(gngtest ${QT_LIBRARIES} gng)
+target_link_libraries(gngtest ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
