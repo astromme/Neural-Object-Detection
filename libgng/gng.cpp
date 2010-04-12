@@ -196,12 +196,12 @@ qreal GrowingNeuralGas::averageError()
 }
 
 // returns a point object located at the midpoint between two points
-Point midpoint(Point *p1, Point *p2) {
+Point midpoint(const Point &p1, const Point &p2) {
   Point p3;
-  p3.resize(p1->size());
+  p3.resize(p1.size());
   
-  for (int i=0; i<p1->size(); i++) {
-    p3[i] = (p1->at(i) + p2->at(i))/2;
+  for (int i=0; i<p1.size(); i++) {
+    p3[i] = (p1.at(i) + p2.at(i))/2;
   }
   return p3;
 }
@@ -212,7 +212,7 @@ void GrowingNeuralGas::insertNode()
   Node *worst = maxErrorNode(m_nodes);
   Node *worstNeighbor = maxErrorNode(worst->neighbors());
   
-  Point newPoint = midpoint(&worst->location(), &worstNeighbor->location());
+  Point newPoint = midpoint(worst->location(), worstNeighbor->location());
   Node *newNode = new Node(newPoint);
   m_nodes.append(newNode);
 
