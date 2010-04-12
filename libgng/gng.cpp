@@ -10,7 +10,7 @@
 #include <QHash>
 
 // constructor
-GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, int updateInterval)
+GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   : currentCycles(0),
     m_pointGenerator(0)
 {
@@ -19,15 +19,15 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum, 
   // Hardcoded values from paper
   m_dimension = dimension;
   setWinnerLearnRate(0.1);
-  m_neighborLearnRate = 0.01; // TODO was .01
-  m_maxEdgeAge = 50;
-  m_reduceErrorMultiplier = 0.90; // TODO was 0.995
-  m_minStepsBetweenInsertions = 100;
+  setNeighborLearnRate(0.01); // TODO was .01
+  setMaxEdgeAge(50);
+  setErrorReduction(0.1); // TODO was 0.005
+  setNodeInsertionDelay(50);
   m_stepsSinceLastInsert = m_minStepsBetweenInsertions + 1;
-  m_insertErrorMultiplier = 0.5;
+  setInsertErrorReduction(0.5);
   m_stepCount = 0;
-  m_targetError = 0.001; // TODO was 0.1
-  m_updateInterval = updateInterval;
+  setTargetError(0.001); // TODO was 0.1
+  setUpdateInterval(5000);
   
   //The GNG always begins with two randomly placed units.
   m_nodes.append(new Node(Point(), dimension, minimum, maximum));

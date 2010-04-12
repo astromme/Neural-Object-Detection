@@ -19,7 +19,8 @@ int main(int argc, char* argv[]) {
   // Create our QApplication object. Needed for the gui and for threading
   QApplication app(argc, argv);
   // Create the GNG object with bounds of -1 and 1.
-  GrowingNeuralGas gng(5, -1, 1, 50);
+  GrowingNeuralGas gng(5);
+  gng.setUpdateInterval(50);
   // The ImageGenerator provides the source points for the gng (similar to the distribution)
   ImageGenerator generator(imagePath);
   // The GngViewer provides the window in which we can see the results of the GNG/source image

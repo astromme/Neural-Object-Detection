@@ -20,7 +20,7 @@ class GrowingNeuralGas : public QThread {
   Q_OBJECT
  
   public:
-    GrowingNeuralGas(int dimension, qreal minimum = -1, qreal maximum = 1, int updateInterval = 1000);
+    GrowingNeuralGas(int dimension, qreal minimum = -1, qreal maximum = 1);
     ~GrowingNeuralGas();
     
     QString toString();
