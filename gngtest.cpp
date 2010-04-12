@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
   // Create our QApplication object. Needed for the gui and for threading
   QApplication app(argc, argv);
   // Create the GNG object with bounds of -1 and 1.
-  GrowingNeuralGas gng(5, -1, 1, 50);
+  GrowingNeuralGas gng(5);
 
   // set command-line parameters
   gng.setWinnerLearnRate(popts.winnerLearnRate);
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
   gng.setTargetError(popts.targetError);
   gng.setErrorReduction(popts.errorReduction);
   gng.setInsertErrorReduction(popts.insertErrorReduction);
-
+  gng.setUpdateInterval(popts.updateInterval);
 
   // The ImageGenerator provides the source points for the gng (similar to the distribution)
   ImageGenerator generator(imagePath);
