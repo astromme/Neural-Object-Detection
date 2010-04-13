@@ -17,6 +17,7 @@ using std::string;
 void setUpdateInterval(int steps); /**< Emit signal updated() once per this number of steps */
     
 typedef struct s_popts {
+  int delay;
   int updateInterval;
   string imagePath;
   float winnerLearnRate;
@@ -44,6 +45,7 @@ int main(int argc, char* argv[]) {
   GrowingNeuralGas gng(5);
 
   // set command-line parameters
+  gng.setDelay(popts.delay);
   gng.setWinnerLearnRate(popts.winnerLearnRate);
   gng.setNeighborLearnRate(popts.neighborLearnRate);
   gng.setMaxEdgeAge(popts.maxEdgeAge);
@@ -95,7 +97,8 @@ bool parse_args(int argc, char* argv[], ProgOpts& popts){
      ("help,h", "Show this message")
      ("config,c", po::value<string>(&configFile), "Config file to read options from")
      ("imagePath,p", po::value<string>(&popts.imagePath), "Path to image")
-     ("updateInterval,u", po::value<int>(&popts.updateInterval)->default_value(5000), "Emit signal updated() once per this number of steps")
+     ("delay,d", po::value<int>(&popts.delay)->default_value(1), "Add a n millisecond delay to each step.")
+     ("updateInterval,u", po::value<int>(&popts.updateInterval)->default_value(50), "Emit signal updated() once per this number of steps")
      ("winnerLearnrate,w", po::value<float>(&popts.winnerLearnRate)->default_value(0.1), "Used to adjust closest unit towards input point")
      ("neighborLearnRate,n", po::value<float>(&popts.neighborLearnRate)->default_value(0.01), "Used to adjust other neighbors towards input point")
      ("maxEdgeAge,m", po::value<int>(&popts.maxEdgeAge)->default_value(50), "Edges older than maxAge are removed")
