@@ -82,7 +82,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
     p[0] = unNormalize(p[0], m_width);
     p[1] = unNormalize(p[1], m_height);
     
-    QColor c = QColor::fromHsvF(p[2], p[3], p[4]);
+    QColor c = QColor::fromHslF(p[2], p[3], p[4]);
     painter.setBrush(c);
     painter.drawEllipse(p[0]-5, p[1]-5, 10, 10);
   }
