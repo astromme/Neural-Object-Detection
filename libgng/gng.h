@@ -36,7 +36,8 @@ class GrowingNeuralGas : public QThread {
     QList<Edge*> uniqueEdges() const;
     
     int step() const; /**< Returns the current step of the computation. Reset when run() or runSynchronous() is called */
-    
+
+    void setDelay(int milliseconds);
     void setUpdateInterval(int steps); /**< Emit signal updated() once per this number of steps */
     
     void setWinnerLearnRate(qreal learnRate); /**< Used to adjust closest unit towards input point */
@@ -101,6 +102,7 @@ class GrowingNeuralGas : public QThread {
     int m_max;
     int m_stepCount;
     
+    int m_delay;
     int m_updateInterval;
     
     qreal m_winnerLearnRate;

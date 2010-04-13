@@ -27,6 +27,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   setInsertErrorReduction(0.5);
   m_stepCount = 0;
   setTargetError(0.001); // TODO was 0.1
+  setDelay(0);
   setUpdateInterval(5000);
   
   m_min = minimum;
@@ -55,6 +56,9 @@ QString GrowingNeuralGas::toString()
 }
 
 // Setting Parameters
+void GrowingNeuralGas::setDelay(int milliseconds) {
+  m_delay = milliseconds;
+}
 void GrowingNeuralGas::setUpdateInterval(int steps) {
   m_updateInterval = steps;
 }
@@ -299,10 +303,11 @@ void GrowingNeuralGas::run()
     qDebug() << "Running the GNG for" << currentCycles << "additional cycles";
   }
   
-  //sleep(5); // TODO: Remove
-  
   for (int i=0; i<currentCycles; i++) {
-    usleep(1000); // TODO: Remove
+    if (m_delay != 0) {
+      usleep(m_delay*1000);
+    }
+
     m_dataAccess->lock();
     if (m_stepCount % m_updateInterval == 0) {
       emit updated();
