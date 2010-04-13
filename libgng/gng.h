@@ -36,6 +36,8 @@ class GrowingNeuralGas : public QThread {
     QList<Edge*> uniqueEdges() const;
     
     int step() const; /**< Returns the current step of the computation. Reset when run() or runSynchronous() is called */
+    Point focusPoint() const;
+    bool focusing() const;
     
     void setUpdateInterval(int steps); /**< Emit signal updated() once per this number of steps */
     
@@ -113,6 +115,9 @@ class GrowingNeuralGas : public QThread {
     qreal m_reduceErrorMultiplier;
     qreal m_insertErrorMultiplier;
     qreal m_targetError;
+    
+    Point m_pickCloseTo;
+    int m_pickCloseToCountdown;
     
     QList<Node*> m_nodes;
     QList<Edge*> m_uniqueEdges;

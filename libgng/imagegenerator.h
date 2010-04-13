@@ -13,6 +13,7 @@ class ImageGenerator : public PointGenerator {
     ~ImageGenerator();
 
     virtual Point generatePoint();
+    virtual Point generateNearbyPoint(const Point& nearThisPoint);
     virtual int dimension();
 
     int width() const;
@@ -21,6 +22,7 @@ class ImageGenerator : public PointGenerator {
   private:
     QImage m_image;
     qreal normalize(qreal value, qreal maxValue);
+    Point pointFromXY(int x, int y);
 };
 
 #endif // _IMAGEGENERATOR_H
