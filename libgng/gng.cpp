@@ -264,7 +264,22 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
     connectNodes(winners.first, winners.second);
   }
   
-  removeStaleEdges();;
+    
+//   qreal dist = winners.first->location().distanceTo(winners.second->location());
+//   qreal xyDist = winners.first->location().xyDistanceTo(winners.second->location());
+//   if ((averageError() < m_targetError) && (nodes().size() > 4) && (xyDist > 0.2*sqrt(2)*m_max)) {
+//     Point p1 = winners.first->location();
+//     Point p2 = winners.second->location();
+//     qDebug() << "xydist:" << xyDist << "(" << p1[0] << p1[1] << ") (" << p2[0] << p2[1] << ")";
+//     
+//     Edge *e1 = winners.first->getEdgeTo(winners.second);
+//     Edge *e2 = winners.second->getEdgeTo(winners.first);
+//     
+//     if (e1) { e1->setAge(100); }
+//     if (e2) { e2->setAge(100); }
+//   }
+  
+  removeStaleEdges();
   
   if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_minStepsBetweenInsertions)) {
     qDebug() << "Creating new Node at timestep " << m_stepCount << " and error " << averageError();

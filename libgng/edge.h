@@ -21,6 +21,7 @@ class Edge {
     Node* to() const;
     
     void incrementAge();
+    void setAge(int age);
     int age() const;
     void resetAge();
         

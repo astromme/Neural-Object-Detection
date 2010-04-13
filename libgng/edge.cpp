@@ -36,5 +36,10 @@ void Edge::incrementAge()
 {
   m_age++;
 }
+void Edge::setAge(int age)
+{
+  m_age = age;
+}
+
 
 

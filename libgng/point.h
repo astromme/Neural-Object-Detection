@@ -7,7 +7,8 @@
 class Point : public QVector<qreal> {
   
   public:
-    qreal distanceTo(const Point &other);
+    qreal distanceTo(const Point &other); //TODO document
+    qreal xyDistanceTo(const Point &other); //TODO document
     
 };
 
