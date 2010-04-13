@@ -340,7 +340,7 @@ void GrowingNeuralGas::run()
     }
     
     Point nextPoint;
-    if (m_pickCloseToCountdown > 0) {
+    if (false && m_pickCloseToCountdown > 0) {
       nextPoint = m_pointGenerator->generateNearbyPoint(m_pickCloseTo);
     } else {
       nextPoint = m_pointGenerator->generatePoint();
