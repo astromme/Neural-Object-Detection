@@ -97,7 +97,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
     painter.setBrush(transparentGray);
     int x = unNormalize(focus[0], m_width) - 0.05*width();
     int y = unNormalize(focus[1], m_height) - 0.05*height();
-    painter.drawEllipse(x, y, 0.1*width(), 0.1*height());
+    painter.drawEllipse(x, y, 0.1*width(), 0.1*height()); //TODO Don't hardcode
   }
   
   // Draw framecount

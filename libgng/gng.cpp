@@ -287,15 +287,16 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
     insertNode();
   }
   
+  // TODO Make less hacky
   //qDebug() << "Errors: First:" << winners.first->error() << " and Second:" << winners.second->error();
-  qreal errorThreshold = 10*m_targetError;
-  if (m_pickCloseToCountdown > 0) {
-    m_pickCloseToCountdown--;
-  } else if ((averageError() < m_targetError) && (winners.second->error() > errorThreshold)) {
-    //qDebug() << "Picking close to " << trainingPoint;
-    m_pickCloseTo = trainingPoint;
-    m_pickCloseToCountdown = 500;
-  }
+//   qreal errorThreshold = 10*m_targetError;
+//   if (m_pickCloseToCountdown > 0) {
+//     m_pickCloseToCountdown--;
+//   } else if ((averageError() < m_targetError) && (winners.second->error() > errorThreshold)) {
+//     //qDebug() << "Picking close to " << trainingPoint;
+//     m_pickCloseTo = trainingPoint;
+//     m_pickCloseToCountdown = 500;
+//   }
   
   reduceAllErrors();
   m_stepCount++;
@@ -340,11 +341,11 @@ void GrowingNeuralGas::run()
     }
     
     Point nextPoint;
-    if (false && m_pickCloseToCountdown > 0) {
-      nextPoint = m_pointGenerator->generateNearbyPoint(m_pickCloseTo);
-    } else {
+//     if (false && m_pickCloseToCountdown > 0) {
+//       nextPoint = m_pointGenerator->generateNearbyPoint(m_pickCloseTo);
+//     } else {
       nextPoint = m_pointGenerator->generatePoint();
-    }
+//     }
     step(nextPoint);
     
     m_dataAccess->unlock();
