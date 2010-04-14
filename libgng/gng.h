@@ -7,14 +7,13 @@ class Edge;
 class PointGenerator;
 
 #include "point.h"
+#include "subgraph.h"
 
 #include <QPair>
 #include <QList>
 #include <QString>
 #include <QThread>
 #include <QMutex>
-
-typedef QList<Node*> NodeList;
 
 class GrowingNeuralGas : public QThread {
   Q_OBJECT
@@ -29,8 +28,8 @@ class GrowingNeuralGas : public QThread {
     void run(int cycles);
     void synchronousRun(int cycles);
 
-    QList<NodeList> subgraphs();
-    void printSubgraphs(QList<NodeList> &subgraphs, bool printNodes=false);
+    QList<Subgraph> subgraphs();
+    void printSubgraphs(QList<Subgraph> &subgraphs, bool printNodes=false);
     
     QList<Node*> nodes() const;
     QList<Edge*> uniqueEdges() const;

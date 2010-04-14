@@ -6,12 +6,13 @@ include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(libgng_sources
-	point.cpp
-	imagegenerator.cpp
-	node.cpp
-	edge.cpp
-	gng.cpp
-	)
+        point.cpp
+        imagegenerator.cpp
+        node.cpp
+        edge.cpp
+        subgraph.cpp
+        gng.cpp
+        )
 
 set(libgng_headers
 #     point.h
