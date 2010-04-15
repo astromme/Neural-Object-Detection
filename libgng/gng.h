@@ -29,6 +29,7 @@ class GrowingNeuralGas : public QThread {
     void synchronousRun(int cycles);
 
     QList<Subgraph> subgraphs();
+    Subgraph matchingSubgraph(Subgraph exemplar, QList<Subgraph> subgraphs);
     void printSubgraphs(QList<Subgraph> &subgraphs, bool printNodes=false);
     
     QList<Node*> nodes() const;

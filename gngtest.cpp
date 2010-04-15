@@ -76,14 +76,20 @@ int main(int argc, char* argv[]) {
   gng.setPointGenerator(&generator);
 
   // Run the GNG asyncronously (in a separate thread) for 10,000 cycles
-  gng.run(100000);
+  //gng.run(100000);
   
   // Run the GNG synchronously for 10,000 cycles. 
-  //gng.synchronousRun(200000);
+  gng.synchronousRun(6000);
 
   // get subgraphs // TODO better comment
-  /*QList<NodeList> subgraphs = gng.subgraphs();
-  gng.printSubgraphs(subgraphs);*/
+  QList<Subgraph> subgraphs = gng.subgraphs();
+  gng.printSubgraphs(subgraphs);
+
+  Subgraph best_match = gng.matchingSubgraph(subgraphs[subgraphs.size()-1], subgraphs);
+  /*qDebug() << "Printing Best Match!!";
+  foreach(Node* node, best_match){
+    qDebug() << node->toString();
+  }*/
 
   // Execute the Qt mainloop. Needed for widgets to update themselves/for events to happen
   app.exec();
