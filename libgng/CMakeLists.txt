@@ -9,6 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(libgng_sources
         point.cpp
         imagegenerator.cpp
+	camerasource.cpp
         node.cpp
         edge.cpp
         subgraph.cpp
@@ -20,6 +21,7 @@ set(libgng_headers
 #     imagegenerator.h
 #     node.h
 #     edge.h
+    camerasource.h
     gng.h
     )
 
@@ -29,4 +31,4 @@ add_executable(opencvtest opencvtest.cpp)
 target_link_libraries(opencvtest ${OpenCV_LIBS})
 
 add_library(gng SHARED ${libgng_sources} ${libgng_mocs})
-target_link_libraries(gng ${QT_LIBRARIES})
+target_link_libraries(gng ${QT_LIBRARIES} ${OpenCV_LIBS})

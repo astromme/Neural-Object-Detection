@@ -27,7 +27,6 @@ class ImageGenerator : public PointGenerator, QThread {
   private:
     QMutex *m_dataAccess;
     QImage m_image;
-    qreal normalize(qreal value, qreal maxValue);
     Point pointFromXY(int x, int y);
 };
 

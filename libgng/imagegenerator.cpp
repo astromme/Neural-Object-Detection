@@ -102,11 +102,6 @@ Point ImageGenerator::generateNearbyPoint(const Point& nearThisPoint)
   return pointFromXY(closeX, closeY);
 }
 
-qreal ImageGenerator::normalize(qreal value, qreal maxValue)
-{
-  return value/maxValue;
-}
-
 int ImageGenerator::width() const
 {
   m_dataAccess->lock();

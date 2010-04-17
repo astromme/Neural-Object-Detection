@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QApplication>
+#include "libgng/camerasource.h"
 
 GngViewer::GngViewer(int width, int height, QWidget* parent)
   : QWidget(parent)
@@ -19,6 +20,7 @@ GngViewer::GngViewer(int width, int height, QWidget* parent)
   m_width = width;
   m_height = height;
   m_gng = 0;
+  m_cameraSource = 0;
   m_paintBackground = false;
 }
 
@@ -43,6 +45,13 @@ void GngViewer::setSource(const QPixmap& background)
 //   //	setPalette(palette);
 }
 
+void GngViewer::setSource(CameraSource* source)
+{
+  setAttribute(Qt::WA_OpaquePaintEvent);
+  m_cameraSource = source;
+  m_paintBackground = true;
+}
+
 qreal GngViewer::unNormalize(qreal value, qreal maxValue)
 {
   return maxValue*value;
@@ -55,6 +64,9 @@ void GngViewer::paintEvent(QPaintEvent* e)
   painter.setRenderHint(QPainter::Antialiasing);
   
   if (m_paintBackground) {
+    if (m_cameraSource) {
+      m_background = QPixmap::fromImage(m_cameraSource->image());
+    }
     painter.drawPixmap(rect(), m_background);
   }
   

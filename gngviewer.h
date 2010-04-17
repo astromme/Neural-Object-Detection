@@ -4,6 +4,7 @@
 
 #include <QWidget>
 
+class CameraSource;
 class GrowingNeuralGas;
 
 class GngViewer : public QWidget {
@@ -12,6 +13,7 @@ class GngViewer : public QWidget {
     ~GngViewer();
     
     void setGng(GrowingNeuralGas *gng);
+    void setSource(CameraSource *source);
     void setSource(const QPixmap &background);
     
   protected:
@@ -23,6 +25,7 @@ class GngViewer : public QWidget {
     int m_height;
     GrowingNeuralGas *m_gng;
     
+    CameraSource *m_cameraSource;
     QPixmap m_background;
     bool m_paintBackground;
 };
