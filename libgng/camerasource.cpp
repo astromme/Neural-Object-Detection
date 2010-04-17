@@ -42,9 +42,11 @@ void CameraSource::convertFrameToImage()
     for( y = 0; y < m_frame->height; y++, data += m_frame->widthStep ) {
       for( x = 0; x < m_frame->width; x++) {
         uint *p = (uint*)m_image.scanLine(y) + x;
+        qDebug() << "m_frame: " << m_frame;
         qDebug() << m_frame->nChannels;
         qDebug() << x;
-        qDebug() << data[2] << data[1];
+        qDebug() << data[2] << data[1] << data[0];
+        qDebug() << qRgb(4, 5, 5);
         *p = qRgb(data[x * m_frame->nChannels+2], data[x * m_frame->nChannels+1], data[x * m_frame->nChannels]);
       }
     }
