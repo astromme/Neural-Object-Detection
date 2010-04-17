@@ -57,7 +57,8 @@ int main(int argc, char* argv[]) {
   gng.setUpdateInterval(popts.updateInterval);
 
   // The ImageGenerator provides the source points for the gng (similar to the distribution)
-  ImageGenerator generator(imagePath);
+  QImage tempimg(imagePath);
+  ImageGenerator generator(tempimg);
   // The GngViewer provides the window in which we can see the results of the GNG/source image
   GngViewer view(generator.width(), generator.height());
 

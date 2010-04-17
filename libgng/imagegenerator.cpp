@@ -6,15 +6,25 @@
 #include <QDebug>
 #include <QList>
 #include <QColor>
+#include <QMutex>
 
-ImageGenerator::ImageGenerator(const QString& filePath)
+ImageGenerator::ImageGenerator(const QImage& image)
 : PointGenerator(),
-  m_image(filePath)
+  m_image(image)
 {
+  m_dataAccess = new QMutex();
 }
 
 ImageGenerator::~ImageGenerator()
 {
+  delete m_dataAccess;
+}
+
+void ImageGenerator::setImage(const QImage& image)
+{
+  m_dataAccess->lock();
+  m_image = image;
+  m_dataAccess->unlock();
 }
 
 int ImageGenerator::dimension()
@@ -29,7 +39,9 @@ Point ImageGenerator::pointFromXY(int x, int y)
   p[0] = normalize(x, width());
   p[1] = normalize(y, height());
 
+  m_dataAccess->lock();
   QColor colors = m_image.pixel(x, y);
+  m_dataAccess->unlock();
   colors = colors.toHsv();
   colors.getHsvF(&p[2], &p[3], &p[4]);
   //colors.getHslF(&p[2], &p[3], &p[4]);
@@ -97,9 +109,15 @@ qreal ImageGenerator::normalize(qreal value, qreal maxValue)
 
 int ImageGenerator::width() const
 {
-  return m_image.width();
+  m_dataAccess->lock();
+  int width = m_image.width();
+  m_dataAccess->unlock();
+  return width;
 }
 int ImageGenerator::height() const
 {
-  return m_image.height();
+  m_dataAccess->lock();
+  int height = m_image.height();
+  m_dataAccess->unlock();
+  return height;
 }
