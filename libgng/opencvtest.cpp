@@ -10,9 +10,11 @@ using std::cout;
 
 int main(int, char**)
 {
-    CvCapture* cam = cvCreateCameraCapture(0);
-    if (!cam)
+    CvCapture* cam = cvCreateCameraCapture(-1);
+    if (!cam){
+      printf("Camera not found!\n");
       return -1;
+    }
 
     //Mat edges;
     Mat frame;
