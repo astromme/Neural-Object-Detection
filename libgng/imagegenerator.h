@@ -4,14 +4,19 @@
 
 #include <QString>
 #include <QImage>
+#include <QThread>
 
 #include "pointgenerator.h"
 
-class ImageGenerator : public PointGenerator { 
+class QMutex;
+
+class ImageGenerator : public PointGenerator, QThread { 
   public:
-    ImageGenerator(const QString &filePath);
+    ImageGenerator(const QImage &image);
     ~ImageGenerator();
 
+    void setImage(const QImage &image);
+    
     virtual Point generatePoint();
     virtual Point generateNearbyPoint(const Point& nearThisPoint);
     virtual int dimension();
@@ -20,6 +25,7 @@ class ImageGenerator : public PointGenerator {
     int height() const;
 
   private:
+    QMutex *m_dataAccess;
     QImage m_image;
     qreal normalize(qreal value, qreal maxValue);
     Point pointFromXY(int x, int y);
