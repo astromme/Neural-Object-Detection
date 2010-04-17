@@ -118,7 +118,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
   white.setAlphaF(0.6);
   painter.setBrush(white);
   painter.setPen(Qt::black);
-  QString stepString = QString("Frame %1").arg(m_gng->step());
+  QString stepString = QString("Iteration %1").arg(m_gng->step());
   int width = QApplication::fontMetrics().width(stepString);
   int height = QApplication::fontMetrics().height();
   painter.drawRect(5, 5, 10+width, 10+height);
