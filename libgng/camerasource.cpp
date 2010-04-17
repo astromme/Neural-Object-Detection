@@ -12,7 +12,7 @@ CameraSource::CameraSource()
     qDebug() << "Camera not found";
     return;
   }
-  processNextFrame();
+  m_image = QImage(QSize(width(), height()), QImage::Format_RGB32);
 }
 CameraSource::~CameraSource()
 {
@@ -44,7 +44,7 @@ void CameraSource::convertFrameToImage()
         uint *p = (uint*)m_image.scanLine(y) + x;
         qDebug() << m_frame->nChannels;
         qDebug() << x;
-        qDebug() << data;
+        qDebug() << data[2] << data[1];
         *p = qRgb(data[x * m_frame->nChannels+2], data[x * m_frame->nChannels+1], data[x * m_frame->nChannels]);
       }
     }
@@ -64,12 +64,12 @@ QImage CameraSource::image() const
 
 int CameraSource::width()
 {
-  return m_frame->width;
+  return cvGetCaptureProperty(m_device, CV_CAP_PROP_FRAME_WIDTH);
 }
 
 int CameraSource::height()
 {
-  return m_frame->height;
+  return cvGetCaptureProperty(m_device, CV_CAP_PROP_FRAME_HEIGHT);
 }
 
 Point CameraSource::generatePoint()
