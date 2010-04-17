@@ -19,20 +19,22 @@ int main(int, char**)
     IplImage *img;
     //namedWindow("edges",1);
 
-    cvGrabFrame(cam);
-    img = cvRetrieveFrame(cam);
 
     while(true)
     {
-        //cap >> frame; // get a new frame from camera
+      //cap >> frame; // get a new frame from camera
 
-        //cvtColor(frame, edges, CV_BGR);
-        //cvtColor(frame, edges, CV_BGR2GRAY);
-        //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
-        //Canny(edges, edges, 0, 30, 3);
-        //imshow("frame", frame);
-        //if(waitKey(30) >= 0) 
-          break;
+      //cvtColor(frame, edges, CV_BGR);
+      //cvtColor(frame, edges, CV_BGR2GRAY);
+      //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+      //Canny(edges, edges, 0, 30, 3);
+      //imshow("frame", frame);
+
+      cvGrabFrame(cam);
+      img = cvRetrieveFrame(cam);
+      cvShowImage("img", img);
+      if(waitKey(30) >= 0) 
+        break;
         
     }
     int type = frame.type();
@@ -41,10 +43,10 @@ int main(int, char**)
     //cout << frame.at<float>(0,0);
     //
     CvScalar s;
-    for (int r=0; r<1000; r++){
-      for (int c=0; c<1000; c++){
-        s=cvGet2D(img,0,0); // get the (i,j) pixel value 
-        printf("[%d,%d]: B=%f, G=%f, R=%f\n",r,c,s.val[0],s.val[1],s.val[2]); 
+    for (int r=0; r<img->height; r++){
+      for (int c=0; c<img->width; c++){
+        s=cvGet2D(img,r,c); // get the (i,j) pixel value 
+        printf("[%d,%d]: R=%f, G=%f, B=%f\n",r,c,s.val[2],s.val[1],s.val[0]); 
         usleep(1);
       }
     }
