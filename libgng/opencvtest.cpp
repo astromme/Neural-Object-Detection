@@ -1,26 +1,60 @@
+#include <cstdio>
+#include <iostream>
+#include <string>
+#include <ctime>
 #include "cv.h"
 #include "highgui.h"
 
 using namespace cv;
+using std::cout;
 
 int main(int, char**)
 {
-    VideoCapture cap(0); // open the default camera
-    if(!cap.isOpened())  // check if we succeeded
-        return -1;
+    CvCapture* cam = cvCreateCameraCapture(0);
+    if (!cam)
+      return -1;
 
-    Mat edges;
-    namedWindow("edges",1);
-    for(;;)
+    //Mat edges;
+    Mat frame;
+    IplImage *img;
+    //namedWindow("edges",1);
+
+    cvGrabFrame(cam);
+    img = cvRetrieveFrame(cam);
+
+    while(true)
     {
-        Mat frame;
-        cap >> frame; // get a new frame from camera
-        cvtColor(frame, edges, CV_BGR2GRAY);
-        GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
-        Canny(edges, edges, 0, 30, 3);
-        imshow("edges", edges);
-        if(waitKey(30) >= 0) break;
+        //cap >> frame; // get a new frame from camera
+
+        //cvtColor(frame, edges, CV_BGR);
+        //cvtColor(frame, edges, CV_BGR2GRAY);
+        //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+        //Canny(edges, edges, 0, 30, 3);
+        //imshow("frame", frame);
+        //if(waitKey(30) >= 0) 
+          break;
+        
     }
+    int type = frame.type();
+    //int val = frame.at<int>(0,0);
+    //printf("%d\n",val);
+    //cout << frame.at<float>(0,0);
+    //
+    CvScalar s;
+    for (int r=0; r<1000; r++){
+      for (int c=0; c<1000; c++){
+        s=cvGet2D(img,0,0); // get the (i,j) pixel value 
+        printf("[%d,%d]: B=%f, G=%f, R=%f\n",r,c,s.val[0],s.val[1],s.val[2]); 
+        usleep(1);
+      }
+    }
+
+    //s.val[0]=111; 
+    //s.val[1]=111; 
+    //s.val[2]=111; 
+    //cvSet2D(img,i,j,s); // set the (i,j) pixel value 
+
+
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 }
