@@ -1,0 +1,49 @@
+Thoughts on what we want to do
+------------------------------
+
+* greyscale
+* color representation (rgb, hsv, hsl)
+* make physical distance more important
+  ==> +1.5 x,y distance
+* focus on high-error areas/boundaries
+* object tracking
+  ==> Using AIBO
+* initial object choice
+* process a 'movie' (multiple frames)
+  ==> ability to pause
+* color networks of nodes based on the subgraph
+
+What we want for final presentation
+-----------------------------------
++ * object tracking in movie
++ * use webcam to demo tracking
+* be able to specify initial object choice
+  ==> command-line option
+  ==> OR click on it..
+* setup 'scene'
+  ==> adapt to changes in lighting
+    -- lights on, off
+    -- shades up, down
+  ==> adapt to changes in motion
+    -- moving water bottle
+    -- objects of same color, big/small following
+
+Presentation Outline
+--------------------
+* Introduce Project
+  ==> High-level goals
+* GNG Background
+* Inputs to GNG
+  ==> Color model
+* Hypothesis (?)
+  ==> make clear what our program can do
+  ==> what do/did we think will happen
+  ==> why is GNG a good tool to use
+* Specific Techniques (that worked)
+    -- show distinct effects of each technique
+    -- how they work
+  ==> focus
+  ==> distance
+* Demo
+  ==> see 'scene' above
+* Future work (we have two weeks!)
