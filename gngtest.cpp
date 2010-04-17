@@ -27,6 +27,7 @@ typedef struct s_popts {
   float targetError;
   float errorReduction;
   float insertErrorReduction;
+  int totalIterations;
 } ProgOpts;
 
 bool parse_args(int argc, char* argv[], ProgOpts& popts);
@@ -76,20 +77,20 @@ int main(int argc, char* argv[]) {
   gng.setPointGenerator(&generator);
 
   // Run the GNG asyncronously (in a separate thread) for 10,000 cycles
-  //gng.run(100000);
+  gng.run(popts.totalIterations);
   
   // Run the GNG synchronously for 10,000 cycles. 
-  gng.synchronousRun(6000);
-
-  // get subgraphs // TODO better comment
-  QList<Subgraph> subgraphs = gng.subgraphs();
-  gng.printSubgraphs(subgraphs);
-
-  Subgraph best_match = gng.matchingSubgraph(subgraphs[subgraphs.size()-1], subgraphs);
-  /*qDebug() << "Printing Best Match!!";
-  foreach(Node* node, best_match){
-    qDebug() << node->toString();
-  }*/
+//   gng.synchronousRun(popts.totalIterations);
+// 
+//   // get subgraphs // TODO better comment
+//   QList<Subgraph> subgraphs = gng.subgraphs();
+//   gng.printSubgraphs(subgraphs);
+// 
+//   Subgraph best_match = gng.matchingSubgraph(subgraphs[subgraphs.size()-1], subgraphs);
+//   /*qDebug() << "Printing Best Match!!";
+//   foreach(Node* node, best_match){
+//     qDebug() << node->toString();
+//   }*/
 
   // Execute the Qt mainloop. Needed for widgets to update themselves/for events to happen
   app.exec();
@@ -109,9 +110,10 @@ bool parse_args(int argc, char* argv[], ProgOpts& popts){
      ("neighborLearnRate,n", po::value<float>(&popts.neighborLearnRate)->default_value(0.01), "Used to adjust other neighbors towards input point")
      ("maxEdgeAge,m", po::value<int>(&popts.maxEdgeAge)->default_value(50), "Edges older than maxAge are removed")
      ("nodeInsertionDelay,i", po::value<int>(&popts.nodeInsertionDelay)->default_value(100), "Min steps before inserting a new node")
-     ("targetError,t", po::value<float>(&popts.targetError)->default_value(0.001), "Continue inserting nodes until the average error has reached this threshold")
-     ("errorReduction,e", po::value<float>(&popts.errorReduction)->default_value(0.1), "All errors are reduced by this amount each GNG step")
-     ("insertErrorReduction,s", po::value<float>(&popts.insertErrorReduction)->default_value(0.5), "Reduce new unit's error by this much");
+     ("targetError,e", po::value<float>(&popts.targetError)->default_value(0.001), "Continue inserting nodes until the average error has reached this threshold")
+     ("errorReduction,r", po::value<float>(&popts.errorReduction)->default_value(0.1), "All errors are reduced by this amount each GNG step")
+     ("insertErrorReduction,s", po::value<float>(&popts.insertErrorReduction)->default_value(0.5), "Reduce new unit's error by this much")
+     ("totalIterations,t", po::value<int>(&popts.totalIterations)->default_value(100000), "Run this many iterations in total");
    po::variables_map vm;
    po::store(po::parse_command_line(argc, argv, desc), vm);
    po::notify(vm);
