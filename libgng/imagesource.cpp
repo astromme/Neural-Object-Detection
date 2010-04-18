@@ -42,9 +42,10 @@ Point ImageSource::pointFromXY(int x, int y)
   m_dataAccess->lock();
   QColor colors = m_image.pixel(x, y);
   m_dataAccess->unlock();
-  colors = colors.toHsv();
-  colors.getHsvF(&p[2], &p[3], &p[4]);
-  //colors.getHslF(&p[2], &p[3], &p[4]);
+  //colors = colors.toHsv();
+  colors = colors.toHsl();
+  //colors.getHsvF(&p[2], &p[3], &p[4]);
+  colors.getHslF(&p[2], &p[3], &p[4]);
   
   if (p[2] < 0) {
     p[2] = 0; // qt returns hue == -1 if the color is a gray/black/white
