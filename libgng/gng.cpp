@@ -407,7 +407,7 @@ void GrowingNeuralGas::generateSubgraphs()
       Node* searchNode = searchList.takeFirst(); 
 
       // add node to subgraph since we can reach it
-      subgraph.append(searchNode); 
+      subgraph.append(searchNode);
 
       // by removing node from dictionary we effectively mark it as 'visited'
       nodeDict.remove(searchNode);

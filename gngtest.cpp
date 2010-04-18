@@ -5,6 +5,7 @@
 #include "libgng/imagesource.h"
 #include "libgng/node.h"
 
+
 #include <boost/program_options.hpp>
 #include <string>
 #include <iostream>
@@ -61,7 +62,8 @@ int main(int argc, char* argv[]) {
   QImage tempimg(imagePath);
   ImageSource generator(tempimg);
   // The GngViewer provides the window in which we can see the results of the GNG/source image
-  GngViewer view(generator.width(), generator.height());
+  GngViewer view;
+  view.setSize(generator.width(), generator.height());
   
   for(int i=1;i<=11;i++) {
     app.addImage(QImage(QString("../images/rgb/rgb%1.png").arg(i)));
@@ -73,9 +75,6 @@ int main(int argc, char* argv[]) {
   // Give the view a gng to visualize.
   view.setGng(&gng);
   view.show();
-  
-  // Tell the view to update each time the GNG emits updated(). Useful for async mode
-  QObject::connect(&gng, SIGNAL(updated()), &view, SLOT(update()));
   
   // Give the visualizer the background. comment out these lines to have a blank background
   QPixmap img;

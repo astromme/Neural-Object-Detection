@@ -10,12 +10,13 @@ class GrowingNeuralGas;
 
 class GngViewer : public QWidget {
   public:
-    GngViewer(int width, int height, QWidget *parent = 0);
+    GngViewer(QWidget *parent = 0);
     ~GngViewer();
     
     void setGng(GrowingNeuralGas *gng);
     void setSource(CameraSource *source);
     void setSource(const QPixmap &background);
+    void setSize(int width, int height);
     
   protected:
     virtual void paintEvent(QPaintEvent* e);

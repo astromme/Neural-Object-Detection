@@ -10,15 +10,10 @@
 #include <QApplication>
 #include "libgng/camerasource.h"
 
-GngViewer::GngViewer(int width, int height, QWidget* parent)
+GngViewer::GngViewer(QWidget* parent)
   : QWidget(parent)
 {
-  resize(width, height);
-  setMinimumSize(width, height);
-  setMaximumSize(width, height);
-  
-  m_width = width;
-  m_height = height;
+  setSize(200, 200);
   m_gng = 0;
   m_cameraSource = 0;
   m_paintBackground = false;
@@ -31,6 +26,16 @@ GngViewer::GngViewer(int width, int height, QWidget* parent)
 GngViewer::~GngViewer()
 {
 
+}
+
+void GngViewer::setSize(int width, int height)
+{
+  resize(width, height);
+  setMinimumSize(width, height);
+  setMaximumSize(width, height);
+  
+  m_width = width;
+  m_height = height;
 }
 
 void GngViewer::setGng(GrowingNeuralGas* gng)
