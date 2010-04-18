@@ -96,6 +96,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
     
     //QColor c = QColor::fromHsvF(p[2], p[3], p[4]);
     QColor c = QColor::fromHslF(p[2], p[3], p[4]);
+    //QColor c = QColor::fromHslF(p[2], 1, .5);
     painter.setBrush(c);
     painter.drawEllipse(p[0]-5, p[1]-5, 10, 10);
   }
