@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QDebug>
 #include "libgng/camerasource.h"
+#include "ui_viewer.h"
 
 namespace po=boost::program_options;
 using std::string;
@@ -39,6 +40,11 @@ int main(int argc, char* argv[]) {
 
   // Create our QApplication object. Needed for the gui and for threading
   QApplication app(argc, argv);
+ 
+//   QWidget w;
+//   Ui::Form ui;
+//   ui.setupUi(&w);
+//   w.show();
 
   // Create the GNG object with bounds of -1 and 1.
   GrowingNeuralGas gng(5);
