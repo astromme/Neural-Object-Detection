@@ -250,8 +250,16 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
   }
   QPair<Node*, Node*> winners = computeDistances(trainingPoint);
   incrementEdgeAges(winners.first);
-  winners.first->setError(winners.first->error() + pow(winners.first->location().distanceTo(trainingPoint), 2));
-  winners.first->moveTowards(trainingPoint, m_winnerLearnRate);
+  
+  // if the point is already the right color, don't touch it by moving its xy position all over the place.
+  if (0.01 > winners.first->location().colorDistanceTo(trainingPoint)) {
+    //qDebug() << winners.first->location() << trainingPoint;
+    winners.first->setError(winners.first->error() + 0.1*pow(winners.first->location().distanceTo(trainingPoint), 2));
+    winners.first->moveTowards(trainingPoint, 0.1*m_winnerLearnRate);
+  } else {
+    winners.first->setError(winners.first->error() + pow(winners.first->location().distanceTo(trainingPoint), 2));
+    winners.first->moveTowards(trainingPoint, m_winnerLearnRate);
+  }
   
   foreach(Node *node, winners.first->neighbors()) {
     node->moveTowards(trainingPoint, m_neighborLearnRate);
