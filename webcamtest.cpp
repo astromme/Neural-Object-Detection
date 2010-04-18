@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
 
   CameraSource source;
   source.start();
+  qDebug() << "Creating view with width and height" << source.width() << source.height();
   GngViewer view(source.width(), source.height());
   
   // Give the view a gng to visualize.

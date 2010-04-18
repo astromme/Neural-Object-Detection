@@ -38,6 +38,7 @@ class CameraSource : public QThread, public PointGenerator {
     void convertFrameToImage();
     QMutex *m_dataAccess;
     QImage m_image;
+    uchar* m_imageData;
     QTimer m_nextFrameTimer;
     CvCapture *m_device;
     IplImage *m_frame;
