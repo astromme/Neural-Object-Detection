@@ -22,6 +22,10 @@ GngViewer::GngViewer(int width, int height, QWidget* parent)
   m_gng = 0;
   m_cameraSource = 0;
   m_paintBackground = false;
+  
+  // Set widget to repaint 25 times per second
+  m_repaintTimer.setInterval(40);
+  connect(&m_repaintTimer, SIGNAL(timeout()), SLOT(update()));
 }
 
 GngViewer::~GngViewer()
@@ -32,6 +36,8 @@ GngViewer::~GngViewer()
 void GngViewer::setGng(GrowingNeuralGas* gng)
 {
   m_gng = gng;
+  update();
+  m_repaintTimer.start();
 }
 
 void GngViewer::setSource(const QPixmap& background)

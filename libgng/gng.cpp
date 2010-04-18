@@ -371,6 +371,11 @@ void GrowingNeuralGas::run()
   }
 }
 
+QList< Subgraph > GrowingNeuralGas::subgraphs() const
+{
+  return m_subgraphs;
+}
+
 /********************************
  * Function: generateSubgraphs
  * ---------------------------

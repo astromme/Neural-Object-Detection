@@ -3,6 +3,7 @@
 #define _GNGVIEWER_H
 
 #include <QWidget>
+#include <QTimer>
 
 class CameraSource;
 class GrowingNeuralGas;
@@ -21,6 +22,7 @@ class GngViewer : public QWidget {
     
   private:
     qreal unNormalize(qreal value, qreal maxValue);
+    QTimer m_repaintTimer;
     int m_width;
     int m_height;
     GrowingNeuralGas *m_gng;
