@@ -340,7 +340,7 @@ void GrowingNeuralGas::run()
   
   for (int i=0; i<currentCycles; i++) {
     if (m_delay != 0) {
-      usleep(m_delay*1000);
+      usleep(m_delay*10);
     }
     m_dataAccess->lock();
     m_stepCount++;
