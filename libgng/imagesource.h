@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QThread>
 
-#include "pointgenerator.h"
+#include "pointsource.h"
 
 class QMutex;
 

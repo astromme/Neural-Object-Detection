@@ -1,6 +1,6 @@
 #include "gngviewer.h"
 #include "libgng/gng.h"
-#include "libgng/imagegenerator.h"
+#include "libgng/imagesource.h"
 #include "libgng/node.h"
 
 #include <boost/program_options.hpp>

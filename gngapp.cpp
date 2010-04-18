@@ -1,5 +1,5 @@
 #include "gngapp.h"
-#include "libgng/imagegenerator.h"
+#include "libgng/imagesource.h"
 #include "gngviewer.h"
 
 

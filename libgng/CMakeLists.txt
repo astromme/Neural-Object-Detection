@@ -8,7 +8,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(libgng_sources
         point.cpp
-        imagegenerator.cpp
+        imagesource.cpp
 	camerasource.cpp
         node.cpp
         edge.cpp

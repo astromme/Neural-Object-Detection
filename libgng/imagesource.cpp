@@ -1,5 +1,5 @@
 
-#include "imagegenerator.h"
+#include "imagesource.h"
 
 #include <math.h>
 

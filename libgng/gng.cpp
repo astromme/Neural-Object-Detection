@@ -2,7 +2,7 @@
 
 #include "node.h"
 #include "edge.h"
-#include "pointgenerator.h"
+#include "pointsource.h"
 
 #include <math.h>
 

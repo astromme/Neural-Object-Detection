@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QTimer>
 
-#include "pointgenerator.h"
+#include "pointsource.h"
 
 #include <cv.h>
 #include <highgui.h>
