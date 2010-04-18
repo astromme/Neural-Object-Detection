@@ -6,6 +6,7 @@ find_package(Qt4 REQUIRED)
 find_package(OpenCV REQUIRED) # Hack because I need <cv.h> in the header of libgng
 include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -26,10 +27,12 @@ set(gngtest_headers
 
 qt4_wrap_cpp(gngtest_mocs ${gngtest_headers})
 
-add_executable(gngtest ${gngtest_sources} ${gngtest_mocs})
+qt4_wrap_ui(gngtest_uic viewer.ui)
+
+add_executable(gngtest ${gngtest_sources} ${gngtest_mocs} ${gngtest_uic})
 target_link_libraries(gngtest ${QT_LIBRARIES} gng)
 target_link_libraries(gngtest ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-add_executable(webcamtest webcamtest.cpp gngviewer.cpp)
+add_executable(webcamtest webcamtest.cpp gngviewer.cpp ${gngtest_uic})
 target_link_libraries(webcamtest ${QT_LIBRARIES} gng ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
