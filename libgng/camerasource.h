@@ -11,7 +11,7 @@
 #include <cv.h>
 #include <highgui.h>
 
-class CameraSource : public QThread, public PointGenerator {
+class CameraSource : public QThread, public PointSource {
   Q_OBJECT
   public:
     CameraSource();

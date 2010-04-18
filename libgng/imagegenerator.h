@@ -10,10 +10,10 @@
 
 class QMutex;
 
-class ImageGenerator : public PointGenerator, QThread { 
+class ImageSource : public QThread, public PointSource { 
   public:
-    ImageGenerator(const QImage &image);
-    ~ImageGenerator();
+    ImageSource(const QImage &image);
+    ~ImageSource();
 
     void setImage(const QImage &image);
     

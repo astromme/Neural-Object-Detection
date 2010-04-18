@@ -4,10 +4,10 @@
 
 #include "point.h"
 
-class PointGenerator { 
+class PointSource { 
   public:
-    PointGenerator() {}
-    virtual ~PointGenerator() {};
+    PointSource() {}
+    virtual ~PointSource() {};
     /** The dimension of the point generator. All points returned should be of this dimension */
     virtual int dimension() = 0;
     /** Generate a point within the distribution. Reimplement */

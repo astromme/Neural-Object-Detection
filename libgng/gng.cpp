@@ -508,7 +508,7 @@ Point GrowingNeuralGas::focusPoint() const
 
 
 // mutator
-void GrowingNeuralGas::setPointGenerator(PointGenerator* pointGenerator)
+void GrowingNeuralGas::setPointGenerator(PointSource* pointGenerator)
 {
   m_pointGenerator = pointGenerator;
 }

@@ -10,7 +10,7 @@
 #include <QApplication>
 #include <QDebug>
 #include "libgng/camerasource.h"
-#include "ui_viewer.h"
+//#include "ui_viewer.h"
 
 namespace po=boost::program_options;
 using std::string;

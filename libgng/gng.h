@@ -4,7 +4,7 @@
 
 class Node;
 class Edge;
-class PointGenerator;
+class PointSource;
 
 #include "point.h"
 #include "subgraph.h"
@@ -24,7 +24,7 @@ class GrowingNeuralGas : public QThread {
     
     QString toString();
     
-    void setPointGenerator(PointGenerator *pointGenerator);
+    void setPointGenerator(PointSource *pointGenerator);
     void run(int cycles);
     void synchronousRun(int cycles);
 
@@ -61,7 +61,7 @@ class GrowingNeuralGas : public QThread {
   private:
     virtual void run();
     int currentCycles;
-    PointGenerator *m_pointGenerator;
+    PointSource *m_pointGenerator;
     QMutex *m_dataAccess;
     
     /** Computes the distances between the given point and every unit

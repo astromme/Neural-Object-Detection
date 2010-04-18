@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
   // The ImageGenerator provides the source points for the gng (similar to the distribution)
   QImage tempimg(imagePath);
-  ImageGenerator generator(tempimg);
+  ImageSource generator(tempimg);
   // The GngViewer provides the window in which we can see the results of the GNG/source image
   GngViewer view(generator.width(), generator.height());
   

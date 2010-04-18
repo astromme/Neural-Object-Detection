@@ -8,31 +8,31 @@
 #include <QColor>
 #include <QMutex>
 
-ImageGenerator::ImageGenerator(const QImage& image)
-: PointGenerator(),
+ImageSource::ImageSource(const QImage& image)
+: PointSource(),
   m_image(image)
 {
   m_dataAccess = new QMutex();
 }
 
-ImageGenerator::~ImageGenerator()
+ImageSource::~ImageSource()
 {
   delete m_dataAccess;
 }
 
-void ImageGenerator::setImage(const QImage& image)
+void ImageSource::setImage(const QImage& image)
 {
   m_dataAccess->lock();
   m_image = image;
   m_dataAccess->unlock();
 }
 
-int ImageGenerator::dimension()
+int ImageSource::dimension()
 {
   return 5;
 }
 
-Point ImageGenerator::pointFromXY(int x, int y)
+Point ImageSource::pointFromXY(int x, int y)
 {
   Point p;
   p.resize(5);
@@ -53,7 +53,7 @@ Point ImageGenerator::pointFromXY(int x, int y)
   return p;
 }
 
-Point ImageGenerator::generatePoint()
+Point ImageSource::generatePoint()
 {
   int x = qrand() % width();
   int y = qrand() % height();
@@ -68,7 +68,7 @@ Point ImageGenerator::generatePoint()
   return pointFromXY(x, y);
 }
   
-Point ImageGenerator::generateNearbyPoint(const Point& nearThisPoint)
+Point ImageSource::generateNearbyPoint(const Point& nearThisPoint)
 {
 //   // Create gaussian distribution
 //   qreal x1, x2, w, y1, y2;
@@ -102,14 +102,14 @@ Point ImageGenerator::generateNearbyPoint(const Point& nearThisPoint)
   return pointFromXY(closeX, closeY);
 }
 
-int ImageGenerator::width() const
+int ImageSource::width() const
 {
   m_dataAccess->lock();
   int width = m_image.width();
   m_dataAccess->unlock();
   return width;
 }
-int ImageGenerator::height() const
+int ImageSource::height() const
 {
   m_dataAccess->lock();
   int height = m_image.height();

@@ -13,7 +13,7 @@ GngApp::GngApp(int& argc, char** argv)
   connect(&m_switchImageTimeout, SIGNAL(timeout()), SLOT(switchToNextImage()));
 }
 
-void GngApp::setGenerator(ImageGenerator* gen)
+void GngApp::setGenerator(ImageSource* gen)
 {
   m_generator = gen;
 }

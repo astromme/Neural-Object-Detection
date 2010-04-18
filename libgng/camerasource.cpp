@@ -43,21 +43,6 @@ void CameraSource::processNextFrame()
 
 void CameraSource::convertFrameToImage()
 {
-  if (m_frame && cvGetSize(m_frame).width>0) {
-    int x;
-    int y;
-    char* data = m_frame->imageData;
-    for( y = 0; y < m_frame->height; y++, data += m_frame->widthStep ) {
-      for( x = 0; x < m_frame->width; x++) {
-        uint *p = (uint*)m_image.scanLine(y) + x;
-        qDebug() << "m_frame: " << m_frame;
-        qDebug() << m_frame->nChannels;
-        qDebug() << x;
-        qDebug() << data[2] << data[1] << data[0];
-        qDebug() << qRgb(4, 5, 5);
-        *p = qRgb(data[x * m_frame->nChannels+2], data[x * m_frame->nChannels+1], data[x * m_frame->nChannels]);
-      }
-    }
   if (m_imageData) {
     delete m_imageData;
   }
