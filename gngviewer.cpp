@@ -68,6 +68,18 @@ qreal GngViewer::unNormalize(qreal value, qreal maxValue)
   return maxValue*value;
 }
 
+void GngViewer::drawTextInFrame(QPainter *painter, const QPoint& topLeft, const QString& text)
+{
+  QColor white(Qt::white);
+  white.setAlphaF(0.6);
+  painter->setBrush(white);
+  painter->setPen(Qt::black);
+  int width = QApplication::fontMetrics().width(text);
+  int height = QApplication::fontMetrics().height();
+  painter->drawRect(topLeft.x(), topLeft.y(), 10+width, 10+height);
+  painter->drawText(QPoint(topLeft.x()+5, topLeft.y()+5+height), text);
+}
+
 void GngViewer::paintEvent(QPaintEvent* e)
 { 
   //QWidget::paintEvent(e);
@@ -96,8 +108,14 @@ void GngViewer::paintEvent(QPaintEvent* e)
     int y2 = unNormalize(p2[1], m_height);
     
     QColor c = QColor(0, 0, 0);
-    painter.setBrush(c);
+    painter.setPen(c);
     painter.drawLine(x1, y1, x2, y2);
+    
+    int age = m_gng->edgeHistoryAge(edge);
+    int edgeX = abs(x2 - x1)/2 + qMin(x1, x2);
+    int edgeY = abs(y2 - y1)/2 + qMin(y1, y2);
+    
+    //drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->totalAge()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
   }
   foreach(Node *node, m_gng->nodes()) {
     Point p = node->location();
@@ -125,16 +143,9 @@ void GngViewer::paintEvent(QPaintEvent* e)
     painter.drawEllipse(x, y, 0.1*width(), 0.1*height()); //TODO Don't hardcode
   }
   
-  // Draw framecount
-  QColor white(Qt::white);
-  white.setAlphaF(0.6);
-  painter.setBrush(white);
-  painter.setPen(Qt::black);
-  QString stepString = QString("Iteration %1").arg(m_gng->step());
-  int width = QApplication::fontMetrics().width(stepString);
-  int height = QApplication::fontMetrics().height();
-  painter.drawRect(5, 5, 10+width, 10+height);
-  painter.drawText(QPoint(10, 10+height), stepString);
+  // Draw stepcount
+  QString stepString = QString("Step %1").arg(m_gng->step());
+  drawTextInFrame(&painter, QPoint(5, 5), stepString);
   
   m_gng->mutex()->unlock();
 }
