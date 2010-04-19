@@ -125,15 +125,17 @@ void GrowingNeuralGas::incrementEdgeAges(Node* node)
   }
 }
 
-// Updates the history hash for each edge
+// Updates the history hash for each edge and removes old edges
 void GrowingNeuralGas::incrementEdgeHistory()
 {
   int currentTime = m_timer.elapsed();
 
+  bool deletedAnEdge = false; // delete at most one edge per function call
+
   m_dataAccess->lock();
   foreach(Node* node, m_nodes) {
     foreach(Edge* edge, node->edges()) {
-      if ((currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
+      if (!deletedAnEdge && (currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
         qDebug() << "removing edge that has been here for" << (currentTime - edge->lastUpdated()) << "ms" << edge->id();
         Node *n1 = edge->to();
         Node *n2 = edge->from();
@@ -147,6 +149,8 @@ void GrowingNeuralGas::incrementEdgeHistory()
         m_uniqueEdges.removeAll(e2);
         delete edge;
         edge = 0;
+
+        deletedAnEdge = true;
       } else {
         edge->incrementTotalAge();
         if (edge->from() < edge->to()) {
@@ -467,7 +471,7 @@ void GrowingNeuralGas::generateSubgraphs()
       foreach (Node* node, neighbors){
         // Breadth First Search
         // Ignore edges less than 200 steps old
-        if (nodeDict.contains(node) && (searchNode->getEdgeTo(node)->totalAge() > 200)){ //TODO make configurable
+        if (nodeDict.contains(node) && (searchNode->getEdgeTo(node)->totalAge() > 2000)){ //TODO make configurable
           searchList.append(node);
           nodeDict.remove(node);
         }

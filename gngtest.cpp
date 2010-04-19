@@ -29,6 +29,7 @@ typedef struct s_popts {
   float errorReduction;
   float insertErrorReduction;
   int totalIterations;
+  bool movingImage;
 } ProgOpts;
 
 bool parse_args(int argc, char* argv[], ProgOpts& popts);
@@ -64,9 +65,13 @@ int main(int argc, char* argv[]) {
   // The GngViewer provides the window in which we can see the results of the GNG/source image
   GngViewer view;
   view.setSize(generator.width(), generator.height());
-  
-  for(int i=1;i<=11;i++) {
-    app.addImage(QImage(QString("../images/rgb/rgb%1.png").arg(i)));
+ 
+  if (popts.movingImage) {
+    for(int i=1;i<=11;i++) {
+      app.addImage(QImage(QString("../images/rgb/rgb%1.png").arg(i)));
+    }
+  } else {
+    app.addImage(QImage(QString(imagePath)));
   }
   
   app.setGenerator(&generator);
@@ -114,14 +119,15 @@ bool parse_args(int argc, char* argv[], ProgOpts& popts){
      ("imagePath,p", po::value<string>(&popts.imagePath), "Path to image")
      ("delay,d", po::value<int>(&popts.delay)->default_value(1), "Add a n millisecond delay to each step.")
      ("updateInterval,u", po::value<int>(&popts.updateInterval)->default_value(50), "Emit signal updated() once per this number of steps")
-     ("winnerLearnrate,w", po::value<float>(&popts.winnerLearnRate)->default_value(0.1), "Used to adjust closest unit towards input point")
+     ("winnerLearnRate,w", po::value<float>(&popts.winnerLearnRate)->default_value(0.1), "Used to adjust closest unit towards input point")
      ("neighborLearnRate,n", po::value<float>(&popts.neighborLearnRate)->default_value(0.01), "Used to adjust other neighbors towards input point")
      ("maxEdgeAge,m", po::value<int>(&popts.maxEdgeAge)->default_value(50), "Edges older than maxAge are removed")
      ("nodeInsertionDelay,i", po::value<int>(&popts.nodeInsertionDelay)->default_value(100), "Min steps before inserting a new node")
      ("targetError,e", po::value<float>(&popts.targetError)->default_value(0.001), "Continue inserting nodes until the average error has reached this threshold")
      ("errorReduction,r", po::value<float>(&popts.errorReduction)->default_value(0.1), "All errors are reduced by this amount each GNG step")
      ("insertErrorReduction,s", po::value<float>(&popts.insertErrorReduction)->default_value(0.5), "Reduce new unit's error by this much")
-     ("totalIterations,t", po::value<int>(&popts.totalIterations)->default_value(100000), "Run this many iterations in total");
+     ("totalIterations,t", po::value<int>(&popts.totalIterations)->default_value(100000), "Run this many iterations in total")
+     ("movingImage,m", po::value<bool>(&popts.movingImage)->default_value(false), "Run using a movie. Default behavior uses imagePath");
    po::variables_map vm;
    po::store(po::parse_command_line(argc, argv, desc), vm);
    po::notify(vm);
