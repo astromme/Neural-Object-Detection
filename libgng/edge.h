@@ -24,12 +24,20 @@ class Edge {
     void setAge(int age);
     int age() const;
     void resetAge();
+    
+    int totalAge() const;
+    void incrementTotalAge();
+    
+    // timestamp is in milliseconds since the gng was started
+    int lastUpdated();
+    void setLastUpdated(int time);
         
   private:
     Node *m_from;
     Node *m_to;
     int m_age;
-    
+    int m_totalAge;
+    int m_lastUpdated;
 };
 
 #endif // _EDGE_H
