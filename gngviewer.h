@@ -23,6 +23,7 @@ class GngViewer : public QWidget {
     
   private:
     qreal unNormalize(qreal value, qreal maxValue);
+    void drawTextInFrame(QPainter *painter, const QPoint &topLeft, const QString &text);
     QTimer m_repaintTimer;
     int m_width;
     int m_height;

@@ -15,7 +15,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
     m_pointGenerator(0),
     m_pickCloseToCountdown(0)
 {
-  m_dataAccess = new QMutex();
+  m_dataAccess = new QMutex(QMutex::Recursive);
   
   // Hardcoded values from paper
   m_dimension = dimension;
@@ -112,11 +112,39 @@ QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
 // increments all edges of a node
 void GrowingNeuralGas::incrementEdgeAges(Node* node)
 {
+  int currentTime = m_timer.elapsed();
   foreach(Edge* edge, node->edges()) {
+    edge->setLastUpdated(currentTime);
     edge->incrementAge();
     edge->to()->getEdgeTo(node)->incrementAge();
   }
 }
+
+// Updates the history hash for each edge
+void GrowingNeuralGas::incrementEdgeHistory()
+{
+  int currentTime = m_timer.elapsed();
+  
+  m_dataAccess->lock();
+  foreach(Node* node, m_nodes) {
+    foreach(Edge* edge, node->edges()) {
+      if ((currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
+        edge->setAge(m_maxEdgeAge + 1); // remove edge next iteration
+        edge->to()->getEdgeTo(node)->setAge(m_maxEdgeAge + 1);
+        continue; // skip the rest of this loop
+      }
+      
+      edge->incrementTotalAge();
+      if (edge->from() < edge->to()) {
+        NodePair nodes(edge->from(), edge->to());
+        int age = m_edgeHistory.value(nodes, 0);
+        m_edgeHistory.insert(nodes, age+1);
+      }
+    }
+  }
+  m_dataAccess->unlock();
+}
+
 
 /*****************************
  * Function: connectNodes
@@ -293,6 +321,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
 //     if (e2) { e2->setAge(100); }
 //   }
   
+  incrementEdgeHistory();
   removeStaleEdges();
   
   if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_minStepsBetweenInsertions)) {
@@ -315,7 +344,6 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
   reduceAllErrors();
   m_stepCount++;
   m_stepsSinceLastInsert++;
-  
 }
 
 // single threaded run TODO more
@@ -337,6 +365,8 @@ void GrowingNeuralGas::run()
 {
   Q_ASSERT(currentCycles > 0);
   Q_ASSERT(m_pointGenerator->dimension() == m_dimension);
+  
+  m_timer.start(); // time milliseconds since gng was created
   
   if (m_stepCount == 0) {
     qDebug() << "Running the GNG for" << currentCycles << "cycles";
@@ -416,7 +446,8 @@ void GrowingNeuralGas::generateSubgraphs()
       QList<Node*> neighbors = searchNode->neighbors();
       foreach (Node* node, neighbors){
         // Breadth First Search
-        if (nodeDict.contains(node)){
+        // Ignore edges less than 200 steps old
+        if (nodeDict.contains(node) && (searchNode->getEdgeTo(node)->totalAge() > 200)){ //TODO make configurable
           searchList.append(node);
           nodeDict.remove(node);
         }
@@ -545,6 +576,14 @@ Point GrowingNeuralGas::focusPoint() const
   return m_pickCloseTo;
 }
 
+int GrowingNeuralGas::edgeHistoryAge(Edge* edge) const
+{
+  if (edge->from() < edge->to()) {
+    return m_edgeHistory.value(NodePair(edge->from(), edge->to()), 0);
+  } else {
+    return m_edgeHistory.value(NodePair(edge->to(), edge->from()), 0);
+  }
+}
 
 // mutator
 void GrowingNeuralGas::setPointGenerator(PointSource* pointGenerator)

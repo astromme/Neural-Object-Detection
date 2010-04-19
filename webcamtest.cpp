@@ -69,11 +69,7 @@ int main(int argc, char* argv[]) {
   // Give the view a gng to visualize.
   view.setGng(&gng);
   view.show();
-  
-  // Tell the view to update each time the GNG emits updated(). Useful for async mode
-  QObject::connect(&gng, SIGNAL(updated()), &view, SLOT(update()));
-  QObject::connect(&source, SIGNAL(imageUpdated()), &view, SLOT(update()));
-  
+    
   view.setSource(&source);
   
   // Give the GNG its way of generating points
