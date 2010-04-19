@@ -532,7 +532,7 @@ void GrowingNeuralGas::matchingSubgraph(){
 
 // prints subgraphs in a human-readable format
 // should be called using result from getSubgraphs
-void GrowingNeuralGas::printSubgraphs(bool printNodes)
+void GrowingNeuralGas::printSubgraphs(bool printNodes) const
 {
   m_dataAccess->lock();
   QList<Subgraph> subgraphs = m_subgraphs;
