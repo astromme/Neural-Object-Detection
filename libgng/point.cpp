@@ -3,7 +3,7 @@
 
 #include "math.h"
 
-qreal Point::distanceTo(const Point &other) {
+qreal Point::distanceTo(const Point &other) const {
   qreal dist = 0;
   
   for (int i=0; i<size(); i++) {
@@ -14,14 +14,12 @@ qreal Point::distanceTo(const Point &other) {
   //return dist;
 }
 
-qreal Point::xyDistanceTo(const Point &other)
-{
+qreal Point::xyDistanceTo(const Point &other) const {
   Q_ASSERT(size() > 1);
   return sqrt(pow(other[0]-at(0),2) + pow(other[1]-at(1),2));
 }
 
-qreal Point::colorDistanceTo(const Point& other)
-{
+qreal Point::colorDistanceTo(const Point& other) const {
   qreal dist = 0;
   
   // Start at 2 for just colors
@@ -30,4 +28,8 @@ qreal Point::colorDistanceTo(const Point& other)
   }
   
   return sqrt(dist);
+}
+
+QPointF Point::xyLocation() const {
+  return QPointF(at(0), at(1));
 }

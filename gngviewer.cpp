@@ -98,6 +98,37 @@ void GngViewer::paintEvent(QPaintEvent* e)
   }
   
   m_gng->mutex()->lock();
+  painter.save();
+  painter.setPen(Qt::NoPen);
+  
+  // make sure we have up to date subgraphs (so no nodes have been deleted)
+  m_gng->generateSubgraphs();
+  foreach(Subgraph s, m_gng->subgraphs()) {
+    qreal hue = s.first()->location()[2]; //hue of first point
+    qreal sat = s.first()->location()[3];
+    qreal light = s.first()->location()[4];
+    QColor color = QColor::fromHslF(hue, 0.5, 0.5, 0.3);
+    QPen pen(color);
+    pen.setWidth(10);
+    pen.setCapStyle(Qt::RoundCap);
+    painter.setPen(pen);
+        
+    foreach(Node *node, s) {
+      foreach(Node *neighbor, node->neighbors()) {
+        Point p1 = node->location();
+        Point p2 = neighbor->location();
+        
+        int x1 = unNormalize(p1[0], m_width);
+        int y1 = unNormalize(p1[1], m_height);
+        int x2 = unNormalize(p2[0], m_width);
+        int y2 = unNormalize(p2[1], m_height);
+        
+        painter.drawLine(x1, y1, x2, y2);
+      }
+    }
+  }
+  painter.restore();
+  
   foreach(Edge *edge, m_gng->uniqueEdges()) {
     Point p1 = edge->from()->location();
     Point p2 = edge->to()->location();

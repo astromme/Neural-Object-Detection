@@ -412,10 +412,11 @@ void GrowingNeuralGas::run()
     step(nextPoint);
     m_dataAccess->unlock();
     
-    if (m_stepCount > 50000 && m_stepCount % 10000 == 0){
-      generateSubgraphs();
-      printSubgraphs();
-    }
+    // Subgraph generation done in gngviewer.cpp
+//     if (m_stepCount > 50000 && m_stepCount % 10000 == 0){
+//       generateSubgraphs();
+//       printSubgraphs();
+//     }
     
   }
 }
