@@ -135,18 +135,25 @@ void GrowingNeuralGas::incrementEdgeHistory()
     foreach(Edge* edge, node->edges()) {
       if ((currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
         qDebug() << "removing edge that has been here for" << (currentTime - edge->lastUpdated()) << "ms" << edge->id();
-        edge->to()->removeEdge(edge->to()->getEdgeTo(node));
-        edge->from()->removeEdge(edge);
-        m_uniqueEdges.removeAll(edge);
+        Node *n1 = edge->to();
+        Node *n2 = edge->from();
+        
+        Edge *e1 = n1->getEdgeTo(n2);
+        Edge *e2 = n2->getEdgeTo(n1);
+        n1->removeEdge(e1);
+        n2->removeEdge(e2);
+        
+        m_uniqueEdges.removeAll(e1);
+        m_uniqueEdges.removeAll(e2);
         delete edge;
-        continue; // skip the rest of this loop
-      }
-      
-      edge->incrementTotalAge();
-      if (edge->from() < edge->to()) {
-        NodePair nodes(edge->from(), edge->to());
-        int age = m_edgeHistory.value(nodes, 0);
-        m_edgeHistory.insert(nodes, age+1);
+        edge = 0;
+      } else {
+        edge->incrementTotalAge();
+        if (edge->from() < edge->to()) {
+          NodePair nodes(edge->from(), edge->to());
+          int age = m_edgeHistory.value(nodes, 0);
+          m_edgeHistory.insert(nodes, age+1);
+        }
       }
     }
   }
