@@ -116,6 +116,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
     int edgeY = abs(y2 - y1)/2 + qMin(y1, y2);
     
     //drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->totalAge()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
+    //drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->lastUpdated()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
   }
   foreach(Node *node, m_gng->nodes()) {
     Point p = node->location();
@@ -146,6 +147,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
   // Draw stepcount
   QString stepString = QString("Step %1").arg(m_gng->step());
   drawTextInFrame(&painter, QPoint(5, 5), stepString);
+  drawTextInFrame(&painter, QPoint(5, 32), QString("%1s").arg((qreal)m_gng->elapsedTime()/1000, 0, 'f', 2));
   
   m_gng->mutex()->unlock();
 }

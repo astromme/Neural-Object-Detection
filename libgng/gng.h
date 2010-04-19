@@ -27,6 +27,7 @@ class GrowingNeuralGas : public QThread {
     ~GrowingNeuralGas();
     
     QString toString();
+    int elapsedTime() const;
     
     void setPointGenerator(PointSource *pointGenerator);
     void run(int cycles);

@@ -1,8 +1,12 @@
 
 #include "edge.h"
 
+static int currentId = 0;
+
 Edge::Edge(Node* from, Node* to)
+  : m_id(currentId)
 {
+  currentId++;
   m_from = from;
   m_to = to;
   m_age = 0;
@@ -12,6 +16,11 @@ Edge::Edge(Node* from, Node* to)
 
 Edge::~Edge()
 {
+}
+
+int Edge::id() const
+{
+  return m_id;
 }
 
 Node* Edge::from() const

@@ -56,6 +56,11 @@ QString GrowingNeuralGas::toString()
 		.arg(m_stepCount).arg(m_nodes.length()).arg(averageError());
 }
 
+int GrowingNeuralGas::elapsedTime() const
+{
+  return m_timer.elapsed();
+}
+
 // Setting Parameters
 void GrowingNeuralGas::setDelay(int milliseconds) {
   m_delay = milliseconds;
@@ -124,13 +129,16 @@ void GrowingNeuralGas::incrementEdgeAges(Node* node)
 void GrowingNeuralGas::incrementEdgeHistory()
 {
   int currentTime = m_timer.elapsed();
-  
+
   m_dataAccess->lock();
   foreach(Node* node, m_nodes) {
     foreach(Edge* edge, node->edges()) {
       if ((currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
-        edge->setAge(m_maxEdgeAge + 1); // remove edge next iteration
-        edge->to()->getEdgeTo(node)->setAge(m_maxEdgeAge + 1);
+        qDebug() << "removing edge that has been here for" << (currentTime - edge->lastUpdated()) << "ms" << edge->id();
+        edge->to()->removeEdge(edge->to()->getEdgeTo(node));
+        edge->from()->removeEdge(edge);
+        m_uniqueEdges.removeAll(edge);
+        delete edge;
         continue; // skip the rest of this loop
       }
       
@@ -159,6 +167,10 @@ void GrowingNeuralGas::connectNodes(Node* a, Node* b)
   
   a->appendEdge(e1);
   b->appendEdge(e2);
+  
+  int currentTime = m_timer.elapsed();
+  e1->setLastUpdated(currentTime);
+  e2->setLastUpdated(currentTime);
   
   m_uniqueEdges.append(e1);
 }
@@ -281,7 +293,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
   incrementEdgeAges(winners.first);
   
   // if the point is already the right color, don't touch it by moving its xy position all over the place.
-  if (0.01 > winners.first->location().colorDistanceTo(trainingPoint)) {
+  if (false && 0.01 > winners.first->location().colorDistanceTo(trainingPoint)) {
     //qDebug() << winners.first->location() << trainingPoint;
     winners.first->setError(winners.first->error() + 0.1*pow(winners.first->location().distanceTo(trainingPoint), 2));
     winners.first->moveTowards(trainingPoint, 0.1*m_winnerLearnRate);

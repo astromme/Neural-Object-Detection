@@ -17,6 +17,8 @@ class Edge {
     Edge(Node* from, Node* to);
     ~Edge();
     
+    int id() const;
+    
     Node* from() const;
     Node* to() const;
     
@@ -33,6 +35,7 @@ class Edge {
     void setLastUpdated(int time);
         
   private:
+    const int m_id;
     Node *m_from;
     Node *m_to;
     int m_age;
