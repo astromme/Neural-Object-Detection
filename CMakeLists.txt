@@ -14,25 +14,24 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 add_subdirectory(libgng)
 
-set(gngtest_sources
-	gngtest.cpp
-	gngapp.cpp
-	gngviewer.cpp
-	)
+set(gng_image_sources image.cpp)
 
+set(gng_imageseries_sources gngapp.cpp imageseries.cpp)
+set(gng_imageseries_headers gngapp.h)
 
-set(gngtest_headers
-    gngapp.h
-    )
+set(gng_camera_sources camera.cpp)
 
-qt4_wrap_cpp(gngtest_mocs ${gngtest_headers})
+qt4_wrap_cpp(gng_imageseries_mocs ${gngtest_headers})
+#qt4_wrap_ui(gng_imageseries_uic viewer.ui)
 
-qt4_wrap_ui(gngtest_uic viewer.ui)
+add_library(gngviewer SHARED gngviewer.cpp)
+target_link_libraries(gngviewer gng ${QT_LIBRARIES})
 
-add_executable(gngtest ${gngtest_sources} ${gngtest_mocs} ${gngtest_uic})
-target_link_libraries(gngtest ${QT_LIBRARIES} gng)
-target_link_libraries(gngtest ${Boost_PROGRAM_OPTIONS_LIBRARY})
+add_executable(gng-image ${gng_image_sources})
+target_link_libraries(gng-image gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-add_executable(webcamtest webcamtest.cpp gngviewer.cpp ${gngtest_uic})
-target_link_libraries(webcamtest ${QT_LIBRARIES} gng ${Boost_PROGRAM_OPTIONS_LIBRARY})
+add_executable(gng-imageseries ${gng_image_sources} ${gng_imageseries_mocs})
+target_link_libraries(gng-imageseries gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+add_executable(gng-camera ${gng_camera_sources})
+target_link_libraries(gng-camera gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})

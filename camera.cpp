@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 //   ui.setupUi(&w);
 //   w.show();
 
-  // Create the GNG object with bounds of -1 and 1.
+  // Create the GNG object with bounds of 0 and 1.
   GrowingNeuralGas gng(5);
 
   // set command-line parameters
