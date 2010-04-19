@@ -11,9 +11,13 @@ class PointSource;
 
 #include <QPair>
 #include <QList>
+#include <QHash>
 #include <QString>
 #include <QThread>
 #include <QMutex>
+#include <QDateTime>
+
+typedef QPair<Node*, Node*> NodePair;
 
 class GrowingNeuralGas : public QThread {
   Q_OBJECT
@@ -32,6 +36,8 @@ class GrowingNeuralGas : public QThread {
     void generateSubgraphs();
     void matchingSubgraph();
     void printSubgraphs(bool printNodes=false);
+    
+    int edgeHistoryAge(Edge *edge) const;
     
     QList<Node*> nodes() const;
     QList<Edge*> uniqueEdges() const;
@@ -97,6 +103,8 @@ class GrowingNeuralGas : public QThread {
     /** Decays the error at all units. */
     void reduceAllErrors();
     
+    void incrementEdgeHistory();
+    
     /** Processes one input point at a time through the GNG. */
     void step(const Point& trainingPoint);
     
@@ -125,6 +133,10 @@ class GrowingNeuralGas : public QThread {
     
     QList<Node*> m_nodes;
     QList<Edge*> m_uniqueEdges;
+    
+    QHash<NodePair, int> m_edgeHistory;
+    
+    QTime m_timer;
 
     QList<Subgraph> m_subgraphs;
     Subgraph m_followSubgraph;
