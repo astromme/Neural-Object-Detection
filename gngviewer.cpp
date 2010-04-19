@@ -97,19 +97,27 @@ void GngViewer::paintEvent(QPaintEvent* e)
     return;
   }
   
+  // make sure the GNG doesn't change the nodes/subgraphs/edges while we're painting
   m_gng->mutex()->lock();
   painter.save();
   painter.setPen(Qt::NoPen);
   
   // make sure we have up to date subgraphs (so no nodes have been deleted)
   m_gng->generateSubgraphs();
+  
+  // Draw subgraph colors behind edges
   foreach(Subgraph s, m_gng->subgraphs()) {
-    qreal hue = s.first()->location()[2]; //hue of first point
+    qreal hue = 0;
+    foreach(Node *n, s) {
+      hue += n->location()[2];
+    }
+    //qreal hue = s.first()->location()[2]; //hue of first point
+    hue /= s.length();
     qreal sat = s.first()->location()[3];
     qreal light = s.first()->location()[4];
     QColor color = QColor::fromHslF(hue, 0.5, 0.5, 0.3);
     QPen pen(color);
-    pen.setWidth(10);
+    pen.setWidth(5);
     pen.setCapStyle(Qt::RoundCap);
     painter.setPen(pen);
         
@@ -129,6 +137,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
   }
   painter.restore();
   
+  // Draw the actual edges
   foreach(Edge *edge, m_gng->uniqueEdges()) {
     Point p1 = edge->from()->location();
     Point p2 = edge->to()->location();
@@ -149,6 +158,8 @@ void GngViewer::paintEvent(QPaintEvent* e)
     //drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->totalAge()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
     //drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->lastUpdated()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
   }
+  
+  // Draw the nodes
   foreach(Node *node, m_gng->nodes()) {
     Point p = node->location();
     
