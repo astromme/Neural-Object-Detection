@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <QDebug>
+#include <QDir>
 
 namespace po=boost::program_options;
 using std::string;
@@ -19,7 +20,7 @@ void setUpdateInterval(int steps); /**< Emit signal updated() once per this numb
 typedef struct s_popts {
   int delay;
   int updateInterval;
-  string imagePath;
+  string imagesDir;
   float winnerLearnRate;
   float neighborLearnRate;
   int maxEdgeAge;
@@ -37,8 +38,6 @@ int main(int argc, char* argv[]) {
 	ProgOpts popts;
 	if(!parse_args(argc, argv, popts))
 	  exit(1);
-
-  QString imagePath = QString::fromStdString(popts.imagePath);
   
   // Create our QApplication object. Needed for the gui and for threading
   GngApp app(argc, argv);
@@ -57,16 +56,24 @@ int main(int argc, char* argv[]) {
   gng.setInsertErrorReduction(popts.insertErrorReduction);
   gng.setUpdateInterval(popts.updateInterval);
 
-  // The ImageGenerator provides the source points for the gng (similar to the distribution)
-  QImage tempimg(imagePath);
-  ImageSource generator(tempimg);
+ 
+  QDir imagesDir(QString::fromStdString(popts.imagesDir));
+  foreach(QString imageFile, imagesDir.entryList(QDir::Files)) {
+    qDebug() << "image: " << imageFile;
+    app.addImage(QImage(imagesDir.absoluteFilePath(imageFile)));
+  }
+  
+  
   // The GngViewer provides the window in which we can see the results of the GNG/source image
   GngViewer view;
+    
+  // The ImageGenerator provides the source points for the gng (similar to the distribution)
+  QImage firstImg(imagesDir.absoluteFilePath(imagesDir.entryList(QDir::Files).first()));
+  ImageSource generator(firstImg);
+  QPixmap firstImgPixmap = QPixmap::fromImage(firstImg);
+  view.setSource(firstImgPixmap);
+  
   view.setSize(generator.width(), generator.height());
- 
-  for(int i=1;i<=11;i++) {
-    app.addImage(QImage(QString("../images/rgb/rgb%1.png").arg(i)));
-  }
   
   app.setGenerator(&generator);
   app.setViewer(&view);
@@ -75,10 +82,6 @@ int main(int argc, char* argv[]) {
   view.setGng(&gng);
   view.show();
   
-  // Give the visualizer the background. comment out these lines to have a blank background
-  QPixmap img;
-  img.load(imagePath);
-  view.setSource(img);
   
   // Give the GNG its way of generating points
   gng.setPointGenerator(&generator);
@@ -97,7 +100,7 @@ bool parse_args(int argc, char* argv[], ProgOpts& popts){
    desc.add_options()
      ("help,h", "Show this message")
      ("config,c", po::value<string>(&configFile), "Config file to read options from")
-     ("imagePath,p", po::value<string>(&popts.imagePath), "Path to image")
+     ("imagesDir,p", po::value<string>(&popts.imagesDir), "Path to a directory that has images in it")
      ("delay,d", po::value<int>(&popts.delay)->default_value(1), "Add a n millisecond delay to each step.")
      ("updateInterval,u", po::value<int>(&popts.updateInterval)->default_value(50), "Emit signal updated() once per this number of steps")
      ("winnerLearnRate,w", po::value<float>(&popts.winnerLearnRate)->default_value(0.1), "Used to adjust closest unit towards input point")
@@ -118,7 +121,7 @@ bool parse_args(int argc, char* argv[], ProgOpts& popts){
    }
    po::store(po::parse_command_line(argc, argv, desc), vm);
    po::notify(vm);
-   if (vm.count("help") || !vm.count("imagePath")){
+   if (vm.count("help") || !vm.count("imagesDir")){
      std::cout << desc;
 	   return false;
    }

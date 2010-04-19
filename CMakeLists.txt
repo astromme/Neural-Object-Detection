@@ -21,7 +21,7 @@ set(gng_imageseries_headers gngapp.h)
 
 set(gng_camera_sources camera.cpp)
 
-qt4_wrap_cpp(gng_imageseries_mocs ${gngtest_headers})
+qt4_wrap_cpp(gng_imageseries_mocs ${gng_imageseries_headers})
 #qt4_wrap_ui(gng_imageseries_uic viewer.ui)
 
 add_library(gngviewer SHARED gngviewer.cpp)
@@ -30,7 +30,7 @@ target_link_libraries(gngviewer gng ${QT_LIBRARIES})
 add_executable(gng-image ${gng_image_sources})
 target_link_libraries(gng-image gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-add_executable(gng-imageseries ${gng_image_sources} ${gng_imageseries_mocs})
+add_executable(gng-imageseries ${gng_imageseries_sources} ${gng_imageseries_mocs})
 target_link_libraries(gng-imageseries gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(gng-camera ${gng_camera_sources})
