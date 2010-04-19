@@ -31,7 +31,7 @@ class GrowingNeuralGas : public QThread {
     QList<Subgraph> subgraphs() const;
     void generateSubgraphs();
     void matchingSubgraph();
-    void printSubgraphs(bool printNodes=false);
+    void printSubgraphs(bool printNodes=false) const;
     
     QList<Node*> nodes() const;
     QList<Edge*> uniqueEdges() const;
