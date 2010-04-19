@@ -190,7 +190,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
   // Draw stepcount
   QString stepString = QString("Step %L1").arg(m_gng->step());
   drawTextInFrame(&painter, QPoint(5, 5), stepString);
-  drawTextInFrame(&painter, QPoint(5, 32), QString("%L1s").arg((qreal)m_gng->elapsedTime()/1000, 0, 'f', 2));
+  drawTextInFrame(&painter, QPoint(5, 34), QString("%L1s").arg((qreal)m_gng->elapsedTime()/1000, 0, 'f', 2));
   
   m_gng->mutex()->unlock();
 }
