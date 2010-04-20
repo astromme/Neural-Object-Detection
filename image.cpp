@@ -22,6 +22,7 @@ typedef struct s_popts {
   string imagePath;
   float winnerLearnRate;
   float neighborLearnRate;
+  float maxEdgeColorDiff;
   int maxEdgeAge;
   int nodeInsertionDelay;
   float targetError;
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
   gng.setWinnerLearnRate(popts.winnerLearnRate);
   gng.setNeighborLearnRate(popts.neighborLearnRate);
   gng.setMaxEdgeAge(popts.maxEdgeAge);
+  gng.setMaxEdgeColorDiff(popts.maxEdgeColorDiff);
   gng.setNodeInsertionDelay(popts.nodeInsertionDelay);
   gng.setTargetError(popts.targetError);
   gng.setErrorReduction(popts.errorReduction);
@@ -94,6 +96,7 @@ bool parse_args(int argc, char* argv[], ProgOpts& popts){
      ("updateInterval,u", po::value<int>(&popts.updateInterval)->default_value(50), "Emit signal updated() once per this number of steps")
      ("winnerLearnRate,w", po::value<float>(&popts.winnerLearnRate)->default_value(0.1), "Used to adjust closest unit towards input point")
      ("neighborLearnRate,n", po::value<float>(&popts.neighborLearnRate)->default_value(0.01), "Used to adjust other neighbors towards input point")
+     ("maxEdgeColorDiff,f", po::value<float>(&popts.maxEdgeColorDiff)->default_value(0.1), "Edges not created if color difference between nodes is above value")
      ("maxEdgeAge,m", po::value<int>(&popts.maxEdgeAge)->default_value(50), "Edges older than maxAge are removed")
      ("nodeInsertionDelay,i", po::value<int>(&popts.nodeInsertionDelay)->default_value(100), "Min steps before inserting a new node")
      ("targetError,e", po::value<float>(&popts.targetError)->default_value(0.001), "Continue inserting nodes until the average error has reached this threshold")

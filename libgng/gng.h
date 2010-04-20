@@ -55,6 +55,7 @@ class GrowingNeuralGas : public QThread {
     void setNeighborLearnRate(qreal learnRate); /**< Used to adjust other neighbors towards input point */
     
     void setMaxEdgeAge(int steps); /**< Edges older than maxAge are removed */
+    void setMaxEdgeColorDiff(qreal diff); /**< Edges not created if color difference between nodes is above value */
     void setNodeInsertionDelay(int minStepsBetweenInsertions); /**< Min steps before inserting a new node */
     void setTargetError(qreal targetAverageError); /**< Continue inserting nodes until the average error has reached this threshold */
     
@@ -122,12 +123,14 @@ class GrowingNeuralGas : public QThread {
     qreal m_neighborLearnRate;
     
     int m_maxEdgeAge;
+
     int m_minStepsBetweenInsertions;
     int m_stepsSinceLastInsert;
     
     qreal m_reduceErrorMultiplier;
     qreal m_insertErrorMultiplier;
     qreal m_targetError;
+    qreal m_maxEdgeColorDiff;
     
     Point m_pickCloseTo;
     int m_pickCloseToCountdown;

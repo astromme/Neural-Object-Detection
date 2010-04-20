@@ -22,6 +22,7 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   setWinnerLearnRate(0.1);
   setNeighborLearnRate(0.01); // TODO was .01
   setMaxEdgeAge(50);
+  setMaxEdgeColorDiff(0.1);
   setErrorReduction(0.1); // TODO was 0.005
   setNodeInsertionDelay(50);
   m_stepsSinceLastInsert = m_minStepsBetweenInsertions + 1;
@@ -74,6 +75,10 @@ void GrowingNeuralGas::setWinnerLearnRate(qreal learnRate) {
 }
 void GrowingNeuralGas::setNeighborLearnRate(qreal learnRate) {
   m_neighborLearnRate = learnRate;
+}
+
+void GrowingNeuralGas::setMaxEdgeColorDiff(qreal diff) {
+  m_maxEdgeColorDiff = diff;
 }
 
 void GrowingNeuralGas::setMaxEdgeAge(int steps) {
@@ -320,7 +325,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
   qreal first_hue = winners.first->location()[2];
   qreal second_hue = winners.second->location()[2];
 
-  if (averageError() > m_targetError || fabs(first_hue - second_hue) < 0.2){
+  if (averageError() > m_targetError || fabs(first_hue - second_hue) < m_maxEdgeColorDiff){
     if (winners.first->hasEdgeTo(winners.second)) {
       winners.first->getEdgeTo(winners.second)->resetAge();
       winners.second->getEdgeTo(winners.first)->resetAge();
