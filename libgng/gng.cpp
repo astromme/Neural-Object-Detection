@@ -409,6 +409,9 @@ void GrowingNeuralGas::run()
     if (m_delay != 0) {
       usleep(m_delay*10);
     }
+    if (i % 1000 == 0){
+      usleep(1000);
+    }
     m_dataAccess->lock();
     
     if (m_stepCount % m_updateInterval == 0) {
