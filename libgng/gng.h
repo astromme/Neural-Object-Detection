@@ -89,7 +89,7 @@ class GrowingNeuralGas : public QThread {
     /** Checks all edges in the GNG and removes any with an age exceeding
         the maxAge parameter.  Also removes any unit that is completely
         disconnected. */
-    void removeStaleEdges();
+    void removeOldEdges();
     
     /** Given a list of units, returns the unit with the highest error. */
     Node* maxErrorNode(QList<Node*> nodeList);

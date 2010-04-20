@@ -210,12 +210,12 @@ void GrowingNeuralGas::disconnectNodes(Node* a, Node* b)
 }
 
 /*****************************
- * Function: removeStaleEdges
+ * Function: removeOldEdges
  * --------------------------
  * Removes all edges that are older than m_maxAge. Any nodes without any
  * connecting edges are culled as well
  */
-void GrowingNeuralGas::removeStaleEdges()
+void GrowingNeuralGas::removeOldEdges()
 {
   // remove edges
   foreach(Node *node, m_nodes) {
@@ -350,7 +350,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
 //   }
   
   incrementEdgeHistory();
-  removeStaleEdges();
+  removeOldEdges();
   
   if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_minStepsBetweenInsertions)) {
     qDebug() << "Creating new Node at timestep " << m_stepCount << " and error " << averageError();
