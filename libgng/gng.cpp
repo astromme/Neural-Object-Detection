@@ -106,7 +106,7 @@ bool pairLessThan(const DistNodePair &s1, const DistNodePair &s2)
     return s1.first < s2.first;
 }
    
-// TODO: no idea what this does
+// see header
 QPair< Node*, Node* > GrowingNeuralGas::computeDistances(const Point& point)
 {
   QList<DistNodePair> dists;
@@ -271,7 +271,7 @@ Point midpoint(const Point &p1, const Point &p2) {
   return p3;
 }
 
-// TODO: describe this shit
+// see header
 void GrowingNeuralGas::insertNode()
 {
   Node *worst = maxErrorNode(m_nodes);
@@ -291,7 +291,8 @@ void GrowingNeuralGas::insertNode()
   newNode->setError(worst->error());
 }
 
-// reduces error for every node. TODO: why do we want this?
+// reduces error for every node. This happens every timestep
+// to bias the node insertion towards recently updated points
 void GrowingNeuralGas::reduceAllErrors()
 {
   foreach(Node *node, m_nodes) {
@@ -299,7 +300,9 @@ void GrowingNeuralGas::reduceAllErrors()
   }
 }
 
-// umm... steps TODO: wtf?
+// Perform one iteration of the GNG with the given source/traning point
+// The gng will find the two closest nodes, move them closer to the training
+// point and then possibly add new nodes.
 void GrowingNeuralGas::step(const Point& trainingPoint)
 {
   if (m_stepCount % 10000 == 0) {
@@ -381,7 +384,7 @@ void GrowingNeuralGas::synchronousRun(int cycles)
   run();
 }
 
-// TODO not really sure what's going on here
+// start an asynchronous thread running for 'cycles' number of steps
 void GrowingNeuralGas::run(int cycles)
 {
   currentCycles = cycles;
