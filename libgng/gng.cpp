@@ -444,13 +444,14 @@ QList< Subgraph > GrowingNeuralGas::subgraphs() const
  */
 void GrowingNeuralGas::generateSubgraphs()
 {
+  // TODO lock entire function?
   QHash<Node*, bool> nodeDict;
 
   m_dataAccess->lock();
   foreach(Node* node, m_nodes){
     nodeDict.insert(node, true);
   }
-  m_dataAccess->unlock();
+  //m_dataAccess->unlock();
 
   QList<Subgraph> subgraphList;
   while (!nodeDict.empty()){
@@ -489,7 +490,7 @@ void GrowingNeuralGas::generateSubgraphs()
     subgraph.clear();
   }
 
-  m_dataAccess->lock();
+  //m_dataAccess->lock();
   m_subgraphs = subgraphList;
   m_dataAccess->unlock();
 }
