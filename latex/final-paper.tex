@@ -1,0 +1,104 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{apacite}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{subfigure}
+%\usepackage{paralist}
+%\usepackage{mdwlist}
+\newcommand{\comment}[1]{}
+\bibliographystyle{apacite}
+
+\begin{document}
+\title{Object Detection with aGiNG}
+\author{Andrew Stromme \& Ryan Carlson}
+\date{May 14, 2010}
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+Talk about using a modified Growing Neural Gas to track objects. Why is this cool? $-->$ Don't need any type of edge detection. Computationally inexpensive (amortized). We see this as a replacement for the 'blobify' filter.
+
+\section{Related Work}
+
+Talk about Growing Neural Gas papers by Fritzke and maybe the CBIM paper by Meeden. Also mention some previous attempts at object tracking -- Canny/Sobel edge detection. AdaBoost?
+
+\section{Goals}
+
+We want to create a Growing Neural Gas that can identify objects and then have the AIBO track it. Talk about limitations of blobify and how this improves it.
+
+\section{Modifications to Growing Neural Gas}
+
+\subsection{Aging Growing Neural Gas (aGiNG) (AS)}
+
+Since edge ages are set to zero when they win, we want a sense of how long an edge has existed. Added total age counter that is incremented at each step and is reset when removed.
+
+\subsection{Color Barrier Across Object Boundaries (RC)}
+
+If color difference is too great between two nodes, don't add an edge. Since we describe objects in terms of their color, makes sense.
+
+\subsection{More stuff, I think\dots}
+
+\section{Methods}
+
+\subsection{Inputs}
+
+five-dimensional vector (x,y,hue, saturation, color). Introduce notions of ``color space'' versus ``euclidean space''
+
+\subsection{Color Model (AS)}
+
+HSL. Compare to RGB and HSV. Image here?
+
+\subsection{Distance Calculation}
+
+We want to place emphasis on distance. Two colors with zero difference in color space but high dist in euclidean space were being categorized as the same object. Want to make them different. Could try to find an image (4 pieces of paper?) that regular x,y dist fails but 1.5*x,y works.
+
+\subsection{Visualizations (AS)}
+
+This could be its own section if you have lots of subsections, but we should discuss the Qt stuff and the way we project the 5-D vector onto x,y space, color the vertices, update everything dynamically, etc.
+
+\section{Tracking Objects (RC)}
+
+How we define objects -- subgraphs
+
+\subsection{Subgraph Generation}
+
+Modified breadth-first search. Pseudo Code (use verbatim!)
+
+\subsection{Tracking Subgraphs}
+
+Pick an exemplar, track exemplar by counting number of intersecting nodes. Pseudo Code
+
+\section{Experiments}
+
+Talk about broad classes of experiments -- static, moving, and AIBO
+
+\subsection{Static Images}
+
+Easy. Real and Computer-generated
+
+\subsection{Moving Images}
+
+GNG is able to follow what's going on. Very cool!
+
+\subsection{Real-Time Object Tracking with AIBO}
+
+Here's where the implicit memory really helps. As objects move and disappear, GNG is able to cull useless errors.
+
+\subsection{Limitations}
+
+No sense of edges or depth, so we perform poorly on complex, busy images. Example of busy image? Computer in Stromme's room?
+
+\section{Future Work}
+
+\begin{itemize}
+  \item Reduce resolution
+  \item Black and white only
+  \item make error more precise as time goes on if not enough subgraphs
+\end{itemize}
+
+\end{document}
