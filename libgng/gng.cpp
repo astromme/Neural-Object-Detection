@@ -325,6 +325,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
     node->moveTowards(trainingPoint, m_neighborLearnRate);
   }
 
+  // if difference between hues is too great between two nodes, reset ages
   qreal first_hue = winners.first->location()[2];
   qreal second_hue = winners.second->location()[2];
 
@@ -337,6 +338,12 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
     }
   }
   
+  // if GNG has not developed enough subgraphs, try lowering the target errorThreshold
+  if (m_stepCount > 20000 && m_stepCount % 5000 == 0 && 
+      m_targetError > 0.02){ // && m_subgraphs.size() <= 2){
+    setTargetError(m_targetError-0.01);
+    qDebug() << "It's about that time again...Lowered error to " << m_targetError;
+  }
     
 //   qreal dist = winners.first->location().distanceTo(winners.second->location());
 //   qreal xyDist = winners.first->location().xyDistanceTo(winners.second->location());
@@ -426,12 +433,6 @@ void GrowingNeuralGas::run()
 //     }
     step(nextPoint);
     m_dataAccess->unlock();
-    
-    // Subgraph generation done in gngviewer.cpp
-//     if (m_stepCount > 50000 && m_stepCount % 10000 == 0){
-//       generateSubgraphs();
-//       printSubgraphs();
-//     }
     
   }
 }
