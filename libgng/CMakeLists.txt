@@ -10,6 +10,7 @@ set(libgng_sources
         point.cpp
         imagesource.cpp
 	camerasource.cpp
+        aibosource.cpp
         node.cpp
         edge.cpp
         subgraph.cpp
@@ -22,6 +23,7 @@ set(libgng_headers
 #     node.h
 #     edge.h
     camerasource.h
+    aibosource.h
     gng.h
     )
 
@@ -31,4 +33,4 @@ add_executable(opencvtest opencvtest.cpp)
 target_link_libraries(opencvtest ${OpenCV_LIBS})
 
 add_library(gng SHARED ${libgng_sources} ${libgng_mocs})
-target_link_libraries(gng ${QT_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(gng aibo ${QT_LIBRARIES} ${OpenCV_LIBS})

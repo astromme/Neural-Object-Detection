@@ -9,6 +9,7 @@ class CameraSource;
 class GrowingNeuralGas;
 
 class GngViewer : public QWidget {
+  Q_OBJECT
   public:
     GngViewer(QWidget *parent = 0);
     ~GngViewer();
@@ -17,6 +18,9 @@ class GngViewer : public QWidget {
     void setSource(CameraSource *source);
     void setSource(const QPixmap &background);
     void setSize(int width, int height);
+    
+  public slots:
+    void setImage(QImage image);
     
   protected:
     virtual void paintEvent(QPaintEvent* e);

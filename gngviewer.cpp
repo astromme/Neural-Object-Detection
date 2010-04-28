@@ -50,6 +50,7 @@ void GngViewer::setSource(const QPixmap& background)
   setAttribute(Qt::WA_OpaquePaintEvent);
   m_background = background;
   m_paintBackground = true;
+  m_repaintTimer.start();
   
 //   QPalette palette;
 //   palette.setBrush(backgroundRole(), QBrush(background));
@@ -61,6 +62,11 @@ void GngViewer::setSource(CameraSource* source)
   setAttribute(Qt::WA_OpaquePaintEvent);
   m_cameraSource = source;
   m_paintBackground = true;
+}
+
+void GngViewer::setImage(QImage image)
+{
+  setSource(QPixmap::fromImage(image));
 }
 
 qreal GngViewer::unNormalize(qreal value, qreal maxValue)
