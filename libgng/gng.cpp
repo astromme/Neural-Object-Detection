@@ -404,9 +404,9 @@ void GrowingNeuralGas::run()
   Q_ASSERT(currentCycles > 0);
   Q_ASSERT(m_pointGenerator->dimension() == m_dimension);
   
-  sleep(5); // sleep for 5 seconds to get the aibo going
-  
   m_timer.start(); // time milliseconds since gng was created
+  
+  sleep(5); // sleep for 5 seconds to get the aibo going
   
   if (m_stepCount == 0) {
     qDebug() << "Running the GNG for" << currentCycles << "cycles";

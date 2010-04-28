@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QTimer>
+#include <QMutex>
 
 // Convert from little endian to big endian?
 long convert(char *buff) {
@@ -19,6 +20,8 @@ long convert(char *buff) {
 Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
   : QObject(parent)
 {
+  m_dataAccess = new QMutex();
+  
   m_hostname = hostname;
   m_mainSocket = new QTcpSocket(this);
   m_cameraSocket = new QTcpSocket(this);
@@ -31,8 +34,10 @@ Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
   
   // Initialize camera
   m_cameraRunning = false;
+  m_dataAccess->lock();
   m_currentFrame = QImage(416, 320, QImage::Format_RGB32);
   m_currentFrame.fill(0); // fill with black
+  m_dataAccess->unlock();
   connect(m_cameraSocket, SIGNAL(readyRead()), SLOT(cameraSocketReadyRead()));
   connect(m_cameraSocket, SIGNAL(error(QAbstractSocket::SocketError)),
           SLOT(cameraSocketError(QAbstractSocket::SocketError)));
@@ -49,7 +54,7 @@ Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
 
 Aibo::Aibo::~Aibo()
 {
-
+  delete m_dataAccess;
 }
 
 // Camera Meta Functions
@@ -167,8 +172,10 @@ void Aibo::Aibo::cameraSocketReadyRead()
   //qDebug() << "Image of size" << newWidth << newHeight << "with data size" << size;
   //   qDebug() << type << creator << fmt;
   //   qDebug() << "frame" << frameNum << "chan w/h" << chanWidth << chanHeight <<chanID;
+  m_dataAccess->lock();
   m_currentFrame = QImage(newWidth, newHeight, QImage::Format_RGB32);
   m_currentFrame.loadFromData((uchar*)image_buffer, size, "JPG");
+  m_dataAccess->unlock();
   
   emit cameraFrame(m_currentFrame);
 }

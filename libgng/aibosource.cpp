@@ -7,25 +7,15 @@
 AiboSource::AiboSource(const QString& hostname, QObject* parent)
   : Aibo(hostname, parent)
 {
-  m_dataAccess = new QMutex();
-  connect(this, SIGNAL(cameraFrame(QImage)), SLOT(setFrame(QImage)));
 }
 
 AiboSource::~AiboSource()
 {
-
 }
 
 int AiboSource::dimension()
 {
   return 5;
-}
-
-void AiboSource::setFrame(QImage frame)
-{
-  m_dataAccess->lock();
-  m_tempImage = frame;
-  m_dataAccess->unlock();
 }
 
 Point AiboSource::generatePoint()

@@ -6,6 +6,7 @@
 #include <QtNetwork/QAbstractSocket>
 
 class QTcpSocket;
+class QMutex;
 
 class Aibo : public QObject {
   Q_OBJECT
@@ -49,6 +50,9 @@ class Aibo : public QObject {
     void headConnect();
     void headSocketReadyRead();
     void headSocketError(QAbstractSocket::SocketError error);
+    
+  protected:
+    QMutex *m_dataAccess;
     
   private:
     // private methods
