@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
   // Give the GNG its way of generating points
   gng.setPointGenerator(&source);
 
-  // Run the GNG asyncronously (in a separate thread) for 10,000 cycles
+  // Run the GNG asyncronously (in a separate thread) for totalIterations
   gng.run(popts.totalIterations);
   
   // Execute the Qt mainloop. Needed for widgets to update themselves/for events to happen

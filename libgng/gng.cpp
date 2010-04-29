@@ -344,7 +344,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
     setTargetError(m_targetError-0.01);
     qDebug() << "It's about that time again...Lowered error to " << m_targetError;
   }
-    
+ 
 //   qreal dist = winners.first->location().distanceTo(winners.second->location());
 //   qreal xyDist = winners.first->location().xyDistanceTo(winners.second->location());
 //   if ((averageError() < m_targetError) && (nodes().size() > 4) && (xyDist > 0.2*sqrt(2)*m_max)) {
@@ -406,7 +406,7 @@ void GrowingNeuralGas::run()
   
   m_timer.start(); // time milliseconds since gng was created
   
-  sleep(5); // sleep for 5 seconds to get the aibo going
+  //sleep(5); // sleep for 5 seconds to get the aibo going
   
   if (m_stepCount == 0) {
     qDebug() << "Running the GNG for" << currentCycles << "cycles";
@@ -473,7 +473,7 @@ void GrowingNeuralGas::generateSubgraphs()
     searchList.append(initNode);
     while (!searchList.empty()){
       // remove current node from search list
-      Node* searchNode = searchList.takeFirst(); 
+      Node* searchNode = searchList.takeFirst();
 
       // add node to subgraph since we can reach it
       subgraph.append(searchNode);
@@ -485,7 +485,7 @@ void GrowingNeuralGas::generateSubgraphs()
       QList<Node*> neighbors = searchNode->neighbors();
       foreach (Node* node, neighbors){
         // Breadth First Search
-        // Ignore edges less than 200 steps old
+        // Ignore edges less than 2000 steps old
         if (nodeDict.contains(node) && (searchNode->getEdgeTo(node)->totalAge() > 2000)){ //TODO make configurable
           searchList.append(node);
           nodeDict.remove(node);
@@ -536,12 +536,9 @@ void GrowingNeuralGas::matchingSubgraph(){
 
   foreach(Subgraph cur_subgraph, subgraphs){
     count = 0;
-    foreach(Node* exemplar_node, exemplar){
-      foreach(Node* check_node, cur_subgraph){
-        if (exemplar_node == check_node){
-          count++;
-          break;
-        }
+    foreach(Node* check_node, cur_subgraph){
+      if (exemplar.contains(check_node)){
+        count++;
       }
     }
     // check against current best match and update counts as necessary
@@ -629,5 +626,3 @@ void GrowingNeuralGas::setPointGenerator(PointSource* pointGenerator)
 {
   m_pointGenerator = pointGenerator;
 }
-
-
