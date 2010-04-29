@@ -53,7 +53,7 @@ Since edge ages are set to zero when they win, we want a sense of how long an ed
 
 \subsubsection{Not counting edges that are too young}
 
-\subsection{Color Barrier Across Object Boundaries (RC)}
+\subsection{Color Barrier Across Object Boundaries (RC -- Draft)}
 
 %If color difference is too great between two nodes, don't add an edge. Since we describe objects in terms of their color, makes sense.
 Even with the modifications described above, experiments showed that the GNG was still adding an large number of edges between nodes that were right along the boundary edges of objects. For example, if the GNG were categorizing a scene with a black wallet against an off-white wall, a node from the foreground and from the background would often be connected since they were very close in distance. To solve this problem, a check was put in place each time an edge was to be added or the age of an existing edge was to be reset. The hues of the nodes are compared, and if their difference is greater than a specified value the edges are not created. Through experimentation we found that a good threshold value is 0.1, which corresponds to a 36 point difference in the 360-degree hue space. As a rough heuristic, this is about half way between any two consecutive bands of the color strip ({\bf reference color strip below? put this section below Methods?})
