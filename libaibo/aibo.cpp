@@ -106,10 +106,13 @@ void Aibo::Aibo::startHeadControl()
   m_headSocket->disconnectFromHost();
   sendCommand("select \"Head Remote Control\"");
   m_headControlRunning = true;
+  
+  // Wait a second so that the head server can start up
+  QTimer::singleShot(1000, this, SLOT(headConnect()));
 }
 void Aibo::Aibo::headConnect()
 {
-  m_headSocket->connectToHost(m_hostname, HeadRemoteControl, QIODevice::ReadWrite);
+  m_headSocket->connectToHost(m_hostname, HeadRemoteControl, QIODevice::WriteOnly);
 }
 void Aibo::Aibo::stopHeadControl()
 {
@@ -127,6 +130,9 @@ void Aibo::startWalkControl()
   m_walkSocket->disconnectFromHost();
   sendCommand("select \"Walk Remote Control\"");
   m_walkControlRunning = true;
+  
+  // Wait a second so that the walk server can start up
+  QTimer::singleShot(1000, this, SLOT(walkConnect()));
 }
 void Aibo::stopWalkControl()
 {
@@ -138,20 +144,15 @@ bool Aibo::isWalkControlRunning() const
 {
   return m_walkControlRunning;
 }
+void Aibo::walkConnect()
+{
+  m_walkSocket->connectToHost(m_hostname, WalkRemoteControl, QIODevice::WriteOnly);
+}
 
-
-// Main Socket Read/Write
 void Aibo::Aibo::mainSocketReadyRead()
 {
 
 }
-void Aibo::Aibo::mainSocketError(QAbstractSocket::SocketError error )
-{
-  qDebug() << "Main Socket Error! Yikes:" << m_mainSocket->errorString();
-}
-
-
-// Camera Socket Read/Write
 void Aibo::Aibo::cameraSocketReadyRead()
 { 
   if (m_cameraSocket->bytesAvailable() < 35000) {
@@ -200,21 +201,26 @@ void Aibo::Aibo::cameraSocketReadyRead()
   
   emit cameraFrame(m_currentFrame);
 }
+
+
+// Errors
+void Aibo::Aibo::mainSocketError(QAbstractSocket::SocketError error )
+{
+  qDebug() << "Main Socket Error! Yikes:" << m_mainSocket->errorString();
+}
 void Aibo::Aibo::cameraSocketError(QAbstractSocket::SocketError error)
 {
   qDebug() << "Camera Socket Error:" << m_cameraSocket->errorString();
-}
-
-
-// Head Socket Read/Write
-void Aibo::Aibo::headSocketReadyRead()
-{
-
 }
 void Aibo::Aibo::headSocketError(QAbstractSocket::SocketError error )
 {
   qDebug() << "Head Socket Error:" << m_headSocket->errorString();
 }
+void Aibo::walkSocketError(QAbstractSocket::SocketError error)
+{
+  qDebug() << "Walk Socket Error:" << m_walkSocket->errorString();
+}
+
 
 // Templated qBound() doesn't like mixed ints and reals
 // so we fix it here instead of cluttering code below;

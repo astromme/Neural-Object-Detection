@@ -87,15 +87,16 @@ class Aibo : public QObject {
     
   private slots:
     void mainSocketReadyRead();
-    void mainSocketError(QAbstractSocket::SocketError error);
-    
-    void cameraConnect();
     void cameraSocketReadyRead();
-    void cameraSocketError(QAbstractSocket::SocketError error);
     
-    void headConnect();
-    void headSocketReadyRead();
+    void mainSocketError(QAbstractSocket::SocketError error);
+    void cameraSocketError(QAbstractSocket::SocketError error);
     void headSocketError(QAbstractSocket::SocketError error);
+    void walkSocketError(QAbstractSocket::SocketError error);
+  
+    void cameraConnect();
+    void headConnect();
+    void walkConnect();
     
   protected:
     QMutex *m_dataAccess;
