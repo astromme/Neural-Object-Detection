@@ -26,6 +26,7 @@ Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
   m_mainSocket = new QTcpSocket(this);
   m_cameraSocket = new QTcpSocket(this);
   m_headSocket = new QTcpSocket(this);
+  m_walkSocket = new QTcpSocket(this);
   
   // Initialize main
   connect(m_mainSocket, SIGNAL(readyRead()), SLOT(mainSocketReadyRead()));
@@ -47,6 +48,9 @@ Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
   connect(m_headSocket, SIGNAL(readyRead()), SLOT(headSocketReadyRead()));
   connect(m_headSocket, SIGNAL(error(QAbstractSocket::SocketError)),
           SLOT(headSocketError(QAbstractSocket::SocketError)));
+          
+  // Initialize walk control
+  m_walkControlRunning = false;
 
 
   m_mainSocket->connectToHost(m_hostname, (qint16)MainControl);
@@ -99,9 +103,9 @@ QImage Aibo::Aibo::cameraImage() const
 // Head Control Meta Functions
 void Aibo::Aibo::startHeadControl()
 {
+  m_headSocket->disconnectFromHost();
   sendCommand("select \"Head Remote Control\"");
   m_headControlRunning = true;
-  m_headSocket->disconnectFromHost();
 }
 void Aibo::Aibo::headConnect()
 {
@@ -116,6 +120,23 @@ void Aibo::Aibo::stopHeadControl()
 bool Aibo::Aibo::isHeadControlRunning() const
 {
   return m_headControlRunning;
+}
+
+void Aibo::startWalkControl()
+{
+  m_walkSocket->disconnectFromHost();
+  sendCommand("select \"Walk Remote Control\"");
+  m_walkControlRunning = true;
+}
+void Aibo::stopWalkControl()
+{
+  m_walkSocket->disconnectFromHost();
+  sendCommand("select \"#Walk Remote Control\"");
+  m_walkControlRunning = false;
+}
+bool Aibo::isWalkControlRunning() const
+{
+  return m_walkControlRunning;
 }
 
 
@@ -195,6 +216,77 @@ void Aibo::Aibo::headSocketError(QAbstractSocket::SocketError error )
   qDebug() << "Head Socket Error:" << m_headSocket->errorString();
 }
 
+// Templated qBound() doesn't like mixed ints and reals
+// so we fix it here instead of cluttering code below;
+qreal qBound(int min, qreal value, int max) {
+  return qBound((qreal)min, value, (qreal)max);
+}
+
+qreal Aibo::pan() const
+{
+  qWarning() << "pan() unimplemented";
+  return 0;
+}
+qreal Aibo::tilt() const
+{
+  qWarning() << "tilt() unimplemented";
+  return 0;
+}
+qreal Aibo::roll() const
+{
+  qWarning() << "roll() unimplemented";
+  return 0;
+}
+void Aibo::setTilt(qreal tilt)
+{
+  tilt = qBound(-1, tilt, 0);
+  sendControl(HeadTilt, tilt);
+}
+void Aibo::setPan(qreal pan)
+{
+  pan = qBound(-1, pan, 1);
+  sendControl(HeadPan, pan);
+}
+void Aibo::setRoll(qreal roll)
+{
+  roll = qBound(0, roll, 1);
+  sendControl(HeadRoll, roll);
+}
+void Aibo::setHeadOrientation(qreal tilt, qreal pan, qreal roll)
+{
+  setTilt(tilt);
+  setPan(pan);
+  setRoll(roll);
+}
+
+void Aibo::setTranslation(qreal velocity)
+{
+  qBound(-1, velocity, 1);
+  sendControl(BodyTranslate, velocity);
+}
+void Aibo::setRotation(qreal velocity)
+{
+  qBound(-1, velocity, 1);
+  sendControl(BodyRotate, velocity);
+}
+void Aibo::setStrafing(qreal velocity)
+{
+  qBound(-1, velocity, 1);
+  sendControl(BodyStrafe, velocity);
+}
+void Aibo::setMovement(qreal translationVelocity, qreal rotationVelocity)
+{
+  setTranslation(translationVelocity);
+  setRotation(rotationVelocity);
+}
+
+void Aibo::setJoint(Aibo::Joint joint, qreal x, qreal y, qreal z)
+{
+  x = qBound(-1, x, 1);
+  y = qBound(-1, y, 1);
+  z = qBound(-1, z, 1);
+  qWarning() << "setJoint() unimplemented";
+}
 
 
 
@@ -217,9 +309,54 @@ char* Aibo::Aibo::readUntil(QTcpSocket *socket, char stop)
   return retval;
 }
 
-void Aibo::Aibo::sendCommand(const QString& command)
+void Aibo::Aibo::sendCommand(const QString& command, QTcpSocket *socket)
 {
-  m_mainSocket->write(QString("%1\n").arg(command).toAscii());
+  if (socket == 0) {
+    socket = m_mainSocket;
+  }
+  socket->write(QString("%1\n").arg(command).toAscii());
+}
+void Aibo::sendControl(Control control, qreal amount)
+{
+  QTcpSocket *socket;
+  QChar controlChar;
+  switch (control) {
+    case HeadTilt:
+      controlChar = 't';
+      socket = m_headSocket;
+      break;
+    case HeadPan:
+      controlChar = 'p';
+      socket = m_headSocket;
+      break;
+    case HeadRoll:
+      controlChar = 'r';
+      socket = m_headSocket;
+      break;
+    case BodyTranslate:
+      controlChar = 'f';
+      socket = m_walkSocket;
+      break;
+    case BodyRotate:
+      controlChar = 'r';
+      socket = m_walkSocket;
+      break;
+    case BodyStrafe:
+      controlChar = 's';
+      socket = m_walkSocket;
+      break;
+    default:
+      qDebug() << "Unknown Control" << control;
+      return;
+      break;
+  }
+  
+  //TODO: Verify Accuracy
+  char command[5];
+  command[0] = controlChar.toAscii();
+  command[1] = (unsigned char)amount;
+  
+  sendCommand(command);
 }
 void Aibo::Aibo::set(const QString& property, const QString& value)
 {
