@@ -17,7 +17,7 @@ long convert(char *buff) {
   return retval;
 }
 
-Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
+Aibo::Aibo(const QString& hostname, QObject* parent)
   : QObject(parent)
 {
   m_dataAccess = new QMutex();
@@ -56,13 +56,13 @@ Aibo::Aibo::Aibo(const QString& hostname, QObject* parent)
   m_mainSocket->connectToHost(m_hostname, (qint16)MainControl);
 }  
 
-Aibo::Aibo::~Aibo()
+Aibo::~Aibo()
 {
   delete m_dataAccess;
 }
 
 // Camera Meta Functions
-void Aibo::Aibo::startCamera()
+void Aibo::startCamera()
 {
   // Set camera resolution to maximum (416x320)
   set("vision.rawcam_y_skip", "0");
@@ -81,27 +81,27 @@ void Aibo::Aibo::startCamera()
   // Wait a second so that the camera server can start up
   QTimer::singleShot(1000, this, SLOT(cameraConnect()));
 }
-void Aibo::Aibo::cameraConnect()
+void Aibo::cameraConnect()
 {
   m_cameraSocket->connectToHost(m_hostname, RawCamServer, QIODevice::ReadOnly);
 }
-void Aibo::Aibo::stopCamera()
+void Aibo::stopCamera()
 {
   m_cameraSocket->disconnectFromHost();
   sendCommand("!select \"#Raw Cam Server\"");
   m_cameraRunning = false;
 }
-bool Aibo::Aibo::isCameraRunning() const
+bool Aibo::isCameraRunning() const
 {
   return m_cameraRunning;
 }
-QImage Aibo::Aibo::cameraImage() const
+QImage Aibo::cameraImage() const
 {
   return m_currentFrame;
 }
 
 // Head Control Meta Functions
-void Aibo::Aibo::startHeadControl()
+void Aibo::startHeadControl()
 {
   m_headSocket->disconnectFromHost();
   sendCommand("select \"Head Remote Control\"");
@@ -110,17 +110,17 @@ void Aibo::Aibo::startHeadControl()
   // Wait a second so that the head server can start up
   QTimer::singleShot(1000, this, SLOT(headConnect()));
 }
-void Aibo::Aibo::headConnect()
+void Aibo::headConnect()
 {
   m_headSocket->connectToHost(m_hostname, HeadRemoteControl, QIODevice::WriteOnly);
 }
-void Aibo::Aibo::stopHeadControl()
+void Aibo::stopHeadControl()
 {
   m_headSocket->disconnectFromHost();
   sendCommand("select \"#Head Remote Control\"");
   m_headControlRunning = false;
 }
-bool Aibo::Aibo::isHeadControlRunning() const
+bool Aibo::isHeadControlRunning() const
 {
   return m_headControlRunning;
 }
@@ -149,11 +149,11 @@ void Aibo::walkConnect()
   m_walkSocket->connectToHost(m_hostname, WalkRemoteControl, QIODevice::WriteOnly);
 }
 
-void Aibo::Aibo::mainSocketReadyRead()
+void Aibo::mainSocketReadyRead()
 {
 
 }
-void Aibo::Aibo::cameraSocketReadyRead()
+void Aibo::cameraSocketReadyRead()
 { 
   if (m_cameraSocket->bytesAvailable() < 35000) {
     return;
@@ -204,15 +204,15 @@ void Aibo::Aibo::cameraSocketReadyRead()
 
 
 // Errors
-void Aibo::Aibo::mainSocketError(QAbstractSocket::SocketError error )
+void Aibo::mainSocketError(QAbstractSocket::SocketError error )
 {
   qDebug() << "Main Socket Error! Yikes:" << m_mainSocket->errorString();
 }
-void Aibo::Aibo::cameraSocketError(QAbstractSocket::SocketError error)
+void Aibo::cameraSocketError(QAbstractSocket::SocketError error)
 {
   qDebug() << "Camera Socket Error:" << m_cameraSocket->errorString();
 }
-void Aibo::Aibo::headSocketError(QAbstractSocket::SocketError error )
+void Aibo::headSocketError(QAbstractSocket::SocketError error )
 {
   qDebug() << "Head Socket Error:" << m_headSocket->errorString();
 }
@@ -297,7 +297,7 @@ void Aibo::setJoint(Aibo::Joint joint, qreal x, qreal y, qreal z)
 
 
 // Utilities
-char* Aibo::Aibo::readUntil(QTcpSocket *socket, char stop)
+char* Aibo::readUntil(QTcpSocket *socket, char stop)
 {
   // Fuck. C programming at its finest (worst)
   static char retval[100]; // max buffer? 50?
@@ -315,7 +315,7 @@ char* Aibo::Aibo::readUntil(QTcpSocket *socket, char stop)
   return retval;
 }
 
-void Aibo::Aibo::sendCommand(const QString& command, QTcpSocket *socket)
+void Aibo::sendCommand(const QString& command, QTcpSocket *socket)
 {
   if (socket == 0) {
     socket = m_mainSocket;
@@ -364,7 +364,7 @@ void Aibo::sendControl(Control control, qreal amount)
   
   sendCommand(command);
 }
-void Aibo::Aibo::set(const QString& property, const QString& value)
+void Aibo::set(const QString& property, const QString& value)
 {
   sendCommand(QString("!set %1=%2").arg(property).arg(value));
 }
