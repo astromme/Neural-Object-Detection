@@ -38,6 +38,12 @@ class Aibo : public QObject {
       BodyStrafe
     };
     
+    enum Resolution {
+      Full_416x320,
+      Half_208x160,
+      Quarter_104x80
+    };
+    
     enum Joint {
       //TODO Enumerate joints
     };
@@ -56,7 +62,7 @@ class Aibo : public QObject {
     qreal roll() const;
     
   public slots:
-    void startCamera();
+    void startCamera(Resolution resolution=Half_208x160);
     void stopCamera();
     
     void startHeadControl();

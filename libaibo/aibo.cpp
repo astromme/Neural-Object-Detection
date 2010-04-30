@@ -70,11 +70,22 @@ Aibo::~Aibo()
 }
 
 // Camera Meta Functions
-void Aibo::startCamera()
+void Aibo::startCamera(Aibo::Resolution resolution)
 {
-  // Set camera resolution to maximum (416x320)
-  set("vision.rawcam_y_skip", "1");
-  set("vision.rawcam_uv_skip", "2");
+  switch (resolution) {
+    case Full_416x320:
+      set("vision.rawcam_y_skip", "0");
+      set("vision.rawcam_uv_skip", "1");
+      break;
+    case Half_208x160:
+      set("vision.rawcam_y_skip", "1");
+      set("vision.rawcam_uv_skip", "2");
+      break;
+    case Quarter_104x80:
+      set("vision.rawcam_y_skip", "2");
+      set("vision.rawcam_uv_skip", "3");
+      break;
+  };
   
   set("vision.rawcam_encoding", "color");
   set("vision.rawcam_interval", "50"); // Set ms delay to 25. (40fps) //TODO
