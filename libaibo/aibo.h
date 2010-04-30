@@ -120,6 +120,10 @@ class Aibo : public QObject {
     QTcpSocket *m_estopSocket;
     
     bool m_cameraRunning;
+    bool m_cameraHeaderStage;
+    int m_cameraFrameSize;
+    int m_newWidth;
+    int m_newHeight;
     bool m_headControlRunning;
     bool m_walkControlRunning;
     

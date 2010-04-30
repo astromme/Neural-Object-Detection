@@ -40,6 +40,8 @@ Aibo::Aibo(const QString& hostname, QObject* parent)
   m_currentFrame = QImage(416, 320, QImage::Format_RGB32);
   m_currentFrame.fill(0); // fill with black
   m_dataAccess->unlock();
+  m_cameraHeaderStage = true;
+  m_cameraFrameSize = 0;
   connect(m_cameraSocket, SIGNAL(readyRead()), SLOT(cameraSocketReadyRead()));
   connect(m_cameraSocket, SIGNAL(error(QAbstractSocket::SocketError)),
           SLOT(cameraSocketError(QAbstractSocket::SocketError)));
@@ -168,53 +170,66 @@ void Aibo::mainSocketReadyRead()
 }
 void Aibo::cameraSocketReadyRead()
 { 
-  if (m_cameraSocket->bytesAvailable() < 35000) {
+  if (m_cameraHeaderStage) {
+    if (m_cameraSocket->bytesAvailable() < 1000) {
+      return;
+    }
+    
+    // Types taken from aibolib.cpp
+    char *header, *type, *creator, *fmt;
+    long format, compression, timeStamp, frameNum, unknown1;
+    long chanWidth, chanHeight, layer, chanID, unknown2;
+    
+    header = m_cameraSocket->read(4).data();  // \r\0\0\0
+    type = readUntil(m_cameraSocket, (char)0); // "TekkotsuImage"
+    format = convert(m_cameraSocket->read(4).data());
+    compression = convert(m_cameraSocket->read(4).data());
+    m_newWidth = convert(m_cameraSocket->read(4).data());
+    m_newHeight = convert(m_cameraSocket->read(4).data());
+    timeStamp = convert(m_cameraSocket->read(4).data());
+    frameNum = convert(m_cameraSocket->read(4).data());
+    unknown1 = convert(m_cameraSocket->read(4).data());
+    //printf("unknown1: %ld\n", unknown1);
+    //// Got creator=FbkImage
+    //// Got chanwidth=104
+    //// Got chanheight=80
+    //// Got layer=3
+    //// Got chan_id=0
+    //// Got fmt=JPEGColor
+    //// read JPEG: len=2547
+    creator = readUntil(m_cameraSocket, (char)0); // creator
+    chanWidth = convert(m_cameraSocket->read(4).data());
+    chanHeight = convert(m_cameraSocket->read(4).data());
+    layer = convert(m_cameraSocket->read(4).data());
+    chanID = convert(m_cameraSocket->read(4).data());
+    unknown2 = convert(m_cameraSocket->read(4).data());
+    fmt = readUntil(m_cameraSocket, (char)0); // fmt
+    m_cameraFrameSize = convert(m_cameraSocket->read(4).data());
+    m_cameraHeaderStage = false;
+
+  } else if (m_cameraSocket->bytesAvailable() < m_cameraFrameSize + 100) { // This is just me being paranoid, 100 isn't needed 
     return;
+  } else {
+    //qDebug() << "Image of size" << m_newWidth << m_newHeight << "with data size" << m_cameraFrameSize;
+    //   qDebug() << type << creator << fmt;
+    //   qDebug() << "frame" << frameNum << "chan w/h" << chanWidth << chanHeight <<chanID;
+    int bytesAvailable = m_cameraSocket->bytesAvailable();
+    char *image_buffer = m_cameraSocket->read(m_cameraFrameSize).data();
+    bool success = true;
+    m_dataAccess->lock();
+    m_currentFrame = QImage(m_newWidth, m_newHeight, QImage::Format_RGB32);
+    if (!m_currentFrame.loadFromData((uchar*)image_buffer, m_cameraFrameSize, "JPG")) {
+      qDebug() << "Failed loading data. Size:" << m_cameraFrameSize << "and bytesAvailable" << bytesAvailable;
+      success = false;
+    }
+    m_dataAccess->unlock();
+    
+    m_cameraHeaderStage = true;
+    
+    if (success) {
+      emit cameraFrame(m_currentFrame);
+    }
   }
-  
-  // Types taken from aibolib.cpp
-  char *header, *type, *creator, *fmt, *image_buffer;
-  long format, compression, newWidth, newHeight, timeStamp, frameNum, unknown1;
-  long chanWidth, chanHeight, layer, chanID, unknown2, size;
-  
-  header = m_cameraSocket->read(4).data();  // \r\0\0\0
-  type = readUntil(m_cameraSocket, (char)0); // "TekkotsuImage"
-  format = convert(m_cameraSocket->read(4).data());
-  compression = convert(m_cameraSocket->read(4).data());
-  newWidth = convert(m_cameraSocket->read(4).data());
-  newHeight = convert(m_cameraSocket->read(4).data());
-  timeStamp = convert(m_cameraSocket->read(4).data());
-  frameNum = convert(m_cameraSocket->read(4).data());
-  unknown1 = convert(m_cameraSocket->read(4).data());
-  //printf("unknown1: %ld\n", unknown1);
-  //// Got creator=FbkImage
-  //// Got chanwidth=104
-  //// Got chanheight=80
-  //// Got layer=3
-  //// Got chan_id=0
-  //// Got fmt=JPEGColor
-  //// read JPEG: len=2547
-  creator = readUntil(m_cameraSocket, (char)0); // creator
-  chanWidth = convert(m_cameraSocket->read(4).data());
-  chanHeight = convert(m_cameraSocket->read(4).data());
-  layer = convert(m_cameraSocket->read(4).data());
-  chanID = convert(m_cameraSocket->read(4).data());
-  unknown2 = convert(m_cameraSocket->read(4).data());
-  fmt = readUntil(m_cameraSocket, (char)0); // fmt
-  size = convert(m_cameraSocket->read(4).data());
-  image_buffer = m_cameraSocket->read(size).data();
-  
-  //qDebug() << "Image of size" << newWidth << newHeight << "with data size" << size;
-  //   qDebug() << type << creator << fmt;
-  //   qDebug() << "frame" << frameNum << "chan w/h" << chanWidth << chanHeight <<chanID;
-  m_dataAccess->lock();
-  m_currentFrame = QImage(newWidth, newHeight, QImage::Format_RGB32);
-  if (!m_currentFrame.loadFromData((uchar*)image_buffer, size, "JPG")) {
-    qDebug() << "Failed loading data. Size:" << size << "and bytesAvailable" << m_cameraSocket->bytesAvailable();
-  }
-  m_dataAccess->unlock();
-  
-  emit cameraFrame(m_currentFrame);
 }
 
 
