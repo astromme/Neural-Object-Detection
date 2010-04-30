@@ -73,8 +73,8 @@ Aibo::~Aibo()
 void Aibo::startCamera()
 {
   // Set camera resolution to maximum (416x320)
-  set("vision.rawcam_y_skip", "0");
-  set("vision.rawcam_uv_skip", "1");
+  set("vision.rawcam_y_skip", "1");
+  set("vision.rawcam_uv_skip", "2");
   
   set("vision.rawcam_encoding", "color");
   set("vision.rawcam_interval", "50"); // Set ms delay to 25. (40fps) //TODO
