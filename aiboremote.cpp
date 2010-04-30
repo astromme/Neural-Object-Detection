@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
   remote.show();
   
   Aibo aibo(argv[1]);
-  AiboControl control(&aibo);
+  AiboRemote control(&aibo);
   
 
   QObject::connect(ui.cameraOn, SIGNAL(clicked(bool)), &aibo, SLOT(startCamera()));

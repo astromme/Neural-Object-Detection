@@ -5,11 +5,11 @@
 #include <libaibo/aibo.h>
 
 
-class AiboControl : public QObject {
+class AiboRemote : public QObject {
   Q_OBJECT
   public:
-    AiboControl(Aibo *aibo) { m_aibo = aibo; }
-    ~AiboControl() {}
+    AiboRemote(Aibo *aibo) { m_aibo = aibo; }
+    ~AiboRemote() {}
     
   public slots:
     void headLeft() { m_aibo->setPan(1); }
