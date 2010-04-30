@@ -45,18 +45,25 @@ class Aibo : public QObject {
     Aibo(const QString &hostname, QObject *parent = 0);
     ~Aibo();
     
+    bool isCameraRunning() const;
+    bool isHeadControlRunning() const;
+    bool isWalkControlRunning() const;
+    
+    QImage cameraImage() const;
+    
+    qreal tilt() const;
+    qreal pan() const;
+    qreal roll() const;
+    
+  public slots:
     void startCamera();
     void stopCamera();
-    bool isCameraRunning() const;
-    QImage cameraImage() const;
     
     void startHeadControl();
     void stopHeadControl();
-    bool isHeadControlRunning() const;
     
     void startWalkControl();
     void stopWalkControl();
-    bool isWalkControlRunning() const;
     
     // Head Controls. Requries the head control to be running
     /** 0 to -1 (straight ahead to down) */
@@ -67,10 +74,6 @@ class Aibo : public QObject {
     void setRoll(qreal roll);
     
     void setHeadOrientation(qreal tilt, qreal pan, qreal roll);
-    
-    qreal tilt() const;
-    qreal pan() const;
-    qreal roll() const;
     
     // Body Controls. Requires Walk Remote Control
     void setTranslation(qreal velocity);
@@ -93,10 +96,12 @@ class Aibo : public QObject {
     void cameraSocketError(QAbstractSocket::SocketError error);
     void headSocketError(QAbstractSocket::SocketError error);
     void walkSocketError(QAbstractSocket::SocketError error);
+    void estopSocketError(QAbstractSocket::SocketError error);
   
     void cameraConnect();
     void headConnect();
     void walkConnect();
+    void estopConnect();
     
   protected:
     QMutex *m_dataAccess;
@@ -104,7 +109,7 @@ class Aibo : public QObject {
   private:
     char* readUntil(QTcpSocket* socket, char stop);
     void sendCommand(const QString &command, QTcpSocket *socket=0);
-    void sendControl(Control control, qreal amount);
+    void sendControl(Aibo::Control control, float amount);
     void set(const QString &property, const QString &value);
   
     QString m_hostname;
@@ -112,6 +117,7 @@ class Aibo : public QObject {
     QTcpSocket *m_cameraSocket;
     QTcpSocket *m_headSocket;
     QTcpSocket *m_walkSocket;
+    QTcpSocket *m_estopSocket;
     
     bool m_cameraRunning;
     bool m_headControlRunning;

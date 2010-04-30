@@ -27,6 +27,7 @@ Aibo::Aibo(const QString& hostname, QObject* parent)
   m_cameraSocket = new QTcpSocket(this);
   m_headSocket = new QTcpSocket(this);
   m_walkSocket = new QTcpSocket(this);
+  m_estopSocket = new QTcpSocket(this);
   
   // Initialize main
   connect(m_mainSocket, SIGNAL(readyRead()), SLOT(mainSocketReadyRead()));
@@ -45,13 +46,17 @@ Aibo::Aibo(const QString& hostname, QObject* parent)
           
   // Initialize head control
   m_headControlRunning = false;
-  connect(m_headSocket, SIGNAL(readyRead()), SLOT(headSocketReadyRead()));
   connect(m_headSocket, SIGNAL(error(QAbstractSocket::SocketError)),
           SLOT(headSocketError(QAbstractSocket::SocketError)));
           
   // Initialize walk control
   m_walkControlRunning = false;
+  connect(m_walkSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+          SLOT(walkSocketError(QAbstractSocket::SocketError)));
 
+  connect(m_estopSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+          SLOT(estopSocketError(QAbstractSocket::SocketError)));
+  QTimer::singleShot(1000, this, SLOT(estopConnect()));
 
   m_mainSocket->connectToHost(m_hostname, (qint16)MainControl);
 }  
@@ -104,7 +109,7 @@ QImage Aibo::cameraImage() const
 void Aibo::startHeadControl()
 {
   m_headSocket->disconnectFromHost();
-  sendCommand("select \"Head Remote Control\"");
+  sendCommand("!select \"Head Remote Control\"");
   m_headControlRunning = true;
   
   // Wait a second so that the head server can start up
@@ -117,7 +122,7 @@ void Aibo::headConnect()
 void Aibo::stopHeadControl()
 {
   m_headSocket->disconnectFromHost();
-  sendCommand("select \"#Head Remote Control\"");
+  sendCommand("!select \"#Head Remote Control\"");
   m_headControlRunning = false;
 }
 bool Aibo::isHeadControlRunning() const
@@ -128,7 +133,7 @@ bool Aibo::isHeadControlRunning() const
 void Aibo::startWalkControl()
 {
   m_walkSocket->disconnectFromHost();
-  sendCommand("select \"Walk Remote Control\"");
+  sendCommand("!select \"Walk Remote Control\"");
   m_walkControlRunning = true;
   
   // Wait a second so that the walk server can start up
@@ -137,7 +142,7 @@ void Aibo::startWalkControl()
 void Aibo::stopWalkControl()
 {
   m_walkSocket->disconnectFromHost();
-  sendCommand("select \"#Walk Remote Control\"");
+  sendCommand("!select \"#Walk Remote Control\"");
   m_walkControlRunning = false;
 }
 bool Aibo::isWalkControlRunning() const
@@ -148,6 +153,13 @@ void Aibo::walkConnect()
 {
   m_walkSocket->connectToHost(m_hostname, WalkRemoteControl, QIODevice::WriteOnly);
 }
+
+void Aibo::estopConnect()
+{
+  m_estopSocket->connectToHost(m_hostname, EStopRemoteControl, QIODevice::WriteOnly);
+  sendCommand("start", m_estopSocket);
+}
+
 
 void Aibo::mainSocketReadyRead()
 {
@@ -196,7 +208,9 @@ void Aibo::cameraSocketReadyRead()
   //   qDebug() << "frame" << frameNum << "chan w/h" << chanWidth << chanHeight <<chanID;
   m_dataAccess->lock();
   m_currentFrame = QImage(newWidth, newHeight, QImage::Format_RGB32);
-  m_currentFrame.loadFromData((uchar*)image_buffer, size, "JPG");
+  if (!m_currentFrame.loadFromData((uchar*)image_buffer, size, "JPG")) {
+    qDebug() << "Failed loading data. Size:" << size << "and bytesAvailable" << m_cameraSocket->bytesAvailable();
+  }
   m_dataAccess->unlock();
   
   emit cameraFrame(m_currentFrame);
@@ -220,6 +234,11 @@ void Aibo::walkSocketError(QAbstractSocket::SocketError error)
 {
   qDebug() << "Walk Socket Error:" << m_walkSocket->errorString();
 }
+void Aibo::estopSocketError(QAbstractSocket::SocketError error)
+{
+  qDebug() << "Emergency Stop Socket Error" << m_estopSocket->errorString();
+}
+
 
 
 // Templated qBound() doesn't like mixed ints and reals
@@ -322,7 +341,7 @@ void Aibo::sendCommand(const QString& command, QTcpSocket *socket)
   }
   socket->write(QString("%1\n").arg(command).toAscii());
 }
-void Aibo::sendControl(Control control, qreal amount)
+void Aibo::sendControl(Control control, float amount)
 {
   QTcpSocket *socket;
   QChar controlChar;
@@ -357,12 +376,14 @@ void Aibo::sendControl(Control control, qreal amount)
       break;
   }
   
-  //TODO: Verify Accuracy
   char command[5];
   command[0] = controlChar.toAscii();
-  command[1] = (unsigned char)amount;
-  
-  sendCommand(command);
+  command[1] = ((char*)&amount)[0];
+  command[2] = ((char*)&amount)[1];
+  command[3] = ((char*)&amount)[2];
+  command[4] = ((char*)&amount)[3];
+
+  socket->write(command, 5);
 }
 void Aibo::set(const QString& property, const QString& value)
 {
