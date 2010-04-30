@@ -59,6 +59,7 @@ Aibo::Aibo(const QString& hostname, QObject* parent)
   QTimer::singleShot(1000, this, SLOT(estopConnect()));
 
   m_mainSocket->connectToHost(m_hostname, (qint16)MainControl);
+  sendCommand("!select \"EStop Remote Control\"");
 }  
 
 Aibo::~Aibo()
