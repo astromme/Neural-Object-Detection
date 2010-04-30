@@ -3,10 +3,13 @@
 
 #include <QList>
 
-class Node;
+#include "point.h"
 
-class Subgraph : public QList<Node*> {
+class GngNode;
+
+class Subgraph : public QList<GngNode*> {
   public:
+    Point center();
         
   private:
     int m_window; // Steps that this is valid for

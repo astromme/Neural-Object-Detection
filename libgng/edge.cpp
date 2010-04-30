@@ -3,7 +3,7 @@
 
 static int currentId = 0;
 
-Edge::Edge(Node* from, Node* to)
+Edge::Edge(GngNode* from, GngNode* to)
   : m_id(currentId)
 {
   currentId++;
@@ -23,12 +23,12 @@ int Edge::id() const
   return m_id;
 }
 
-Node* Edge::from() const
+GngNode* Edge::from() const
 {
   return m_from;
 }
 
-Node* Edge::to() const
+GngNode* Edge::to() const
 {
   return m_to;
 }

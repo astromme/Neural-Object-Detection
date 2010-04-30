@@ -14,7 +14,7 @@ qreal realRand(qreal minimum, qreal maximum) {
   return rand;
 }
 
-Node::Node(Point location, int dimension, qreal min, qreal max)
+GngNode::GngNode(Point location, int dimension, qreal min, qreal max)
 {
   m_dimension = dimension;
   m_min = min;
@@ -31,16 +31,16 @@ Node::Node(Point location, int dimension, qreal min, qreal max)
   }
 }
 
-Node::~Node()
+GngNode::~GngNode()
 {
 }
 
-Point Node::location()
+Point GngNode::location()
 {
   return m_location;
 }
 
-QString Node::toString() const
+QString GngNode::toString() const
 {
   QString string = "[";
   foreach(qreal part, m_location) {
@@ -50,9 +50,9 @@ QString Node::toString() const
   return string;
 }
 
-bool Node::hasEdgeTo(const Node* other) const
+bool GngNode::hasEdgeTo(const GngNode* other) const
 {
-  foreach(Node *neighbor, neighbors()) {
+  foreach(GngNode *neighbor, neighbors()) {
     if (other == neighbor) {
       return true;
     }
@@ -60,7 +60,7 @@ bool Node::hasEdgeTo(const Node* other) const
   return false;
 }
 
-Edge* Node::getEdgeTo(const Node* other) const
+Edge* GngNode::getEdgeTo(const GngNode* other) const
 {
   foreach(Edge* edge, m_edges) {
     if (edge->to() == other) {
@@ -70,42 +70,42 @@ Edge* Node::getEdgeTo(const Node* other) const
   return 0;
 }
 
-void Node::appendEdge(Edge* edge)
+void GngNode::appendEdge(Edge* edge)
 {
   m_edges.append(edge);
 }
 
-void Node::removeEdge(Edge* edge)
+void GngNode::removeEdge(Edge* edge)
 {
   m_edges.removeAll(edge);
 }
 
-QList<Node*> Node::neighbors() const
+QList<GngNode*> GngNode::neighbors() const
 {
-  QList<Node*> neighbors;
+  QList<GngNode*> neighbors;
   foreach(Edge* edge, m_edges) {
     neighbors.append(edge->to());
   }
   return neighbors;
 }
 
-QList< Edge* > Node::edges() const
+QList< Edge* > GngNode::edges() const
 {
   return m_edges;
 }
 
-qreal Node::error() const
+qreal GngNode::error() const
 {
   return m_error;
 }
 
-void Node::setError(qreal error)
+void GngNode::setError(qreal error)
 {
   m_error = error;
 }
 
 // adjust position of node towards a given point and a learningRate
-void Node::moveTowards(const Point& point, qreal learningRate)
+void GngNode::moveTowards(const Point& point, qreal learningRate)
 {
   for (int i=0; i<point.size(); i++) {
     m_location[i] += learningRate*(point[i]-m_location[i]);

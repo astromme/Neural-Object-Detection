@@ -2,7 +2,7 @@
 #ifndef _GROWINGNEURALGAS_H
 #define _GROWINGNEURALGAS_H
 
-class Node;
+class GngNode;
 class Edge;
 class PointSource;
 
@@ -16,8 +16,9 @@ class PointSource;
 #include <QThread>
 #include <QMutex>
 #include <QDateTime>
+#include <QColor>
 
-typedef QPair<Node*, Node*> NodePair;
+typedef QPair<GngNode*, GngNode*> NodePair;
 
 class GrowingNeuralGas : public QThread {
   Q_OBJECT
@@ -36,11 +37,12 @@ class GrowingNeuralGas : public QThread {
     QList<Subgraph> subgraphs() const;
     void generateSubgraphs();
     void matchingSubgraph();
+    void assignFollowSubgraph(QColor targetColor);
     void printSubgraphs(bool printNodes=false) const;
     
     int edgeHistoryAge(Edge *edge) const;
     
-    QList<Node*> nodes() const;
+    QList<GngNode*> nodes() const;
     QList<Edge*> uniqueEdges() const;
     
     int step() const; /**< Returns the current step of the computation. Reset when run() or runSynchronous() is called */
@@ -75,16 +77,16 @@ class GrowingNeuralGas : public QThread {
     
     /** Computes the distances between the given point and every unit
         in the GNG.  Returns the closest and next closest units. */
-    QPair<Node*, Node*> computeDistances(const Point& point); // find 2 best nodes
+    QPair<GngNode*, GngNode*> computeDistances(const Point& point); // find 2 best nodes
     
     /** Increments the ages of every unit directly connected to the given unit. */
-    void incrementEdgeAges(Node *node);
+    void incrementEdgeAges(GngNode *node);
     
     /** Adds the appropriate edges to connect units a and b. */
-    void connectNodes(Node *a, Node *b);
+    void connectNodes(GngNode *a, GngNode *b);
     
     /** Removes the appropriate edges to disconnect units a and b. */
-    void disconnectNodes(Node *a, Node *b);
+    void disconnectNodes(GngNode *a, GngNode *b);
     
     /** Checks all edges in the GNG and removes any with an age exceeding
         the maxAge parameter.  Also removes any unit that is completely
@@ -92,7 +94,7 @@ class GrowingNeuralGas : public QThread {
     void removeOldEdges();
     
     /** Given a list of units, returns the unit with the highest error. */
-    Node* maxErrorNode(QList<Node*> nodeList);
+    GngNode* maxErrorNode(QList<GngNode*> nodeList);
     
     /** Returns the average error across all units in the GNG. */
     qreal averageError();
@@ -135,7 +137,7 @@ class GrowingNeuralGas : public QThread {
     Point m_pickCloseTo;
     int m_pickCloseToCountdown;
     
-    QList<Node*> m_nodes;
+    QList<GngNode*> m_nodes;
     QList<Edge*> m_uniqueEdges;
     
     QHash<NodePair, int> m_edgeHistory;
