@@ -5,20 +5,18 @@
 #include <libaibo/aibo.h>
 
 
-class AiboRemote : public QObject {
+class AiboControl : public QObject {
   Q_OBJECT
   public:
-    AiboRemote(Aibo *aibo);
-    ~AiboRemote() {}
+    AiboControl(Aibo *aibo);
+    ~AiboControl() {}
     
   public slots:
-    void headLeft();
-    void headRight();
-    void headUp();
-    void headDown();
-    void headCenter();
-    
-    void stop();
+    void moveFocusLeft(qreal velocity=0.5);
+    void moveFocusRight(qreal velocity=0.5);
+    void moveFocusUp(qreal velocity=0.5);
+    void moveFocusDown(qreal velocity=0.5);
+    void stopMovingFocus();
     
     void moveForward();
     void moveBackward();

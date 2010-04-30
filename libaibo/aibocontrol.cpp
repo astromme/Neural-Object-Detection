@@ -1,42 +1,36 @@
 #include "aibocontrol.h"
-AiboRemote::AiboRemote(Aibo* aibo) {
+AiboControl::AiboControl(Aibo* aibo) {
     m_aibo = aibo;
 }
-void AiboRemote::headLeft() {
+void AiboControl::moveFocusLeft(qreal velocity) {
     m_aibo->setPan(1);
 }
-void AiboRemote::headRight() {
+void AiboControl::moveFocusRight(qreal velocity) {
     m_aibo->setPan(-1);
 }
-void AiboRemote::headUp() {
+void AiboControl::moveFocusUp(qreal velocity) {
     m_aibo->setTilt(0);
 }
-void AiboRemote::headDown() {
+void AiboControl::moveFocusDown(qreal velocity) {
     m_aibo->setTilt(-1);
 }
-void AiboRemote::headCenter() {
-    m_aibo->setTilt(0);
-    m_aibo->setPan(0);
+void AiboControl::stopMovingFocus() {
 }
-void AiboRemote::stop() {
-    m_aibo->setMovement(0, 0);
-    m_aibo->setStrafing(0);
-}
-void AiboRemote::moveForward() {
+void AiboControl::moveForward() {
     m_aibo->setTranslation(0.5);
 }
-void AiboRemote::moveBackward() {
+void AiboControl::moveBackward() {
     m_aibo->setTranslation(-0.5);
 }
-void AiboRemote::moveLeft() {
+void AiboControl::moveLeft() {
     m_aibo->setStrafing(0.5);
 }
-void AiboRemote::moveRight() {
+void AiboControl::moveRight() {
     m_aibo->setStrafing(-0.5);
 }
-void AiboRemote::turnRight() {
+void AiboControl::turnRight() {
     m_aibo->setRotation(-0.5);
 }
-void AiboRemote::turnLeft() {
+void AiboControl::turnLeft() {
     m_aibo->setRotation(0.5);
 }
