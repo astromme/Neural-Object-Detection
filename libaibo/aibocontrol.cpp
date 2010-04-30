@@ -1,13 +1,37 @@
 #include "aibocontrol.h"
+
 AiboControl::AiboControl(Aibo* aibo) {
     m_aibo = aibo;
 }
+
+void AiboControl::startHeadControl()
+{
+  m_aibo->startHeadControl();
+}
+void AiboControl::stopHeadControl()
+{
+  m_aibo->stopHeadControl();
+}
+void AiboControl::startWalkControl()
+{
+  m_aibo->startWalkControl();
+}
+void AiboControl::stopWalkControl()
+{
+  m_aibo->stopWalkControl();
+}
+
 void AiboControl::moveFocusLeft(qreal velocity) {
     m_aibo->setPan(1);
 }
 void AiboControl::moveFocusRight(qreal velocity) {
     m_aibo->setPan(-1);
 }
+void AiboControl::moveFocusCenter(qreal velocity)
+{
+    m_aibo->setPan(0);
+}
+
 void AiboControl::moveFocusUp(qreal velocity) {
     m_aibo->setTilt(0);
 }

@@ -12,8 +12,14 @@ class AiboControl : public QObject {
     ~AiboControl() {}
     
   public slots:
+    void startHeadControl();
+    void stopHeadControl();
+    void startWalkControl();
+    void stopWalkControl();
+    
     void moveFocusLeft(qreal velocity=0.5);
     void moveFocusRight(qreal velocity=0.5);
+    void moveFocusCenter(qreal velocity=0.5);
     void moveFocusUp(qreal velocity=0.5);
     void moveFocusDown(qreal velocity=0.5);
     void stopMovingFocus();

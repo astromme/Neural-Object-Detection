@@ -12,7 +12,7 @@ CameraSource::CameraSource()
   connect(&m_nextFrameTimer, SIGNAL(timeout()), SLOT(processNextFrame()));
   m_frame = 0;
   m_imageData = 0;
-  m_device = cvCreateCameraCapture(0);
+  m_device = cvCreateCameraCapture(1);
   if (!m_device){
     qDebug() << "Camera not found";
     return;

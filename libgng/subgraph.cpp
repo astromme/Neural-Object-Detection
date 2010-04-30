@@ -28,11 +28,11 @@ Point Subgraph::center()
     lightness += pt[4];
   }
   
-  x/size();
-  y/size();
-  hue/size();
-  saturation/size();
-  lightness/size();
+  x /= size();
+  y /= size();
+  hue /= size();
+  saturation /= size();
+  lightness /= size();
   
   Point avg;
   avg.resize(5);

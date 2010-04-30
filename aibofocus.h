@@ -29,6 +29,7 @@ class AiboFocus : QObject {
     AiboControl* m_aibo;    
     QColor m_focusColor;
     QTimer m_timer;
+    bool m_modifyX;
 };
 
 #endif // _AIBO_FOCUS_H
