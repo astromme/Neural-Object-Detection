@@ -1,5 +1,5 @@
-#ifndef AIBOREMOTE_H
-#define AIBOREMOTE_H
+#ifndef _AIBOREMOTE_H
+#define _AIBOREMOTE_H
 
 #include <QObject>
 #include <libaibo/aibo.h>
@@ -31,4 +31,4 @@ class AiboRemote : public QObject {
     Aibo *m_aibo;    
 };
 
-#endif //AIBOREMOTE_H
+#endif //_AIBOREMOTE_H

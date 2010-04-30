@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include "libgng/gng.h"
-
+#include "aibofocus.h"
 
 namespace po=boost::program_options;
 using std::string;
@@ -50,6 +50,8 @@ int main(int argc, char* argv[]) {
   viewer.show();
   
   AiboSource aibo(QString::fromStdString(popts.hostname));
+  AiboFocus aibofocus(&gng, &aibo);
+  aibofocus.setColor(QColor(Qt::black));
   
   QObject::connect(&aibo, SIGNAL(cameraFrame(QImage)),
                    &viewer, SLOT(setImage(QImage)));

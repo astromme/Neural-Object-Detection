@@ -23,6 +23,8 @@ set(gng_imageseries_headers gngapp.h)
 set(gng_camera_sources camera.cpp)
 
 set(gng_aibo_sources aibo.cpp)
+set(gng_aibo_focus_sources aibofocus.cpp)
+qt4_wrap_cpp(gng_abio_focus_mocs aibofocus.h)
 
 qt4_wrap_cpp(gng_imageseries_mocs ${gng_imageseries_headers})
 #qt4_wrap_ui(gng_imageseries_uic viewer.ui)
@@ -50,5 +52,8 @@ target_link_libraries(gng-imageseries gng gngviewer ${QT_LIBRARIES} ${Boost_PROG
 add_executable(gng-camera ${gng_camera_sources})
 target_link_libraries(gng-camera gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-add_executable(gng-aibo ${gng_aibo_sources})
+add_executable(gng-aibo ${gng_aibo_sources} ${gng_aibo_focus_sources} ${gng_abio_focus_mocs})
 target_link_libraries(gng-aibo aibo gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+# add_executable(gng-aibofocus ${gng_aibo_focus_sources})
+# target_link_libraries(gng-aibo aibo gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})

@@ -347,6 +347,7 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
   }
  
   // TODO remove -- this is super hacky
+/*
   if (m_stepCount == 10000){
     generateSubgraphs();
     QColor targetColor = QColor::fromRgbF(1,0,0).toHsl();
@@ -359,10 +360,8 @@ void GrowingNeuralGas::step(const Point& trainingPoint)
     generateSubgraphs();
     matchingSubgraph();
     Point center = m_followSubgraph.center();
-    qDebug() << "Center: " << center[0] << ", " <<
-      center[1] << ", " << center[2] << ", " << center[3] <<
-      ", " << center[4];
   }
+*/
  
 //   qreal dist = winners.first->location().distanceTo(winners.second->location());
 //   qreal xyDist = winners.first->location().xyDistanceTo(winners.second->location());
@@ -425,7 +424,7 @@ void GrowingNeuralGas::run()
   
   m_timer.start(); // time milliseconds since gng was created
   
-  //sleep(5); // sleep for 5 seconds to get the aibo going
+  sleep(5); // sleep for 5 seconds to get the aibo going
   
   if (m_stepCount == 0) {
     qDebug() << "Running the GNG for" << currentCycles << "cycles";
@@ -639,6 +638,12 @@ void GrowingNeuralGas::printSubgraphs(bool printNodes) const
     }
   }
 }
+
+Subgraph GrowingNeuralGas::followSubgraph() const
+{
+  return m_followSubgraph;
+}
+
 
 // accessors
 QMutex* GrowingNeuralGas::mutex() const

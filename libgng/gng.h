@@ -39,6 +39,7 @@ class GrowingNeuralGas : public QThread {
     void matchingSubgraph();
     void assignFollowSubgraph(QColor targetColor);
     void printSubgraphs(bool printNodes=false) const;
+    Subgraph followSubgraph() const;
     
     int edgeHistoryAge(Edge *edge) const;
     
