@@ -15,6 +15,8 @@ void AiboControl::moveFocusDown(qreal velocity) {
     m_aibo->setTilt(-1);
 }
 void AiboControl::stopMovingFocus() {
+    m_aibo->setTilt(0);
+    m_aibo->setPan(0);
 }
 void AiboControl::moveForward() {
     m_aibo->setTranslation(0.5);
