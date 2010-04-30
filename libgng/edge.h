@@ -2,7 +2,7 @@
 #ifndef _EDGE_H
 #define _EDGE_H
 
-class Node;
+class GngNode;
 
 /**
     Edges in the GNG are undirected.  However for ease of
@@ -14,13 +14,13 @@ class Node;
 class Edge {
   
   public:
-    Edge(Node* from, Node* to);
+    Edge(GngNode* from, GngNode* to);
     ~Edge();
     
     int id() const;
     
-    Node* from() const;
-    Node* to() const;
+    GngNode* from() const;
+    GngNode* to() const;
     
     void incrementAge();
     void setAge(int age);
@@ -36,8 +36,8 @@ class Edge {
         
   private:
     const int m_id;
-    Node *m_from;
-    Node *m_to;
+    GngNode *m_from;
+    GngNode *m_to;
     int m_age;
     int m_totalAge;
     int m_lastUpdated;

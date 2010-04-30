@@ -14,22 +14,22 @@ class Edge;
     Each unit in the GNG maintains a reference vector, an error
     measure, and a list of edges.
  */
-class Node {
+class GngNode {
   
   public:
-    Node(Point location = Point(), int dimension=2, qreal min=0, qreal max=1);
-    ~Node();
+    GngNode(Point location = Point(), int dimension=2, qreal min=0, qreal max=1);
+    ~GngNode();
     
     Point location();
     
     QString toString() const; 
     
-    bool hasEdgeTo(const Node *other) const;
-    Edge* getEdgeTo(const Node *other) const;
+    bool hasEdgeTo(const GngNode *other) const;
+    Edge* getEdgeTo(const GngNode *other) const;
     void appendEdge(Edge *edge);
     void removeEdge(Edge *edge);
     
-    QList<Node*> neighbors() const;
+    QList<GngNode*> neighbors() const;
     QList<Edge*> edges() const;
     
     qreal error() const;
