@@ -128,8 +128,6 @@ One other value to track that is implemented in Aging but is currently not used 
 
 \subsection{Domain Specific Changes}
 
-\subsubsection{XYDist VS ColorDist VS Dist}
-
 \subsubsection{Color Barrier Across Object Boundaries}
 
 %If color difference is too great between two nodes, don't add an edge. Since we describe objects in terms of their color, makes sense.
@@ -196,11 +194,25 @@ We can again look at the runtime and space requirements for the algorithm. We ne
 \section{Experiments}
 \label{sec:experiments}
 
-Talk about broad classes of experiments -- static, moving, and AIBO
+%Talk about broad classes of experiments -- static, moving, and AIBO
+
+There are two broad categories of experiments we conducted. The first distinguished between static and moving images. Static images were used as an early benchmark for testing whether or not our algorithm could correctly categorize an image given unlimited time. Moving images tested the ability of the GNG to both adapt to new situations after creating an initial categorization scheme and to do so in real time. The second category of experiments consisted of either computer-generated images or real-life pictures taken with a camera or captured with a webcam. 
+
+In general, we found that computer generated images (both static and moving) were very easy for the GNG to categorize. Real-life examples contain many more details and are much noisier. In the sections below we detail our experiences with various object detection and tracking tasks. We also experimented with a Sony AIBO reacting appropriately to objects identified by the Growing Neural Gas. Finally we discuss some of the limitations of our algorithm illuminated by these experiments.
 
 \subsection{Static Images}
 
-Easy. Real and Computer-generated
+% Easy. Real and Computer-generated
+
+The key aspect of static images is the categorization task the GNG is tackling is not time sensitive. Thus these tests were a great tool to incrementally check whether or not our GNG was on the right path towards correctly identifying objects in the scene. Figure \ref{fig:rgbStatic} depicts a simple image generating using GIMP\footnote{The GNU Image Manipulation Program, \url{http://www.gimp.org}} with three colored blocks (red, green, and blue) on a white background. We see that four disjoint subgraphs have formed, one for each object and another for the background. These subgraphs form very quickly (5,000 cycles or just over one second) and stay disjoint over time. 
+
+\begin{figure}[h!]
+  \begin{center}
+    %\includegraphics{<+file+>}
+  \end{center}
+  \caption{Computer-generated static image with red, green, and blue blocks on a white background. GNG quickly and correctly categorizes image.}
+  \label{fig:rgbStatic}
+\end{figure}<++>
 
 \subsection{Moving Images}
 
