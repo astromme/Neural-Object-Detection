@@ -43,9 +43,13 @@ Talk about Growing Neural Gas papers by Fritzke and maybe the CBIM paper by Meed
 
 \section{Goals}
 
-We want to create a Growing Neural Gas that can identify objects and then have the AIBO track it. Talk about limitations of blobify and how this improves it.
+%We want to create a Growing Neural Gas that can identify objects and then have the AIBO track it. Talk about limitations of blobify and how this improves it.
+At the broadest level of abstraction, our task is object recognition and tracking using a Growing Neural Gas. We provide an image for the GNG to categorize, and the GNG identifies the objects. In the case of a movie, the GNG must be able to update and adapt to the scene. Objects moving across a canvas need to be identified from one frame to another. To test the algorithm's capacity for tracking, we used sets of simple, computer generated images along with real-world images taken with a camera. Additionally, we created computer generated sequences of images that served as a simple movie. On the other end, we ran the GNG on real-time input coming from a webcam and got encouraging results. We also interfaced with the AIBO and were able to give it appropriate commands given an object to follow moving the scene.
+
+The rest of the paper is organized as follows. Section \ref{sec:GNG} details our implementation of the Growing Neural Gas algorithm in C++. Since our object detection needed to happen in real time, this was an important first task making the GNG very fast. In section \ref{sec:creatingGNG} we discuss the creation and visualization of the GNG. The inputs and the reasoning behind some basic decisions is described. We write about a number of modifications to the GNG algorithm needed to make our implementation accurately identify objects in section \ref{sec:modificationsGNG}. To actually identify and track objects, we need an algorithmic method of picking them out of the full GNG graph. This relies of the use of disjointed subgraphs and is made rigorous in section \ref{sec:objectTracking}. In section \ref{sec:experiments} we detail the experiments we conducted at length. We use that section as a forum for discussing some of the successes and limitations of our implementation and of the Growing Neural Gas algorithm in general. Finally, section \ref{sec:future} discusses the future of this project and what we would like to achieve with more work and time.
 
 \section{Growing Neural Gas}
+\label{sec:GNG}
 
 \subsection{libgng}
 
@@ -64,6 +68,7 @@ The GNG relies on randomly selected input vectors to create and move its nodes a
 Libaibo is a small C++ library that is designed to be a simple and high level interface to the AIBO. It uses the remote control functionality of the Tekkotsu Framework \footnote{TODO: Complete \url{http://www.tekkotsu.org/}} and currently allows access to the camera data and head/body controls. The library also provides a PointSource that takes points from the AIBO's camera. This is meant as a plug and play module to drop into a GNG instance. 
 
 \section{Creating and Visualizing the Growing Neural Gas}
+\label{sec:creatingGNG}
 
 \subsection{Inputs}
 
@@ -82,7 +87,12 @@ HSL. Compare to RGB and HSV. Image here?
 
 %We want to place emphasis on distance. Two colors with zero difference in color space but high dist in euclidean space were being categorized as the same object. Want to make them different. Could try to find an image (4 pieces of paper?) that regular x,y dist fails but 1.5*x,y works.
 
-%Since the GNG treats each of the five inputs equally, sometimes vectors separated by a large distance but with very similar colors end up having a small distance in object space and so the two vertices end up categorized as part of the same object. To fix this problem we added some emp
+Since the GNG treats each of the five inputs equally, sometimes vectors separated by a large distance but with very similar colors end up having a small distance in object space and so the two vertices end up categorized as part of the same object. There are three color inputs and only two distance inputs, so the color information can be overpowering. To fix this problem we added emphasis to the $xy$ distance metric by adding an additional $1.5 * xyDistance$ to the total object distance metric. Thus, the formula is as follows:
+\begin{align*}
+  distance = &\sqrt{(x_2-x_1)^2+(y_2-y_1)^2+(h_2-h_1)^2+(s_2-s_1)^2+(l_2-l_1)^2} \\ &+ 1.5*\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}
+\end{align*}
+
+{\bf Before and after images?}
 
 \subsection{gngviewer}
 
@@ -90,6 +100,7 @@ Because of the incremental nature of our modifications to the GNG we needed a so
 
 
 \section{Modifications to Growing Neural Gas}
+\label{sec:modificationsGNG}
 
 \subsection{Aging Growing Neural Gas (AGiNG)}
 
@@ -119,7 +130,7 @@ One other value to track that is implemented in Aging but is currently not used 
 
 \subsubsection{XYDist VS ColorDist VS Dist}
 
-\subsubsection{Color Barrier Across Object Boundaries (RC -- Draft)}
+\subsubsection{Color Barrier Across Object Boundaries}
 
 %If color difference is too great between two nodes, don't add an edge. Since we describe objects in terms of their color, makes sense.
 Even with the modifications described above, experiments showed that the GNG was still adding an large number of edges between nodes that were right along the boundary edges of objects. For example, if the GNG were categorizing a scene with a black wallet against an off-white wall, a node from the foreground and from the background would often be connected since they were very close in distance. To solve this problem, a check was put in place each time an edge was to be added or the age of an existing edge was to be reset. The hues of the nodes are compared, and if their difference is greater than a specified value the edges are not created. Through experimentation we found that a good threshold value is 0.1, which corresponds to a 36 point difference in the 360-degree hue space. As a rough heuristic, this is about half way between any two consecutive bands of the color strip ({\bf reference color strip below? put this section below Methods?})
@@ -128,7 +139,8 @@ After implementing this change, we quickly saw our graph dwindle down to a size 
 
 \subsubsection{Focus}
 
-\section{Object Tracking (RC -- Draft)}
+\section{Object Tracking}
+\label{sec:objectTracking}
 
 %How we define objects -- subgraphs
 Once the GNG has built up a graph representing the object space, we want to automatically identify and track objects in the scene. We can define objects in the graph in terms of subgraphs. Since we are relying on distance and color as markers of objects and are feeding that information into the Growing Neural Gas, over time the graph will partition itself into smaller, disjoint subgraphs representing objects in the scene. Thus each subgraph represents a single object that we can identify and track.
@@ -182,6 +194,7 @@ Once we have a set of subgraphs that details the objects the GNG has identified,
 We can again look at the runtime and space requirements for the algorithm. We need to traverse every node in the graph and then check if that node is in the exemplar. Thus this has a runtime of $O(\|G\|*\|exemplar\|)$. In the worst case this is $O(\|G\|^2)$ if the exemplar is the entire graph, $G$. In every realistic case, however, the exemplar will be markedly smaller than the approximately one hundred node graph. The algorithm requires $O(\|G\|+\|exemplar\|)$ space.
 
 \section{Experiments}
+\label{sec:experiments}
 
 Talk about broad classes of experiments -- static, moving, and AIBO
 
@@ -202,6 +215,7 @@ Here's where the implicit memory really helps. As objects move and disappear, GN
 No sense of edges or depth, so we perform poorly on complex, busy images. Example of busy image? Computer in Stromme's room?
 
 \section{Future Work}
+\label{sec:future}
 
 \begin{itemize}
   \item Reduce resolution
