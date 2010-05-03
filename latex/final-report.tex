@@ -97,20 +97,19 @@ We have identified a few limitations with the original Growing Neural Gas algori
 
 \subsubsection{Normal Edge Age - Removing Edges}
 
+\subsubsection{Node Insertions - Not too often. Only when error is high}
+
 \subsubsection{Total Edge Age - Discounting Edges}
 
 Since edge ages are set to zero when they win, we want a sense of how long an edge has existed. Added total age counter that is incremented at each step and is reset when removed.
 
-\subsubsection{Edge History - How close nodes were in history}
-
 \subsubsection{Edge Last Updated - Removing old Edges}
 
-\subsubsection{Node Insertions - Not too often. Only when error is high}
+\subsubsection{Edge History - How close nodes were in history}
 
 \subsection{Domain Specific Changes}
 
 \subsubsection{XYDist VS ColorDist VS Dist}
-\subsubsection{Focus}
 
 \subsubsection{Color Barrier Across Object Boundaries (RC -- Draft)}
 
@@ -119,6 +118,7 @@ Even with the modifications described above, experiments showed that the GNG was
 
 After implementing this change, we quickly saw our graph dwindle down to a size of zero. Since the early stages of the GNG consist of creating nodes between spaces that almost always differ in hue values greater than the threshold, very few or no nodes were being created. We resolved that this processing step had to be applied only once the GNG was more developed. This led to the additional check of average error against the target error. If average error is above target error, nodes are no longer being added to the graph, so it is safe to either disallow connections or the resetting of age (which can lead to an edge's removal). With this additional condition, results improved markedly. Edges between objects were much better defined and subgraphs representing each object were more likely to remain disjoint. ({\bf add image showing the difference?})
 
+\subsubsection{Focus}
 
 \section{Object Tracking (RC -- Draft)}
 
