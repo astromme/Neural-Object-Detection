@@ -45,7 +45,7 @@ Talk about Growing Neural Gas papers by Fritzke and maybe the CBIM paper by Meed
 
 We want to create a Growing Neural Gas that can identify objects and then have the AIBO track it. Talk about limitations of blobify and how this improves it.
 
-\section{Creating and Visualizing the Growing Neural Gas}
+\section{Growing Neural Gas}
 
 \subsection{libgng}
 
@@ -63,11 +63,7 @@ The GNG relies on randomly selected input vectors to create and move its nodes a
 
 Libaibo is a small C++ library that is designed to be a simple and high level interface to the AIBO. It uses the remote control functionality of the Tekkotsu Framework \footnote{TODO: Complete \url{http://www.tekkotsu.org/}} and currently allows access to the camera data and head/body controls. The library also provides a PointSource that takes points from the AIBO's camera. This is meant as a plug and play module to drop into a GNG instance. 
 
-\subsection{gngviewer}
-
-Because of the incremental nature of our modifications to the GNG we needed a solid way of visualizing the results of the GNG. From this need the gngviewer emerged. The viewer is domain-specific, it assumes a GNG with inputs that contain pixel information. The viewer runs asynchronously from the GNG and provides a continuously updating view of how the GNG is changing. It provides layers that show the nodes along with their color information, the edges and the subgraphs that have been generated. TODO: Insert image of GNGViewer.
-
-\section{Methods}
+\section{Creating and Visualizing the Growing Neural Gas}
 
 \subsection{Inputs}
 
@@ -88,14 +84,14 @@ HSL. Compare to RGB and HSV. Image here?
 
 %Since the GNG treats each of the five inputs equally, sometimes vectors separated by a large distance but with very similar colors end up having a small distance in object space and so the two vertices end up categorized as part of the same object. To fix this problem we added some emp
 
-\subsection{Implementation}
+\subsection{gngviewer}
 
-Talk about C++ implementation of GNG and AIBO movement.
+Because of the incremental nature of our modifications to the GNG we needed a solid way of visualizing the results of the GNG. From this need the gngviewer emerged. The viewer is domain-specific, it assumes a GNG with inputs that contain pixel information. The viewer runs asynchronously from the GNG and provides a continuously updating view of how the GNG is changing. It provides layers that show the nodes along with their color information, the edges and the subgraphs that have been generated. TODO: Insert image of GNGViewer.
 
 
 \section{Modifications to Growing Neural Gas}
 
-\subsection{Aging Growing Neural Gas (aGiNG) (AS)}
+\subsection{Aging Growing Neural Gas (AGiNG) (AS)}
 
 Since edge ages are set to zero when they win, we want a sense of how long an edge has existed. Added total age counter that is incremented at each step and is reset when removed.
 
