@@ -22,6 +22,8 @@
 \renewcommand{\IF}{\mbox{{\bf if} }\tab}
 \newcommand{\IN}{\mbox{ {\bf in} }}
 
+\newcommand{\xyspace}{{\em xy} space}
+
 \begin{document}
 \title{Object Detection with aGiNG}
 \author{Andrew Stromme \& Ryan Carlson}
@@ -47,6 +49,30 @@ We want to create a Growing Neural Gas that can identify objects and then have t
 
 This could be its own section if you have lots of subsections, but we should discuss the Qt stuff and the way we project the 5-D vector onto x,y space, color the vertices, update everything dynamically, etc.
 
+\section{Methods}
+
+\subsection{Inputs}
+
+%five-dimensional vector (x,y,hue, saturation, lightness). Introduce notions of ``object space'' as a combination of ``color space'' versus ``euclidean space''
+
+Objects are defined as a combination of colors and distances between points in an image. Intuitively, two pixels that are close to each other and are similar colors should be judged as part of the same object. Thus we have notions of ``color space'' and ``\xyspace'' which combine to create ``object space.'' If pixels are close in both color space and \xyspace{} then there are also close in object space -- they are part of the same object. To define this object space the GNG takes as input a five-dimensional vector. This vector contains the $x$~and~$y$ coordinates as well as the color information, represented by $hue$, $saturation$, and $lightness$ (described in section \ref{sec:colorModel}). Thus when the distance in 5-space of two input vectors is measured to be small, we can say with confidence that the two vectors describe the same object. When the distance is large, the vectors are probably not part of the same object. All values are scaled from 0 to 1 before being sent to the GNG.
+
+\subsection{Color Model (AS)}
+\label{sec:colorModel}
+
+HSL. Compare to RGB and HSV. Image here?
+
+\subsection{Distance Calculation}
+
+%We want to place emphasis on distance. Two colors with zero difference in color space but high dist in euclidean space were being categorized as the same object. Want to make them different. Could try to find an image (4 pieces of paper?) that regular x,y dist fails but 1.5*x,y works.
+
+%Since the GNG treats each of the five inputs equally, sometimes vectors separated by a large distance but with very similar colors end up having a small distance in object space and so the two vertices end up categorized as part of the same object. To fix this problem we added some emp
+
+\subsection{Implementation}
+
+Talk about C++ implementation of GNG and AIBO movement.
+
+
 \section{Modifications to Growing Neural Gas}
 
 \subsection{Aging Growing Neural Gas (aGiNG) (AS)}
@@ -65,24 +91,6 @@ Even with the modifications described above, experiments showed that the GNG was
 After implementing this change, we quickly saw our graph dwindle down to a size of zero. Since the early stages of the GNG consist of creating nodes between spaces that almost always differ in hue values greater than the threshold, very few or no nodes were being created. We resolved that this processing step had to be applied only once the GNG was more developed. This led to the additional check of average error against the target error. If average error is above target error, nodes are no longer being added to the graph, so it is safe to either disallow connections or the resetting of age (which can lead to an edge's removal). With this additional condition, results improved markedly. Edges between objects were much better defined and subgraphs representing each object were more likely to remain disjoint. ({\bf add image showing the difference?})
 
 \subsection{More stuff, I think\dots}
-
-\section{Methods}
-
-\subsection{Inputs}
-
-five-dimensional vector (x,y,hue, saturation, color). Introduce notions of ``object space'' as a combination of ``color space'' versus ``euclidean space''
-
-\subsection{Color Model (AS)}
-
-HSL. Compare to RGB and HSV. Image here?
-
-\subsection{Distance Calculation}
-
-We want to place emphasis on distance. Two colors with zero difference in color space but high dist in euclidean space were being categorized as the same object. Want to make them different. Could try to find an image (4 pieces of paper?) that regular x,y dist fails but 1.5*x,y works.
-
-\subsection{Implementation}
-
-Talk about C++ implementation of GNG and AIBO movement.
 
 \section{Object Tracking (RC -- Draft)}
 
