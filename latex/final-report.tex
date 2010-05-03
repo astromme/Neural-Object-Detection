@@ -25,7 +25,7 @@
 \newcommand{\xyspace}{{\em xy} space}
 
 \begin{document}
-\title{Object Detection with aGiNG}
+\title{Object Detection with AGiNG}
 \author{Andrew Stromme \& Ryan Carlson}
 \date{May 14, 2010}
 \maketitle
@@ -95,17 +95,25 @@ Because of the incremental nature of our modifications to the GNG we needed a so
 
 We have identified a few limitations with the original Growing Neural Gas algorithm. Most of these limitations are exposed when the input image data changes over time. These important considerations for our problem domain and it is important to address these. Each will be discussed separately along with the modifications to the core GNG that resolve or alleviate the issue at hand. The sum of these small changes significantly changes how the GNG adds and removes nodes and edges and how it categorizes its input space. We introduce our new type of GNG outfitted with these changes as AGiNG. AGiNG is designed to provide the standard GNG with information regarding the history of nodes and edges. It is composed of a number of small modifications which will be discussed individually in subsequent sections.
 
-\subsubsection{Normal Edge Age - Removing Edges}
-
 \subsubsection{Node Insertions - Not too often. Only when error is high}
+
+The first addition to the GNG dealt with node insertion. The original GNG inserted nodes on a fixed interval. This caused a few complications. Firstly, it didn't allow the GNG to come to any sort of natural equilibrium. The longer the GNG was run the more nodes there would be. This is a problem because we are running the GNG continuously for many thousands of time steps. In \citeA{meeden} this issue is addressed by only adding new nodes when the average error is above some error threshold. This helps but still causes problems for our particular inputs. Because the inputs that we give to the GNG can be so dissimilar the average error can be extremely high even if hundreds of new nodes are added. To lower the error it is necessary to run the GNG for a number of time steps to allow the nodes to spread out and start categorizing the input space. To allow for this we have combined the two GNG node insertion policies. New nodes are added at most every n time steps (where n is normally around 100) but only while the average error is greater than a thresholded value (normally between 0.1 and 0.01). TODO: Before/After Picture?
+
+\subsubsection{Normal Edge Age - Edge Removal}
+
+Growing Neural Gas has a built in sense of edge ages. Each iteration, all of the edges that are connected to the selected `winner' node are incremented in age. The age of an edge is reset when it is the edge between the primary and secondary winner for any given iteration. Edges are removed when they exceed some threshold age. This normal edge age does well with what it was originally designed to do: remove edges when they are not between similar enough nodes, where similar is defined as distance relative to the distance of other nodes.
 
 \subsubsection{Total Edge Age - Discounting Edges}
 
-Since edge ages are set to zero when they win, we want a sense of how long an edge has existed. Added total age counter that is incremented at each step and is reset when removed.
+An edge with a normal edge age of 0 could mean one of three things. Either the edge was just added or it was just reset or it was added at some time in the past and then was never connected to a winning node and thus was never updated. This is very ambiguous and therefore normal edge age isn't adequate for our needs. We started by defining a sense of total edge age. This is an integer counter which is incremented for each edge every single time step. If an edge is added or re-added its total age starts at 0. This allows us to differentiate between the first and second options. If the edge has been around for a long time and has been constantly updated then its total age will be high. However, if the edge was just added then its edge age will be low. We use this information to discount edges when subgraphs are generated for the object detection and tracking. Young ages are not counted when the subgraph generator traverses graphs to generate objects. The reasoning for this is that old edges have a much better chance of representing a strong connection internal to an object where young edges are likely to be temporary connections made by choosing some noisy input point. TODO: Before/After Picture
 
 \subsubsection{Edge Last Updated - Removing old Edges}
 
-\subsubsection{Edge History - How close nodes were in history}
+Even with total edge age it is ambiguous how long an edge has been around for in terms of physical time. This is important once images begin to be dynamic instead of static. If a webcam is providing 30 frames per second then an edge that was added 5 seconds ago isn't useful if it hasn't been updated. In this case even the total edge age can't provide the necessary information. There is the possibility that it was an edge that had lasted for a long time and thus had an old total age but then the scene switched quickly (lights were turned on, something fell in front of the camera) and the nodes that the edge was connected to were no longer updated. This caused the appearance of `ghost structures' that were left behind when the scene changed. To account for this a last updated parameter was added to the each edge. The GNG itself keeps track of how many seconds it has been since it was started. Each time an edge is modified it resets its last updated parameter to the current runtime of the GNG. Each time step the GNG checks for ages that haven't been updated in a set amount of time (usually around 5 seconds) and begins to remove them one at a time. TODO: Before/After pictures with ghost structures.
+
+\subsubsection{Edge History}
+
+One other value to track that is implemented in Aging but is currently not used for anything is a sense of edge history. This provides a per-edge counter that is incremented every time step when an edge is present between two nodes. If an edge is present for a while, then is removed but is subsequently re-added the counter remains intact. This is implemented using a hash table, hashing on the unique ids of the two nodes that the edge connects. A possible future use for this counter is to give a sense of how close nodes were throughout the history of the GNG. If nodes were close to each other there is a good chance that an edge would exist between them and thus the edge history would be high.
 
 \subsection{Domain Specific Changes}
 
