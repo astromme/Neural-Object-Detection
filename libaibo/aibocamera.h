@@ -4,11 +4,11 @@
 #include <QWidget>
 #include <QPixmap>
 
-class AiboCam : public QWidget {
+class AiboCamera : public QWidget {
   Q_OBJECT
   public:
-    AiboCam(QWidget* parent=0);
-    virtual ~AiboCam();
+    AiboCamera(QWidget* parent=0);
+    virtual ~AiboCamera();
     
   public slots:
     void updateImage(QImage image);

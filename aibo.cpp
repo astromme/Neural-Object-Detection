@@ -45,13 +45,13 @@ int main(int argc, char* argv[]) {
   GrowingNeuralGas gng(5);
   
   GngViewer viewer;
-  viewer.setSize(416, 320);
+  viewer.setSize(832, 640);
   viewer.setGng(&gng);
   viewer.show();
   
   AiboSource aibo(QString::fromStdString(popts.hostname));
-  AiboFocus aibofocus(&gng, &aibo);
-  aibofocus.setColor(QColor(Qt::black));
+//   AiboFocus aibofocus(&gng, &aibo);
+//   aibofocus.setColor(QColor(Qt::black));
   
   QObject::connect(&aibo, SIGNAL(cameraFrame(QImage)),
                    &viewer, SLOT(setImage(QImage)));

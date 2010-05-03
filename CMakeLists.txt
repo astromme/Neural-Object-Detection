@@ -34,15 +34,13 @@ qt4_wrap_cpp(gng_imageviewer_mocs gngviewer.h)
 add_library(gngviewer SHARED gngviewer.cpp ${gng_imageviewer_mocs})
 target_link_libraries(gngviewer gng aibo ${QT_LIBRARIES})
 
+add_executable(aibocam aibocam.cpp)
+target_link_libraries(aibocam aibo ${QT_LIBRARIES})
+
 qt4_wrap_ui(aiboremote_ui aiboremote.ui)
 qt4_wrap_cpp(aiboremote_moc aiboremote.h)
 add_executable(aiboremote aiboremote.cpp ${aiboremote_ui} ${aiboremote_moc})
 target_link_libraries(aiboremote aibo ${QT_LIBRARIES})
-
-#qt4_wrap_ui(aibocam_ui aibocam.ui)
-qt4_wrap_cpp(aibocam_moc aibocam.h)
-add_executable(aibocam aibocam.cpp ${aibocam_moc})
-target_link_libraries(aibocam aibo ${QT_LIBRARIES})
 
 add_executable(gng-image ${gng_image_sources})
 target_link_libraries(gng-image gng gngviewer ${QT_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})

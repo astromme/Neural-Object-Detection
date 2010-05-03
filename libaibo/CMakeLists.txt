@@ -10,11 +10,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(libaibo_sources
     aibo.cpp
     aibocontrol.cpp
+    aibocamera.cpp
         )
 
 set(libaibo_headers
     aibo.h
     aibocontrol.h
+    aibocamera.h
     )
 
 qt4_wrap_cpp(libaibo_mocs ${libaibo_headers})
