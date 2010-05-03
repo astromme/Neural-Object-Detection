@@ -95,18 +95,24 @@ Because of the incremental nature of our modifications to the GNG we needed a so
 
 Since edge ages are set to zero when they win, we want a sense of how long an edge has existed. Added total age counter that is incremented at each step and is reset when removed.
 
-\subsubsection{Removing Edges that are too old}
+\subsubsection{Normal Edge Age - Removing Edges}
+\subsubsection{Total Edge Age - Discounting Edges}
+\subsubsection{Edge History - How close nodes were in history}
+\subsubsection{Edge Last Updated - Removing old Edges}
+\subsubsection{Node Insertions - Not too often. Only when error is high}
 
-\subsubsection{Not counting edges that are too young}
+\subsection{Domain Specific Changes}
 
-\subsection{Color Barrier Across Object Boundaries (RC -- Draft)}
+\subsubsection{XYDist VS ColorDist VS Dist}
+\subsubsection{Focus}
+
+\subsubsection{Color Barrier Across Object Boundaries (RC -- Draft)}
 
 %If color difference is too great between two nodes, don't add an edge. Since we describe objects in terms of their color, makes sense.
 Even with the modifications described above, experiments showed that the GNG was still adding an large number of edges between nodes that were right along the boundary edges of objects. For example, if the GNG were categorizing a scene with a black wallet against an off-white wall, a node from the foreground and from the background would often be connected since they were very close in distance. To solve this problem, a check was put in place each time an edge was to be added or the age of an existing edge was to be reset. The hues of the nodes are compared, and if their difference is greater than a specified value the edges are not created. Through experimentation we found that a good threshold value is 0.1, which corresponds to a 36 point difference in the 360-degree hue space. As a rough heuristic, this is about half way between any two consecutive bands of the color strip ({\bf reference color strip below? put this section below Methods?})
 
 After implementing this change, we quickly saw our graph dwindle down to a size of zero. Since the early stages of the GNG consist of creating nodes between spaces that almost always differ in hue values greater than the threshold, very few or no nodes were being created. We resolved that this processing step had to be applied only once the GNG was more developed. This led to the additional check of average error against the target error. If average error is above target error, nodes are no longer being added to the graph, so it is safe to either disallow connections or the resetting of age (which can lead to an edge's removal). With this additional condition, results improved markedly. Edges between objects were much better defined and subgraphs representing each object were more likely to remain disjoint. ({\bf add image showing the difference?})
 
-\subsection{More stuff, I think\dots}
 
 \section{Object Tracking (RC -- Draft)}
 
