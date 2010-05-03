@@ -91,14 +91,20 @@ Because of the incremental nature of our modifications to the GNG we needed a so
 
 \section{Modifications to Growing Neural Gas}
 
-\subsection{Aging Growing Neural Gas (AGiNG) (AS)}
+\subsection{Aging Growing Neural Gas (AGiNG)}
+
+We have identified a few limitations with the original Growing Neural Gas algorithm. Most of these limitations are exposed when the input image data changes over time. These important considerations for our problem domain and it is important to address these. Each will be discussed separately along with the modifications to the core GNG that resolve or alleviate the issue at hand. The sum of these small changes significantly changes how the GNG adds and removes nodes and edges and how it categorizes its input space. We introduce our new type of GNG outfitted with these changes as AGiNG. AGiNG is designed to provide the standard GNG with information regarding the history of nodes and edges. It is composed of a number of small modifications which will be discussed individually in subsequent sections.
+
+\subsubsection{Normal Edge Age - Removing Edges}
+
+\subsubsection{Total Edge Age - Discounting Edges}
 
 Since edge ages are set to zero when they win, we want a sense of how long an edge has existed. Added total age counter that is incremented at each step and is reset when removed.
 
-\subsubsection{Normal Edge Age - Removing Edges}
-\subsubsection{Total Edge Age - Discounting Edges}
 \subsubsection{Edge History - How close nodes were in history}
+
 \subsubsection{Edge Last Updated - Removing old Edges}
+
 \subsubsection{Node Insertions - Not too often. Only when error is high}
 
 \subsection{Domain Specific Changes}
