@@ -205,15 +205,39 @@ In general, we found that computer generated images (both static and moving) wer
 
 % Easy. Real and Computer-generated
 
-The key aspect of static images is the categorization task the GNG is tackling is not time sensitive. Thus these tests were a great tool to incrementally check whether or not our GNG was on the right path towards correctly identifying objects in the scene. Figure \ref{fig:rgbStatic} depicts a simple image generating using GIMP\footnote{The GNU Image Manipulation Program, \url{http://www.gimp.org}} with three colored blocks (red, green, and blue) on a white background. We see that four disjoint subgraphs have formed, one for each object and another for the background. These subgraphs form very quickly (5,000 cycles or just over one second) and stay disjoint over time. 
+The key aspect of static images is the categorization task the GNG is tackling is not time sensitive. Thus these tests were a great tool to incrementally check whether or not our GNG was on the right path towards correctly identifying objects in the scene. Figure \ref{fig:rgbStatic} depicts a simple image generating using GIMP\footnote{The GNU Image Manipulation Program, \url{http://www.gimp.org}} with three colored blocks (red, green, and blue) on a white background. We see that four disjoint subgraphs have formed, one for each object and another for the background. These subgraphs form very quickly (10,000 cycles or less than one second) and stay disjoint over time. 
 
 \begin{figure}[h!]
   \begin{center}
-    %\includegraphics{<+file+>}
+    \includegraphics[width=0.5\textwidth]{rgb_static.png}
   \end{center}
   \caption{Computer-generated static image with red, green, and blue blocks on a white background. GNG quickly and correctly categorizes image.}
   \label{fig:rgbStatic}
-\end{figure}<++>
+\end{figure}
+
+The pictures below (figure \ref{fig:1-4papers}) contain the GNG trying to categorize one, two, three, and four sheets of purple paper on a tan table background. As we see, with the GNG set on reasonable default settings ({\bf see Apendix \ref{appendix:staticImgParams}}), the first three images are categorized very accurately. Indeed, the GNG very quickly distinguishes between background and foreground images and correctly identifies distinct sheets of paper. 
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.45\textwidth]{paper1.png}
+    \includegraphics[width=0.45\textwidth]{paper2.png}
+    \includegraphics[width=0.45\textwidth]{paper3.png}
+    \includegraphics[width=0.45\textwidth]{paper4.png}
+  \end{center}
+  \caption{GNG categorizing one, two, three, and four sheets of purple paper on a table.}
+  \label{fig:1-4papers}
+\end{figure}
+
+The final image with four sheets, however, is not correctly categorized. The GNG contains only two disjoint subgraphs instead of five. The table is correctly identified, but all four sheets of paper are part of the same subgraph. We show the result after 10,000 iterations, but given any number of iterations the graph's basic structure does not change. This is the result of the target error being too high so the GNG does not need add more nodes to better fit the object space. We expect that lowering the target error will cause the GNG to create more nodes and better categorize the space. In \ref{fig:paper4_lowerror} we lower the target error from 0.05~to~0.01 and we see a marked improvement. The image on left the represents the GNG after 10,000 iterations (the same number of iterations as before). We see the GNG is beginning to create disjoint subgraphs but has not yet accurately categorized the object space. After 20,000 iterations, however, the GNG has fully and correctly broken the image up into five distinct subgraphs that we can track. Thus, by lowering the target error we can more accurately describe a space, but it comes with a time cost. 
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.45\textwidth]{paper4_lowerror10000steps.png}
+    \includegraphics[width=0.45\textwidth]{paper4_lowerror20000steps.png}
+  \end{center}
+  \caption{GNG correctly categorizing four sheets of paper with adjusted error.}
+  \label{fig:paper4_lowerror}
+\end{figure}
 
 \subsection{Moving Images}
 
@@ -236,5 +260,9 @@ No sense of edges or depth, so we perform poorly on complex, busy images. Exampl
   \item make error more precise as time goes on if not enough subgraphs
   \item more robust AIBO object-following mechanisms
 \end{itemize}
+
+\appendix
+\section{Default Parameters for Static Images}
+\label{appendix:staticImgParams}
 
 \end{document}
