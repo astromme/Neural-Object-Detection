@@ -70,6 +70,11 @@ class GrowingNeuralGas : public QThread {
   signals:
     void updated();    
     
+  public slots:
+    void pause();
+    void resume();
+    void togglePause();
+    
   private:
     virtual void run();
     int currentCycles;
@@ -118,6 +123,7 @@ class GrowingNeuralGas : public QThread {
     int m_min;
     int m_max;
     int m_stepCount;
+    bool m_paused;
     
     int m_delay;
     int m_updateInterval;

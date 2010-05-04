@@ -4,11 +4,13 @@
 #include <libgng/gng.h>
 #include <libgng/node.h>
 #include <libgng/edge.h>
+#include <libgng/camerasource.h>
 
 #include <QPainter>
 #include <QDebug>
 #include <QApplication>
-#include "libgng/camerasource.h"
+#include <QKeyEvent>
+
 
 GngViewer::GngViewer(QWidget* parent)
   : QWidget(parent)
@@ -104,7 +106,9 @@ void GngViewer::paintEvent(QPaintEvent* e)
   }
   
   // make sure the GNG doesn't change the nodes/subgraphs/edges while we're painting
-  m_gng->mutex()->lock();
+  while (!m_gng->mutex()->tryLock(5)) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents, 5);
+  }
   painter.save();
   painter.setPen(Qt::NoPen);
   
@@ -199,6 +203,22 @@ void GngViewer::paintEvent(QPaintEvent* e)
   drawTextInFrame(&painter, QPoint(5, 34), QString("%L1s").arg((qreal)m_gng->elapsedTime()/1000, 0, 'f', 2));
   
   m_gng->mutex()->unlock();
+}
+
+void GngViewer::keyPressEvent(QKeyEvent* e)
+{
+  if (e->key() == Qt::Key_Space) {
+    e->accept();
+  }
+}
+void GngViewer::keyReleaseEvent(QKeyEvent* e)
+{
+  if (e->key() == Qt::Key_Space) {
+    if (m_gng) {
+      qDebug() << "toggle playpause";
+      m_gng->togglePause();
+    }
+  }
 }
 
           

@@ -24,6 +24,8 @@ class GngViewer : public QWidget {
     
   protected:
     virtual void paintEvent(QPaintEvent* e);
+    virtual void keyPressEvent(QKeyEvent* e);
+    virtual void keyReleaseEvent(QKeyEvent* e);
     
   private:
     qreal unNormalize(qreal value, qreal maxValue);

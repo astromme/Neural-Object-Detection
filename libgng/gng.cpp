@@ -36,6 +36,8 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   m_min = minimum;
   m_max = maximum;
   
+  m_paused = false;
+  
   //The GNG always begins with two randomly placed units.
   m_nodes.append(new GngNode(Point(), dimension, minimum, maximum));
   m_nodes.append(new GngNode(Point(), dimension, minimum, maximum));
@@ -441,6 +443,12 @@ void GrowingNeuralGas::run()
     }
     m_dataAccess->lock();
     
+    while (m_paused) {
+      m_dataAccess->unlock();
+      usleep(10000);
+      m_dataAccess->lock();
+    }
+    
     if (m_stepCount % m_updateInterval == 0) {
       emit updated();
     }
@@ -455,6 +463,26 @@ void GrowingNeuralGas::run()
     m_dataAccess->unlock();
     
   }
+}
+
+void GrowingNeuralGas::pause()
+{
+  m_dataAccess->lock();
+  m_paused = true;
+  m_dataAccess->unlock();
+}
+void GrowingNeuralGas::resume()
+{
+  m_dataAccess->lock();
+  m_paused = false;
+  m_dataAccess->unlock();
+}
+
+void GrowingNeuralGas::togglePause()
+{
+  m_dataAccess->lock();
+  m_paused = !m_paused;
+  m_dataAccess->unlock();
 }
 
 QList< Subgraph > GrowingNeuralGas::subgraphs() const
