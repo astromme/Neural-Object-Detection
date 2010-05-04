@@ -14,7 +14,8 @@
 GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   : currentCycles(0),
     m_pointGenerator(0),
-    m_pickCloseToCountdown(0)
+    m_pickCloseToCountdown(0),
+    m_runtime(0)
 {
   m_dataAccess = new QMutex(QMutex::Recursive);
   
@@ -62,6 +63,9 @@ QString GrowingNeuralGas::toString()
 
 int GrowingNeuralGas::elapsedTime() const
 {
+  if (m_runtime != -1) {
+    return m_runtime;
+  }
   return m_timer.elapsed();
 }
 
@@ -425,6 +429,7 @@ void GrowingNeuralGas::run()
   Q_ASSERT(m_pointGenerator->dimension() == m_dimension);
   
   m_timer.start(); // time milliseconds since gng was created
+  m_runtime = -1;
   
   // sleep(5); // sleep for 5 seconds to get the aibo going
   
@@ -463,6 +468,7 @@ void GrowingNeuralGas::run()
     m_dataAccess->unlock();
     
   }
+  m_runtime = m_timer.elapsed();
 }
 
 void GrowingNeuralGas::pause()

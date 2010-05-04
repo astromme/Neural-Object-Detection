@@ -150,6 +150,7 @@ class GrowingNeuralGas : public QThread {
     QHash<NodePair, int> m_edgeHistory;
     
     QTime m_timer;
+    int m_runtime;
 
     QList<Subgraph> m_subgraphs;
     Subgraph m_followSubgraph;
