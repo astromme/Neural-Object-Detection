@@ -3,6 +3,8 @@
 
 #include "math.h"
 
+using namespace GNG;
+
 qreal Point::distanceTo(const Point &other) const {
   qreal dist = 0;
   

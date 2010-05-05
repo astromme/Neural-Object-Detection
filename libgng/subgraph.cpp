@@ -3,6 +3,8 @@
 
 #include <QDebug>
 
+using namespace GNG;
+
 /********************************
  * Function: center
  * ----------------
@@ -19,7 +21,7 @@ Point Subgraph::center()
   x = y = hue = saturation = lightness = 0;
  
   Point pt;
-  foreach (GngNode* node, *this){
+  foreach (GNG::Node* node, *this){
     pt = node->location();
     x += pt[0];
     y += pt[1];

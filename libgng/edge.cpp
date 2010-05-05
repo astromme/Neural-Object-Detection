@@ -1,9 +1,11 @@
 
 #include "edge.h"
 
+using namespace GNG;
+
 static int currentId = 0;
 
-Edge::Edge(GngNode* from, GngNode* to)
+Edge::Edge(GNG::Node* from, GNG::Node* to)
   : m_id(currentId)
 {
   currentId++;
@@ -23,12 +25,12 @@ int Edge::id() const
   return m_id;
 }
 
-GngNode* Edge::from() const
+GNG::Node* Edge::from() const
 {
   return m_from;
 }
 
-GngNode* Edge::to() const
+GNG::Node* Edge::to() const
 {
   return m_to;
 }

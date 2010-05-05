@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 
+using namespace GNG;
 
 GngViewer::GngViewer(QWidget* parent)
   : QWidget(parent)
@@ -114,7 +115,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
   // Draw subgraph colors behind edges
   foreach(Subgraph s, m_gng->subgraphs()) {
     qreal hue = 0;
-    foreach(GngNode *n, s) {
+    foreach(GNG::Node *n, s) {
       hue += n->location()[2];
     }
     //qreal hue = s.first()->location()[2]; //hue of first point
@@ -127,8 +128,8 @@ void GngViewer::paintEvent(QPaintEvent* e)
     pen.setCapStyle(Qt::RoundCap);
     painter.setPen(pen);
         
-    foreach(GngNode *node, s) {
-      foreach(GngNode *neighbor, node->neighbors()) {
+    foreach(GNG::Node *node, s) {
+      foreach(GNG::Node *neighbor, node->neighbors()) {
         Point p1 = node->location();
         Point p2 = neighbor->location();
         
@@ -167,7 +168,7 @@ void GngViewer::paintEvent(QPaintEvent* e)
   }
   
   // Draw the nodes
-  foreach(GngNode *node, m_gng->nodes()) {
+  foreach(GNG::Node *node, m_gng->nodes()) {
     Point p = node->location();
     
     p[0] = unNormalize(p[0], m_width);

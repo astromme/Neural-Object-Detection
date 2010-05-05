@@ -10,6 +10,8 @@
 #include <QDebug>
 #include <QHash>
 
+using namespace GNG;
+
 // constructor
 GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   : m_pointGenerator(0),
@@ -38,8 +40,8 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   m_max = maximum;
   
   //The GNG always begins with two randomly placed units.
-  m_nodes.append(new GngNode(Point(), dimension, minimum, maximum));
-  m_nodes.append(new GngNode(Point(), dimension, minimum, maximum));
+  m_nodes.append(new GNG::Node(Point(), dimension, minimum, maximum));
+  m_nodes.append(new GNG::Node(Point(), dimension, minimum, maximum));
 
   m_uniqueEdges = QList<Edge*>();
   
@@ -97,7 +99,7 @@ void GrowingNeuralGas::runSingleStep()
     qDebug() << "Step " << m_currentStep;
   }
   
-  QPair<GngNode*, GngNode*> winners = computeDistances(trainingPoint);
+  QPair<GNG::Node*, GNG::Node*> winners = computeDistances(trainingPoint);
   incrementEdgeAges(winners.first);
   
   // if the point is already the right color, don't touch it by moving its xy position all over the place.
@@ -110,7 +112,7 @@ void GrowingNeuralGas::runSingleStep()
     winners.first->moveTowards(trainingPoint, m_winnerLearnRate);
   }
   
-  foreach(GngNode *node, winners.first->neighbors()) {
+  foreach(GNG::Node *node, winners.first->neighbors()) {
     node->moveTowards(trainingPoint, m_neighborLearnRate);
   }
 
@@ -217,27 +219,27 @@ int GrowingNeuralGas::elapsedTime() const
 
 
 // sort function used by qSort in gng.cpp 
-typedef QPair<qreal, GngNode*> DistNodePair;
+typedef QPair<qreal, GNG::Node*> DistNodePair;
 bool pairLessThan(const DistNodePair &s1, const DistNodePair &s2)
 {
     return s1.first < s2.first;
 }
    
 // see header
-QPair< GngNode*, GngNode* > GrowingNeuralGas::computeDistances(const Point& point)
+QPair< GNG::Node*, GNG::Node* > GrowingNeuralGas::computeDistances(const Point& point)
 {
   QList<DistNodePair> dists;
   
-  foreach(GngNode *node, m_nodes) {
+  foreach(GNG::Node *node, m_nodes) {
     dists.append(DistNodePair(node->location().distanceTo(point), node));
   }
   qSort(dists.begin(), dists.end(), pairLessThan);
 
-  return QPair<GngNode*, GngNode*>(dists[0].second, dists[1].second);
+  return QPair<GNG::Node*, GNG::Node*>(dists[0].second, dists[1].second);
 }
 
 // increments all edges of a node
-void GrowingNeuralGas::incrementEdgeAges(GngNode* node)
+void GrowingNeuralGas::incrementEdgeAges(GNG::Node* node)
 {
   int currentTime = m_currentRuntime.elapsed();
   foreach(Edge* edge, node->edges()) {
@@ -254,12 +256,12 @@ void GrowingNeuralGas::incrementEdgeHistory()
 
   bool deletedAnEdge = false; // delete at most one edge per function call
 
-  foreach(GngNode* node, m_nodes) {
+  foreach(GNG::Node* node, m_nodes) {
     foreach(Edge* edge, node->edges()) {
       if (!deletedAnEdge && (currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
         qDebug() << "removing edge that has been here for" << (currentTime - edge->lastUpdated()) << "ms" << edge->id();
-        GngNode *n1 = edge->to();
-        GngNode *n2 = edge->from();
+        GNG::Node *n1 = edge->to();
+        GNG::Node *n2 = edge->from();
         
         Edge *e1 = n1->getEdgeTo(n2);
         Edge *e2 = n2->getEdgeTo(n1);
@@ -291,7 +293,7 @@ void GrowingNeuralGas::incrementEdgeHistory()
  * Adds edges between two nodes. Since bidirectional edges in graph are
  * represented as two directed edges, we have to connect a-->b and b-->a
  */
-void GrowingNeuralGas::connectNodes(GngNode* a, GngNode* b)
+void GrowingNeuralGas::connectNodes(GNG::Node* a, GNG::Node* b)
 {
   Edge* e1 = new Edge(a, b);
   Edge* e2 = new Edge(b, a);
@@ -312,7 +314,7 @@ void GrowingNeuralGas::connectNodes(GngNode* a, GngNode* b)
  * Removes edges between two nodes. Since bidirectional edges in graph are
  * represented as two directed edges, we have to remove a-->b and b-->a
  */
-void GrowingNeuralGas::disconnectNodes(GngNode* a, GngNode* b)
+void GrowingNeuralGas::disconnectNodes(GNG::Node* a, GNG::Node* b)
 {
   Edge *e1 = a->getEdgeTo(b);
   Edge *e2 = b->getEdgeTo(a);
@@ -333,7 +335,7 @@ void GrowingNeuralGas::disconnectNodes(GngNode* a, GngNode* b)
 void GrowingNeuralGas::removeOldEdges()
 {
   // remove edges
-  foreach(GngNode *node, m_nodes) {
+  foreach(GNG::Node *node, m_nodes) {
     foreach(Edge *edge, node->edges()) {
       if (edge->age() > m_maxEdgeAge) {
         m_uniqueEdges.removeAll(edge);
@@ -345,7 +347,7 @@ void GrowingNeuralGas::removeOldEdges()
 
   // remove nodes
   for (int i=m_nodes.length()-1; i>=0; i--) {
-    GngNode *node = m_nodes[i];
+    GNG::Node *node = m_nodes[i];
     if (node->edges().isEmpty()) {
       m_nodes.removeAll(node);
       delete node;
@@ -354,10 +356,10 @@ void GrowingNeuralGas::removeOldEdges()
 }
 
 // get node with the highest error
-GngNode* GrowingNeuralGas::maxErrorNode(QList< GngNode* > nodeList)
+GNG::Node* GrowingNeuralGas::maxErrorNode(QList< GNG::Node* > nodeList)
 {
-  GngNode* highestError = nodeList.first();
-  foreach(GngNode *node, nodeList) {
+  GNG::Node* highestError = nodeList.first();
+  foreach(GNG::Node *node, nodeList) {
     if (node->error() > highestError->error()) {
       highestError = node;
     }
@@ -369,7 +371,7 @@ GngNode* GrowingNeuralGas::maxErrorNode(QList< GngNode* > nodeList)
 qreal GrowingNeuralGas::averageError()
 {
   qreal error = 0;
-  foreach(GngNode *node, m_nodes) {
+  foreach(GNG::Node *node, m_nodes) {
     error += node->error();
   }
   return error/m_nodes.length();
@@ -389,11 +391,11 @@ Point midpoint(const Point &p1, const Point &p2) {
 // see header
 void GrowingNeuralGas::insertNode()
 {
-  GngNode *worst = maxErrorNode(m_nodes);
-  GngNode *worstNeighbor = maxErrorNode(worst->neighbors());
+  GNG::Node *worst = maxErrorNode(m_nodes);
+  GNG::Node *worstNeighbor = maxErrorNode(worst->neighbors());
   
   Point newPoint = midpoint(worst->location(), worstNeighbor->location());
-  GngNode *newNode = new GngNode(newPoint, m_dimension, m_min, m_max);
+  GNG::Node *newNode = new GNG::Node(newPoint, m_dimension, m_min, m_max);
   m_nodes.append(newNode);
 
   connectNodes(newNode, worst);
@@ -410,7 +412,7 @@ void GrowingNeuralGas::insertNode()
 // to bias the node insertion towards recently updated points
 void GrowingNeuralGas::reduceAllErrors()
 {
-  foreach(GngNode *node, m_nodes) {
+  foreach(GNG::Node *node, m_nodes) {
     node->setError(node->error() * m_reduceErrorMultiplier);
   }
 }
@@ -430,9 +432,9 @@ QList< Subgraph > GrowingNeuralGas::subgraphs() const
  */
 void GrowingNeuralGas::generateSubgraphs()
 {
-  QHash<GngNode*, bool> nodeDict;
+  QHash<GNG::Node*, bool> nodeDict;
 
-  foreach(GngNode* node, m_nodes){
+  foreach(GNG::Node* node, m_nodes){
     nodeDict.insert(node, true);
   }
   //
@@ -443,12 +445,12 @@ void GrowingNeuralGas::generateSubgraphs()
     Subgraph searchList;
 
     // get node in dictionary
-    GngNode* initNode = nodeDict.begin().key();
+    GNG::Node* initNode = nodeDict.begin().key();
 
     searchList.append(initNode);
     while (!searchList.empty()){
       // remove current node from search list
-      GngNode* searchNode = searchList.takeFirst();
+      GNG::Node* searchNode = searchList.takeFirst();
 
       // add node to subgraph since we can reach it
       subgraph.append(searchNode);
@@ -457,8 +459,8 @@ void GrowingNeuralGas::generateSubgraphs()
       nodeDict.remove(searchNode);
 
       // add all neighbors that can be reached and have not been visited
-      QList<GngNode*> neighbors = searchNode->neighbors();
-      foreach (GngNode* node, neighbors){
+      QList<GNG::Node*> neighbors = searchNode->neighbors();
+      foreach (GNG::Node* node, neighbors){
         // Breadth First Search
         // Ignore edges less than 2000 steps old
         if (nodeDict.contains(node) && (searchNode->getEdgeTo(node)->totalAge() > 2000)){ //TODO make configurable
@@ -509,7 +511,7 @@ void GrowingNeuralGas::matchingSubgraph(){
 
   foreach(Subgraph cur_subgraph, subgraphs){
     count = 0;
-    foreach(GngNode* check_node, cur_subgraph){
+    foreach(GNG::Node* check_node, cur_subgraph){
       if (exemplar.contains(check_node)){
         count++;
       }
@@ -552,7 +554,7 @@ void GrowingNeuralGas::assignFollowSubgraph(QColor targetColor)
   int indexOfBestMatch = 0; // index in m_subgraphs of best HSL match
   qreal avgH, avgR, avgL;
   for (int i=0; i<m_subgraphs.size(); i++){
-    foreach (GngNode* node, m_subgraphs[i]){
+    foreach (GNG::Node* node, m_subgraphs[i]){
       curDist = node->location().colorDistanceTo(exemplar);
       if (curDist < bestColorDistance){
         indexOfBestMatch = i;
@@ -587,7 +589,7 @@ void GrowingNeuralGas::printSubgraphs(bool printNodes) const
     
     // only print node details out if user asks for it
     if (printNodes){
-      foreach(GngNode* node, subgraphs[i]){
+      foreach(GNG::Node* node, subgraphs[i]){
         qDebug() << " " << node->toString();
       }
     }
@@ -601,7 +603,7 @@ Subgraph GrowingNeuralGas::followSubgraph() const
 
 
 // accessors
-QList< GngNode* > GrowingNeuralGas::nodes() const
+QList< GNG::Node* > GrowingNeuralGas::nodes() const
 {
   return m_nodes;
 }

@@ -17,7 +17,7 @@
 class AiboFocus : QObject {
   Q_OBJECT
   public:
-    AiboFocus(GrowingNeuralGas* gng, Aibo* aibo);
+    AiboFocus(GNG::GrowingNeuralGas* gng, Aibo* aibo);
     ~AiboFocus();
     void setColor(QColor focusColor);
     
@@ -25,7 +25,7 @@ class AiboFocus : QObject {
     void followObject();
     
   private:
-    GrowingNeuralGas* m_gng;
+    GNG::GrowingNeuralGas* m_gng;
     AiboControl* m_aibo;    
     QColor m_focusColor;
     QTimer m_timer;

@@ -13,6 +13,7 @@
 
 namespace po=boost::program_options;
 using std::string;
+using namespace GNG;
     
 void setUpdateInterval(int steps); /**< Emit signal updated() once per this number of steps */
     

@@ -1,5 +1,7 @@
 #include "aibofocus.h"
 
+using namespace GNG;
+
 // constructor
 AiboFocus::AiboFocus(GrowingNeuralGas* gng, Aibo* aibo) 
   : m_gng(gng),

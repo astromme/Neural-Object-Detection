@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QColor>
 
+using namespace GNG;
+
 static QImage IplImageToQImage(const IplImage  *iplImage, uchar **data , bool mirroRimage = true );
 
 CameraSource::CameraSource()
