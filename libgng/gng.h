@@ -13,14 +13,14 @@ class PointSource;
 #include <QList>
 #include <QHash>
 #include <QString>
-#include <QThread>
-#include <QMutex>
+#include <QObject>
 #include <QDateTime>
 #include <QColor>
+#include <QTimer>
 
 typedef QPair<GngNode*, GngNode*> NodePair;
 
-class GrowingNeuralGas : public QThread {
+class GrowingNeuralGas : public QObject {
   Q_OBJECT
  
   public:
@@ -31,8 +31,6 @@ class GrowingNeuralGas : public QThread {
     int elapsedTime() const;
     
     void setPointGenerator(PointSource *pointGenerator);
-    void run(int cycles);
-    void synchronousRun(int cycles);
 
     QList<Subgraph> subgraphs() const;
     void generateSubgraphs();
@@ -46,7 +44,9 @@ class GrowingNeuralGas : public QThread {
     QList<GngNode*> nodes() const;
     QList<Edge*> uniqueEdges() const;
     
-    int step() const; /**< Returns the current step of the computation. Reset when run() or runSynchronous() is called */
+    int currentStep() const; /**< Returns the current step of the computation. Reset when run() or runSynchronous() is called */
+    
+    void stopAt(int step);
 
     Point focusPoint() const;
     bool focusing() const;
@@ -65,21 +65,21 @@ class GrowingNeuralGas : public QThread {
     void setErrorReduction(qreal reduceErrorBy); /**< All errors are reduced by this amount each GNG step */
     void setInsertErrorReduction(qreal reduceErrorBy); /**< Reduce new unit's error by this much */
     
-    QMutex* mutex() const;
     
   signals:
     void updated();    
     
   public slots:
-    void pause();
-    void resume();
+    void start();
+    void stop();
     void togglePause();
     
+  private slots:
+    void runManySteps(int steps=1);
+    void runSingleStep();
+    
   private:
-    virtual void run();
-    int currentCycles;
     PointSource *m_pointGenerator;
-    QMutex *m_dataAccess;
     
     /** Computes the distances between the given point and every unit
         in the GNG.  Returns the closest and next closest units. */
@@ -122,8 +122,11 @@ class GrowingNeuralGas : public QThread {
     int m_dimension;
     int m_min;
     int m_max;
-    int m_stepCount;
-    bool m_paused;
+    
+    int m_currentStep;
+    int m_stopAtStep;
+    bool m_running;
+    QTimer m_idleTimer;
     
     int m_delay;
     int m_updateInterval;
@@ -149,8 +152,8 @@ class GrowingNeuralGas : public QThread {
     
     QHash<NodePair, int> m_edgeHistory;
     
-    QTime m_timer;
-    int m_runtime;
+    QTime m_currentRuntime;
+    int m_pastRuntime;
 
     QList<Subgraph> m_subgraphs;
     Subgraph m_followSubgraph;

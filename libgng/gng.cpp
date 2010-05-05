@@ -12,12 +12,12 @@
 
 // constructor
 GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
-  : currentCycles(0),
-    m_pointGenerator(0),
+  : m_pointGenerator(0),
     m_pickCloseToCountdown(0),
-    m_runtime(0)
+    m_stopAtStep(0),
+    m_pastRuntime(0),
+    m_running(false)
 {
-  m_dataAccess = new QMutex(QMutex::Recursive);
   
   // Hardcoded values from paper
   m_dimension = dimension;
@@ -29,15 +29,13 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   setNodeInsertionDelay(50);
   m_stepsSinceLastInsert = m_minStepsBetweenInsertions + 1;
   setInsertErrorReduction(0.5);
-  m_stepCount = 0;
+  m_currentStep = 0;
   setTargetError(0.001); // TODO was 0.1
   setDelay(0);
   setUpdateInterval(5000);
   
   m_min = minimum;
   m_max = maximum;
-  
-  m_paused = false;
   
   //The GNG always begins with two randomly placed units.
   m_nodes.append(new GngNode(Point(), dimension, minimum, maximum));
@@ -46,63 +44,175 @@ GrowingNeuralGas::GrowingNeuralGas(int dimension, qreal minimum, qreal maximum)
   m_uniqueEdges = QList<Edge*>();
   
   connectNodes(m_nodes[0], m_nodes[1]);
+  
+  // Set timeout to 0, meaning that whenever there are no other
+  // events this will get called. Allows for idle processing
+  m_idleTimer.setInterval(0);
+  connect(&m_idleTimer, SIGNAL(timeout()), SLOT(runSingleStep()));
 }
 
 // destructor
 GrowingNeuralGas::~GrowingNeuralGas()
 {
-  delete m_dataAccess;
 }
+
+void GrowingNeuralGas::start()
+{
+  if (m_running) {
+    return;
+  }
+  m_idleTimer.start();
+  m_currentRuntime.start();
+  m_running = true;
+}
+void GrowingNeuralGas::stop()
+{
+  if (!m_running) {
+    return;
+  }
+  m_idleTimer.stop();
+  m_pastRuntime += m_currentRuntime.elapsed();
+  m_running = false;
+}
+void GrowingNeuralGas::togglePause()
+{
+  m_running ? stop() : start();
+}
+void GrowingNeuralGas::stopAt(int step)
+{
+  m_stopAtStep = step;
+}
+// Perform one iteration of the GNG with the given source/traning point
+// The gng will find the two closest nodes, move them closer to the training
+// point and then possibly add new nodes.
+void GrowingNeuralGas::runSingleStep()
+{
+  if (m_currentStep == m_stopAtStep) {
+    return stop();
+  }
+  
+  Point trainingPoint = m_pointGenerator->generatePoint();
+
+  if (m_currentStep % 10000 == 0) {
+    qDebug() << "Step " << m_currentStep;
+  }
+  
+  QPair<GngNode*, GngNode*> winners = computeDistances(trainingPoint);
+  incrementEdgeAges(winners.first);
+  
+  // if the point is already the right color, don't touch it by moving its xy position all over the place.
+  if (false && 0.01 > winners.first->location().colorDistanceTo(trainingPoint)) {
+    //qDebug() << winners.first->location() << trainingPoint;
+    winners.first->setError(winners.first->error() + 0.1*pow(winners.first->location().distanceTo(trainingPoint), 2));
+    winners.first->moveTowards(trainingPoint, 0.1*m_winnerLearnRate);
+  } else {
+    winners.first->setError(winners.first->error() + pow(winners.first->location().distanceTo(trainingPoint), 2));
+    winners.first->moveTowards(trainingPoint, m_winnerLearnRate);
+  }
+  
+  foreach(GngNode *node, winners.first->neighbors()) {
+    node->moveTowards(trainingPoint, m_neighborLearnRate);
+  }
+
+  // if difference between hues is too great between two nodes, reset ages
+  qreal first_hue = winners.first->location()[2];
+  qreal second_hue = winners.second->location()[2];
+
+  if (averageError() > m_targetError || fabs(first_hue - second_hue) < m_maxEdgeColorDiff){
+    if (winners.first->hasEdgeTo(winners.second)) {
+      winners.first->getEdgeTo(winners.second)->resetAge();
+      winners.second->getEdgeTo(winners.first)->resetAge();
+    } else {
+      connectNodes(winners.first, winners.second);
+    }
+  }
+  
+  // if GNG has not developed enough subgraphs, try lowering the target errorThreshold
+  if (false && m_currentStep > 20000 && m_currentStep % 5000 == 0 && 
+      m_targetError > 0.02){ // && m_subgraphs.size() <= 2){
+    setTargetError(m_targetError-0.01);
+    qDebug() << "It's about that time again...Lowered error to " << m_targetError;
+  }
+ 
+  // TODO remove -- this is super hacky
+/*
+  if (m_stepCount == 10000){
+    generateSubgraphs();
+    QColor targetColor = QColor::fromRgbF(1,0,0).toHsl();
+    //QColor targetColor = QColor::fromRgbF(0,0,1).toHsl();
+    //QColor targetColor = QColor::fromRgbF(0,1,0).toHsl();
+    assignFollowSubgraph(targetColor);
+  }
+  
+  if (m_stepCount > 10000 && m_stepCount % 10000 == 0){
+    generateSubgraphs();
+    matchingSubgraph();
+    Point center = m_followSubgraph.center();
+  }
+*/
+ 
+//   qreal dist = winners.first->location().distanceTo(winners.second->location());
+//   qreal xyDist = winners.first->location().xyDistanceTo(winners.second->location());
+//   if ((averageError() < m_targetError) && (nodes().size() > 4) && (xyDist > 0.2*sqrt(2)*m_max)) {
+//     Point p1 = winners.first->location();
+//     Point p2 = winners.second->location();
+//     qDebug() << "xydist:" << xyDist << "(" << p1[0] << p1[1] << ") (" << p2[0] << p2[1] << ")";
+//     
+//     Edge *e1 = winners.first->getEdgeTo(winners.second);
+//     Edge *e2 = winners.second->getEdgeTo(winners.first);
+//     
+//     if (e1) { e1->setAge(100); }
+//     if (e2) { e2->setAge(100); }
+//   }
+  
+  incrementEdgeHistory();
+  removeOldEdges();
+  
+  if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_minStepsBetweenInsertions)) {
+    qDebug() << "Creating new Node at timestep " << m_currentStep << " and error " << averageError();
+    m_stepsSinceLastInsert = 0;
+    insertNode();
+  }
+  
+  // TODO Make less hacky
+  //qDebug() << "Errors: First:" << winners.first->error() << " and Second:" << winners.second->error();
+//   qreal errorThreshold = 10*m_targetError;
+//   if (m_pickCloseToCountdown > 0) {
+//     m_pickCloseToCountdown--;
+//   } else if ((averageError() < m_targetError) && (winners.second->error() > errorThreshold)) {
+//     //qDebug() << "Picking close to " << trainingPoint;
+//     m_pickCloseTo = trainingPoint;
+//     m_pickCloseToCountdown = 500;
+//   }
+  
+  reduceAllErrors();
+  m_currentStep++;
+  m_stepsSinceLastInsert++;
+}
+
+void GrowingNeuralGas::runManySteps(int steps)
+{
+  for(int i=0; i<steps; i++) {
+    runSingleStep();
+  }
+}
+
+
 
 // converts gng to a string to print out
 QString GrowingNeuralGas::toString()
 {
   return QString("GNG step %1\nNumber of units: %2\nAverage error: %3\n")
-		.arg(m_stepCount).arg(m_nodes.length()).arg(averageError());
+		.arg(m_currentStep).arg(m_nodes.length()).arg(averageError());
 }
 
 int GrowingNeuralGas::elapsedTime() const
 {
-  if (m_runtime != -1) {
-    return m_runtime;
+  if (m_running) {
+    return m_pastRuntime + m_currentRuntime.elapsed();
+  } else {
+    return m_pastRuntime;
   }
-  return m_timer.elapsed();
-}
-
-// Setting Parameters
-void GrowingNeuralGas::setDelay(int milliseconds) {
-  m_delay = milliseconds;
-}
-void GrowingNeuralGas::setUpdateInterval(int steps) {
-  m_updateInterval = steps;
-}
-
-void GrowingNeuralGas::setWinnerLearnRate(qreal learnRate) {
-  m_winnerLearnRate = learnRate;
-}
-void GrowingNeuralGas::setNeighborLearnRate(qreal learnRate) {
-  m_neighborLearnRate = learnRate;
-}
-
-void GrowingNeuralGas::setMaxEdgeColorDiff(qreal diff) {
-  m_maxEdgeColorDiff = diff;
-}
-
-void GrowingNeuralGas::setMaxEdgeAge(int steps) {
-  m_maxEdgeAge = steps;
-}
-void GrowingNeuralGas::setNodeInsertionDelay(int minStepsBetweenInsertions) {
-  m_minStepsBetweenInsertions = minStepsBetweenInsertions;
-}
-void GrowingNeuralGas::setTargetError(qreal targetAverageError) {
-  m_targetError = targetAverageError;
-}
-
-void GrowingNeuralGas::setErrorReduction(qreal reduceErrorBy) {
-  m_reduceErrorMultiplier = 1-reduceErrorBy;
-}
-void GrowingNeuralGas::setInsertErrorReduction(qreal reduceErrorBy) {
-  m_insertErrorMultiplier = 1-reduceErrorBy;
 }
 
 
@@ -129,7 +239,7 @@ QPair< GngNode*, GngNode* > GrowingNeuralGas::computeDistances(const Point& poin
 // increments all edges of a node
 void GrowingNeuralGas::incrementEdgeAges(GngNode* node)
 {
-  int currentTime = m_timer.elapsed();
+  int currentTime = m_currentRuntime.elapsed();
   foreach(Edge* edge, node->edges()) {
     edge->setLastUpdated(currentTime);
     edge->incrementAge();
@@ -140,11 +250,10 @@ void GrowingNeuralGas::incrementEdgeAges(GngNode* node)
 // Updates the history hash for each edge and removes old edges
 void GrowingNeuralGas::incrementEdgeHistory()
 {
-  int currentTime = m_timer.elapsed();
+  int currentTime = m_currentRuntime.elapsed();
 
   bool deletedAnEdge = false; // delete at most one edge per function call
 
-  m_dataAccess->lock();
   foreach(GngNode* node, m_nodes) {
     foreach(Edge* edge, node->edges()) {
       if (!deletedAnEdge && (currentTime - edge->lastUpdated()) > 5000) { // if it's been more than 5 seconds
@@ -173,7 +282,6 @@ void GrowingNeuralGas::incrementEdgeHistory()
       }
     }
   }
-  m_dataAccess->unlock();
 }
 
 
@@ -191,7 +299,7 @@ void GrowingNeuralGas::connectNodes(GngNode* a, GngNode* b)
   a->appendEdge(e1);
   b->appendEdge(e2);
   
-  int currentTime = m_timer.elapsed();
+  int currentTime = m_currentRuntime.elapsed();
   e1->setLastUpdated(currentTime);
   e2->setLastUpdated(currentTime);
   
@@ -307,189 +415,6 @@ void GrowingNeuralGas::reduceAllErrors()
   }
 }
 
-// Perform one iteration of the GNG with the given source/traning point
-// The gng will find the two closest nodes, move them closer to the training
-// point and then possibly add new nodes.
-void GrowingNeuralGas::step(const Point& trainingPoint)
-{
-  if (m_stepCount % 10000 == 0) {
-    qDebug() << "Step " << m_stepCount;
-  }
-  QPair<GngNode*, GngNode*> winners = computeDistances(trainingPoint);
-  incrementEdgeAges(winners.first);
-  
-  // if the point is already the right color, don't touch it by moving its xy position all over the place.
-  if (false && 0.01 > winners.first->location().colorDistanceTo(trainingPoint)) {
-    //qDebug() << winners.first->location() << trainingPoint;
-    winners.first->setError(winners.first->error() + 0.1*pow(winners.first->location().distanceTo(trainingPoint), 2));
-    winners.first->moveTowards(trainingPoint, 0.1*m_winnerLearnRate);
-  } else {
-    winners.first->setError(winners.first->error() + pow(winners.first->location().distanceTo(trainingPoint), 2));
-    winners.first->moveTowards(trainingPoint, m_winnerLearnRate);
-  }
-  
-  foreach(GngNode *node, winners.first->neighbors()) {
-    node->moveTowards(trainingPoint, m_neighborLearnRate);
-  }
-
-  // if difference between hues is too great between two nodes, reset ages
-  qreal first_hue = winners.first->location()[2];
-  qreal second_hue = winners.second->location()[2];
-
-  if (averageError() > m_targetError || fabs(first_hue - second_hue) < m_maxEdgeColorDiff){
-    if (winners.first->hasEdgeTo(winners.second)) {
-      winners.first->getEdgeTo(winners.second)->resetAge();
-      winners.second->getEdgeTo(winners.first)->resetAge();
-    } else {
-      connectNodes(winners.first, winners.second);
-    }
-  }
-  
-  // if GNG has not developed enough subgraphs, try lowering the target errorThreshold
-  if (false && m_stepCount > 20000 && m_stepCount % 5000 == 0 && 
-      m_targetError > 0.02){ // && m_subgraphs.size() <= 2){
-    setTargetError(m_targetError-0.01);
-    qDebug() << "It's about that time again...Lowered error to " << m_targetError;
-  }
- 
-  // TODO remove -- this is super hacky
-/*
-  if (m_stepCount == 10000){
-    generateSubgraphs();
-    QColor targetColor = QColor::fromRgbF(1,0,0).toHsl();
-    //QColor targetColor = QColor::fromRgbF(0,0,1).toHsl();
-    //QColor targetColor = QColor::fromRgbF(0,1,0).toHsl();
-    assignFollowSubgraph(targetColor);
-  }
-  
-  if (m_stepCount > 10000 && m_stepCount % 10000 == 0){
-    generateSubgraphs();
-    matchingSubgraph();
-    Point center = m_followSubgraph.center();
-  }
-*/
- 
-//   qreal dist = winners.first->location().distanceTo(winners.second->location());
-//   qreal xyDist = winners.first->location().xyDistanceTo(winners.second->location());
-//   if ((averageError() < m_targetError) && (nodes().size() > 4) && (xyDist > 0.2*sqrt(2)*m_max)) {
-//     Point p1 = winners.first->location();
-//     Point p2 = winners.second->location();
-//     qDebug() << "xydist:" << xyDist << "(" << p1[0] << p1[1] << ") (" << p2[0] << p2[1] << ")";
-//     
-//     Edge *e1 = winners.first->getEdgeTo(winners.second);
-//     Edge *e2 = winners.second->getEdgeTo(winners.first);
-//     
-//     if (e1) { e1->setAge(100); }
-//     if (e2) { e2->setAge(100); }
-//   }
-  
-  incrementEdgeHistory();
-  removeOldEdges();
-  
-  if (averageError() > m_targetError && (m_stepsSinceLastInsert > m_minStepsBetweenInsertions)) {
-    qDebug() << "Creating new Node at timestep " << m_stepCount << " and error " << averageError();
-    m_stepsSinceLastInsert = 0;
-    insertNode();
-  }
-  
-  // TODO Make less hacky
-  //qDebug() << "Errors: First:" << winners.first->error() << " and Second:" << winners.second->error();
-//   qreal errorThreshold = 10*m_targetError;
-//   if (m_pickCloseToCountdown > 0) {
-//     m_pickCloseToCountdown--;
-//   } else if ((averageError() < m_targetError) && (winners.second->error() > errorThreshold)) {
-//     //qDebug() << "Picking close to " << trainingPoint;
-//     m_pickCloseTo = trainingPoint;
-//     m_pickCloseToCountdown = 500;
-//   }
-  
-  reduceAllErrors();
-  m_stepCount++;
-  m_stepsSinceLastInsert++;
-}
-
-// single threaded run TODO more
-void GrowingNeuralGas::synchronousRun(int cycles)
-{
-  currentCycles = cycles;
-  run();
-}
-
-// start an asynchronous thread running for 'cycles' number of steps
-void GrowingNeuralGas::run(int cycles)
-{
-  currentCycles = cycles;
-  start(QThread::LowestPriority);
-}
-
-// multithreaded run TODO more
-void GrowingNeuralGas::run()
-{
-  Q_ASSERT(currentCycles > 0);
-  Q_ASSERT(m_pointGenerator->dimension() == m_dimension);
-  
-  m_timer.start(); // time milliseconds since gng was created
-  m_runtime = -1;
-  
-  // sleep(5); // sleep for 5 seconds to get the aibo going
-  
-  if (m_stepCount == 0) {
-    qDebug() << "Running the GNG for" << currentCycles << "cycles";
-  } else {
-    qDebug() << "Running the GNG for" << currentCycles << "additional cycles";
-  }
-  
-  for (int i=0; i<currentCycles; i++) {
-    if (m_delay != 0) {
-      usleep(m_delay*10);
-    }
-    if (i % 1000 == 0){
-      usleep(1000);
-    }
-    m_dataAccess->lock();
-    
-    while (m_paused) {
-      m_dataAccess->unlock();
-      usleep(10000);
-      m_dataAccess->lock();
-    }
-    
-    if (m_stepCount % m_updateInterval == 0) {
-      emit updated();
-    }
-    
-    Point nextPoint;
-//     if (false && m_pickCloseToCountdown > 0) {
-//       nextPoint = m_pointGenerator->generateNearbyPoint(m_pickCloseTo);
-//     } else {
-      nextPoint = m_pointGenerator->generatePoint();
-//     }
-    step(nextPoint);
-    m_dataAccess->unlock();
-    
-  }
-  m_runtime = m_timer.elapsed();
-}
-
-void GrowingNeuralGas::pause()
-{
-  m_dataAccess->lock();
-  m_paused = true;
-  m_dataAccess->unlock();
-}
-void GrowingNeuralGas::resume()
-{
-  m_dataAccess->lock();
-  m_paused = false;
-  m_dataAccess->unlock();
-}
-
-void GrowingNeuralGas::togglePause()
-{
-  m_dataAccess->lock();
-  m_paused = !m_paused;
-  m_dataAccess->unlock();
-}
 
 QList< Subgraph > GrowingNeuralGas::subgraphs() const
 {
@@ -505,14 +430,12 @@ QList< Subgraph > GrowingNeuralGas::subgraphs() const
  */
 void GrowingNeuralGas::generateSubgraphs()
 {
-  // TODO lock entire function?
   QHash<GngNode*, bool> nodeDict;
 
-  m_dataAccess->lock();
   foreach(GngNode* node, m_nodes){
     nodeDict.insert(node, true);
   }
-  //m_dataAccess->unlock();
+  //
 
   QList<Subgraph> subgraphList;
   while (!nodeDict.empty()){
@@ -551,9 +474,7 @@ void GrowingNeuralGas::generateSubgraphs()
     subgraph.clear();
   }
 
-  //m_dataAccess->lock();
   m_subgraphs = subgraphList;
-  m_dataAccess->unlock();
 }
 
 /*****************************
@@ -581,10 +502,10 @@ void GrowingNeuralGas::matchingSubgraph(){
   Subgraph exemplar;
   Subgraph best_subgraph; // best match to exemplar
 
-  m_dataAccess->lock();
+  
   exemplar = m_followSubgraph;
   subgraphs = m_subgraphs;
-  m_dataAccess->unlock();
+  
 
   foreach(Subgraph cur_subgraph, subgraphs){
     count = 0;
@@ -601,9 +522,9 @@ void GrowingNeuralGas::matchingSubgraph(){
   }
  
   // set new subgraph to follow 
-  m_dataAccess->lock();
+  
   m_followSubgraph = best_subgraph;
-  m_dataAccess->unlock();
+  
 }
 
 /**********************************
@@ -617,7 +538,7 @@ void GrowingNeuralGas::matchingSubgraph(){
  */
 void GrowingNeuralGas::assignFollowSubgraph(QColor targetColor)
 {
-  m_dataAccess->lock();
+  
   qreal hue, saturation, lightness;
   targetColor.getHslF(&hue, &saturation, &lightness);
   
@@ -643,16 +564,16 @@ void GrowingNeuralGas::assignFollowSubgraph(QColor targetColor)
   // set followSubgraph to subgraph at best indexOfBestMatch
   m_followSubgraph = m_subgraphs[indexOfBestMatch];
     
-  m_dataAccess->unlock();
+  
 }
 
 // prints subgraphs in a human-readable format
 // should be called using result from getSubgraphs
 void GrowingNeuralGas::printSubgraphs(bool printNodes) const
 {
-  m_dataAccess->lock();
+  
   QList<Subgraph> subgraphs = m_subgraphs;
-  m_dataAccess->unlock();
+  
 
   qDebug() << "Printing Subgraphs";
   qDebug() << "------------------";
@@ -680,12 +601,6 @@ Subgraph GrowingNeuralGas::followSubgraph() const
 
 
 // accessors
-QMutex* GrowingNeuralGas::mutex() const
-{
-  return m_dataAccess;
-}
-
-
 QList< GngNode* > GrowingNeuralGas::nodes() const
 {
   return m_nodes;
@@ -696,9 +611,9 @@ QList< Edge* > GrowingNeuralGas::uniqueEdges() const
   return m_uniqueEdges;
 }
 
-int GrowingNeuralGas::step() const
+int GrowingNeuralGas::currentStep() const
 {
-  return m_stepCount;
+  return m_currentStep;
 }
 
 bool GrowingNeuralGas::focusing() const
@@ -723,4 +638,43 @@ int GrowingNeuralGas::edgeHistoryAge(Edge* edge) const
 void GrowingNeuralGas::setPointGenerator(PointSource* pointGenerator)
 {
   m_pointGenerator = pointGenerator;
+}
+
+
+
+
+// Setting Parameters
+void GrowingNeuralGas::setDelay(int milliseconds) {
+  m_delay = milliseconds;
+}
+void GrowingNeuralGas::setUpdateInterval(int steps) {
+  m_updateInterval = steps;
+}
+
+void GrowingNeuralGas::setWinnerLearnRate(qreal learnRate) {
+  m_winnerLearnRate = learnRate;
+}
+void GrowingNeuralGas::setNeighborLearnRate(qreal learnRate) {
+  m_neighborLearnRate = learnRate;
+}
+
+void GrowingNeuralGas::setMaxEdgeColorDiff(qreal diff) {
+  m_maxEdgeColorDiff = diff;
+}
+
+void GrowingNeuralGas::setMaxEdgeAge(int steps) {
+  m_maxEdgeAge = steps;
+}
+void GrowingNeuralGas::setNodeInsertionDelay(int minStepsBetweenInsertions) {
+  m_minStepsBetweenInsertions = minStepsBetweenInsertions;
+}
+void GrowingNeuralGas::setTargetError(qreal targetAverageError) {
+  m_targetError = targetAverageError;
+}
+
+void GrowingNeuralGas::setErrorReduction(qreal reduceErrorBy) {
+  m_reduceErrorMultiplier = 1-reduceErrorBy;
+}
+void GrowingNeuralGas::setInsertErrorReduction(qreal reduceErrorBy) {
+  m_insertErrorMultiplier = 1-reduceErrorBy;
 }
