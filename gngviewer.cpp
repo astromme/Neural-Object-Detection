@@ -105,10 +105,6 @@ void GngViewer::paintEvent(QPaintEvent* e)
     return;
   }
   
-  // make sure the GNG doesn't change the nodes/subgraphs/edges while we're painting
-  while (!m_gng->mutex()->tryLock(5)) {
-    QCoreApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents, 5);
-  }
   painter.save();
   painter.setPen(Qt::NoPen);
   
@@ -198,11 +194,10 @@ void GngViewer::paintEvent(QPaintEvent* e)
   }
   
   // Draw stepcount
-  QString stepString = QString("Step %L1").arg(m_gng->step());
+  QString stepString = QString("Step %L1").arg(m_gng->currentStep());
   drawTextInFrame(&painter, QPoint(5, 5), stepString);
   drawTextInFrame(&painter, QPoint(5, 34), QString("%L1s").arg((qreal)m_gng->elapsedTime()/1000, 0, 'f', 2));
   
-  m_gng->mutex()->unlock();
 }
 
 void GngViewer::keyPressEvent(QKeyEvent* e)
