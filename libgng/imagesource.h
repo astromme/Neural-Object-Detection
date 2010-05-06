@@ -10,24 +10,28 @@
 
 class QMutex;
 
-class ImageSource : public QThread, public PointSource { 
-  public:
-    ImageSource(const QImage &image);
-    ~ImageSource();
+namespace GNG {
 
-    void setImage(const QImage &image);
-    
-    virtual Point generatePoint();
-    virtual Point generateNearbyPoint(const Point& nearThisPoint);
-    virtual int dimension();
+  class ImageSource : public QThread, public PointSource { 
+    public:
+      ImageSource(const QImage &image);
+      ~ImageSource();
 
-    int width() const;
-    int height() const;
+      void setImage(const QImage &image);
+      
+      virtual Point generatePoint();
+      virtual Point generateNearbyPoint(const Point& nearThisPoint);
+      virtual int dimension();
 
-  private:
-    QMutex *m_dataAccess;
-    QImage m_image;
-    Point pointFromXY(int x, int y);
-};
+      int width() const;
+      int height() const;
+
+    private:
+      QMutex *m_dataAccess;
+      QImage m_image;
+      Point pointFromXY(int x, int y);
+  };
+  
+}
 
 #endif // _IMAGEGENERATOR_H

@@ -5,14 +5,16 @@
 #include <QVector>
 #include <QPointF>
 
-class Point : public QVector<qreal> {
-  
-  public:
-    qreal distanceTo(const Point &other) const; //TODO document
-    qreal xyDistanceTo(const Point &other) const; //TODO document
-    qreal colorDistanceTo(const Point &other) const;
+namespace GNG {
+  class Point : public QVector<qreal> {
     
-    QPointF xyLocation() const;
-};
+    public:
+      qreal distanceTo(const Point &other) const; //TODO document
+      qreal xyDistanceTo(const Point &other) const; //TODO document
+      qreal colorDistanceTo(const Point &other) const;
+      
+      QPointF xyLocation() const;
+  };
+}
 
 #endif // _POINT_H

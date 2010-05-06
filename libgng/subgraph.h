@@ -5,14 +5,16 @@
 
 #include "point.h"
 
-class GngNode;
+namespace GNG {
+  class Node;
 
-class Subgraph : public QList<GngNode*> {
-  public:
-    Point center();
-        
-  private:
-    int m_window; // Steps that this is valid for
-};
+  class Subgraph : public QList<GNG::Node*> {
+    public:
+      Point center();
+          
+    private:
+      int m_window; // Steps that this is valid for
+  };
+}
 
 #endif // _SUBGRAPH_H

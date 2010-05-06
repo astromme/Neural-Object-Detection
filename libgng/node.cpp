@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <cstdlib>
 
+using namespace GNG;
+
 qreal realRand(qreal minimum, qreal maximum) {
   qreal rand = ((float)qrand())/RAND_MAX;
   rand *= maximum-minimum;
@@ -14,7 +16,7 @@ qreal realRand(qreal minimum, qreal maximum) {
   return rand;
 }
 
-GngNode::GngNode(Point location, int dimension, qreal min, qreal max)
+Node::Node(Point location, int dimension, qreal min, qreal max)
 {
   m_dimension = dimension;
   m_min = min;
@@ -31,16 +33,16 @@ GngNode::GngNode(Point location, int dimension, qreal min, qreal max)
   }
 }
 
-GngNode::~GngNode()
+Node::~Node()
 {
 }
 
-Point GngNode::location()
+Point Node::location()
 {
   return m_location;
 }
 
-QString GngNode::toString() const
+QString Node::toString() const
 {
   QString string = "[";
   foreach(qreal part, m_location) {
@@ -50,9 +52,9 @@ QString GngNode::toString() const
   return string;
 }
 
-bool GngNode::hasEdgeTo(const GngNode* other) const
+bool Node::hasEdgeTo(const Node* other) const
 {
-  foreach(GngNode *neighbor, neighbors()) {
+  foreach(Node *neighbor, neighbors()) {
     if (other == neighbor) {
       return true;
     }
@@ -60,7 +62,7 @@ bool GngNode::hasEdgeTo(const GngNode* other) const
   return false;
 }
 
-Edge* GngNode::getEdgeTo(const GngNode* other) const
+Edge* Node::getEdgeTo(const Node* other) const
 {
   foreach(Edge* edge, m_edges) {
     if (edge->to() == other) {
@@ -70,42 +72,42 @@ Edge* GngNode::getEdgeTo(const GngNode* other) const
   return 0;
 }
 
-void GngNode::appendEdge(Edge* edge)
+void Node::appendEdge(Edge* edge)
 {
   m_edges.append(edge);
 }
 
-void GngNode::removeEdge(Edge* edge)
+void Node::removeEdge(Edge* edge)
 {
   m_edges.removeAll(edge);
 }
 
-QList<GngNode*> GngNode::neighbors() const
+QList<Node*> Node::neighbors() const
 {
-  QList<GngNode*> neighbors;
+  QList<Node*> neighbors;
   foreach(Edge* edge, m_edges) {
     neighbors.append(edge->to());
   }
   return neighbors;
 }
 
-QList< Edge* > GngNode::edges() const
+QList< Edge* > Node::edges() const
 {
   return m_edges;
 }
 
-qreal GngNode::error() const
+qreal Node::error() const
 {
   return m_error;
 }
 
-void GngNode::setError(qreal error)
+void Node::setError(qreal error)
 {
   m_error = error;
 }
 
 // adjust position of node towards a given point and a learningRate
-void GngNode::moveTowards(const Point& point, qreal learningRate)
+void Node::moveTowards(const Point& point, qreal learningRate)
 {
   for (int i=0; i<point.size(); i++) {
     m_location[i] += learningRate*(point[i]-m_location[i]);

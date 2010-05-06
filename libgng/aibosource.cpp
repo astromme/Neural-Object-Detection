@@ -4,6 +4,8 @@
 #include <QtNetwork/QTcpSocket>
 #include <QMutex>
 
+using namespace GNG;
+
 AiboSource::AiboSource(const QString& hostname, QObject* parent)
   : Aibo(hostname, parent)
 {

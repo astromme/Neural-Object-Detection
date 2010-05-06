@@ -5,17 +5,19 @@
 #include <QWidget>
 #include <QTimer>
 
-class CameraSource;
-class GrowingNeuralGas;
-
+namespace GNG {
+  class CameraSource;
+  class GrowingNeuralGas;
+}
+  
 class GngViewer : public QWidget {
   Q_OBJECT
   public:
     GngViewer(QWidget *parent = 0);
     ~GngViewer();
     
-    void setGng(GrowingNeuralGas *gng);
-    void setSource(CameraSource *source);
+    void setGng(GNG::GrowingNeuralGas *gng);
+    void setSource(GNG::CameraSource *source);
     void setSource(const QPixmap &background);
     void setSize(int width, int height);
     
@@ -33,9 +35,9 @@ class GngViewer : public QWidget {
     QTimer m_repaintTimer;
     int m_width;
     int m_height;
-    GrowingNeuralGas *m_gng;
+    GNG::GrowingNeuralGas *m_gng;
     
-    CameraSource *m_cameraSource;
+    GNG::CameraSource *m_cameraSource;
     QPixmap m_background;
     bool m_paintBackground;
 };

@@ -2,6 +2,7 @@
 #include "libgng/imagesource.h"
 #include "gngviewer.h"
 
+using namespace GNG;
 
 GngApp::GngApp(int& argc, char** argv)
   : QApplication(argc, argv)

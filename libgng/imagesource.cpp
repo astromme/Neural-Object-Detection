@@ -8,6 +8,8 @@
 #include <QColor>
 #include <QMutex>
 
+using namespace GNG;
+
 ImageSource::ImageSource(const QImage& image)
 : PointSource(),
   m_image(image)

@@ -7,14 +7,18 @@
 
 #include "pointsource.h"
 
-class AiboSource : public Aibo, public PointSource {
-  Q_OBJECT
-  public:
-    AiboSource(const QString &hostname, QObject* parent = 0);
-    virtual ~AiboSource();
-    
-    virtual int dimension();
-    virtual Point generatePoint();
-};
+namespace GNG {
+
+  class AiboSource : public Aibo, public PointSource {
+    Q_OBJECT
+    public:
+      AiboSource(const QString &hostname, QObject* parent = 0);
+      virtual ~AiboSource();
+      
+      virtual int dimension();
+      virtual Point generatePoint();
+  };
+  
+}
 
 #endif //GNG_AIBOSOURCE_H

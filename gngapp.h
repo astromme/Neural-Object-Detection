@@ -5,7 +5,10 @@
 #include <QImage>
 #include <QTimer>
 
-class ImageSource;
+namespace GNG {
+  class ImageSource;
+}
+
 class GngViewer;
 
 class GngApp : public QApplication {
@@ -13,7 +16,7 @@ class GngApp : public QApplication {
   
   public:
     GngApp(int& argc, char** argv);
-    void setGenerator(ImageSource *gen);
+    void setGenerator(GNG::ImageSource *gen);
     void setViewer(GngViewer *view);
     void addImage(const QImage &image);
     void runMovie();
@@ -21,7 +24,7 @@ class GngApp : public QApplication {
   private:
     QTimer m_switchImageTimeout;
     QList<QImage> m_images;
-    ImageSource *m_generator;
+    GNG::ImageSource *m_generator;
     GngViewer *m_viewer;
     int m_currentImage;
     
