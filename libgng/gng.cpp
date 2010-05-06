@@ -657,40 +657,17 @@ qreal GrowingNeuralGas::targetError() const{ return m_targetError; }
 qreal GrowingNeuralGas::errorReduction() const{ return 1-m_reduceErrorMultiplier; }
 qreal GrowingNeuralGas::insertErrorReduction() const{ return 1-m_insertErrorMultiplier; }
 
+// Setters
+void GrowingNeuralGas::setDelay(int milliseconds) { m_delay = milliseconds; }
+void GrowingNeuralGas::setUpdateInterval(int steps) { m_updateInterval = steps; }
 
+void GrowingNeuralGas::setWinnerLearnRate(qreal learnRate) { m_winnerLearnRate = learnRate; }
+void GrowingNeuralGas::setNeighborLearnRate(qreal learnRate) { m_neighborLearnRate = learnRate; }
 
-// Setting Parameters
-void GrowingNeuralGas::setDelay(int milliseconds) {
-  m_delay = milliseconds;
-}
-void GrowingNeuralGas::setUpdateInterval(int steps) {
-  m_updateInterval = steps;
-}
+void GrowingNeuralGas::setMaxEdgeAge(int steps) { m_maxEdgeAge = steps; }
+void GrowingNeuralGas::setMaxEdgeColorDiff(qreal diff) { m_maxEdgeColorDiff = diff; }
+void GrowingNeuralGas::setNodeInsertionDelay(int minStepsBetweenInsertions) { m_minStepsBetweenInsertions = minStepsBetweenInsertions; }
+void GrowingNeuralGas::setTargetError(qreal targetAverageError) { m_targetError = targetAverageError; }
 
-void GrowingNeuralGas::setWinnerLearnRate(qreal learnRate) {
-  m_winnerLearnRate = learnRate;
-}
-void GrowingNeuralGas::setNeighborLearnRate(qreal learnRate) {
-  m_neighborLearnRate = learnRate;
-}
-
-void GrowingNeuralGas::setMaxEdgeColorDiff(qreal diff) {
-  m_maxEdgeColorDiff = diff;
-}
-
-void GrowingNeuralGas::setMaxEdgeAge(int steps) {
-  m_maxEdgeAge = steps;
-}
-void GrowingNeuralGas::setNodeInsertionDelay(int minStepsBetweenInsertions) {
-  m_minStepsBetweenInsertions = minStepsBetweenInsertions;
-}
-void GrowingNeuralGas::setTargetError(qreal targetAverageError) {
-  m_targetError = targetAverageError;
-}
-
-void GrowingNeuralGas::setErrorReduction(qreal reduceErrorBy) {
-  m_reduceErrorMultiplier = 1-reduceErrorBy;
-}
-void GrowingNeuralGas::setInsertErrorReduction(qreal reduceErrorBy) {
-  m_insertErrorMultiplier = 1-reduceErrorBy;
-}
+void GrowingNeuralGas::setErrorReduction(qreal reduceErrorBy) { m_reduceErrorMultiplier = 1-reduceErrorBy; }
+void GrowingNeuralGas::setInsertErrorReduction(qreal reduceErrorBy) { m_insertErrorMultiplier = 1-reduceErrorBy; }
