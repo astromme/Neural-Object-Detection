@@ -92,8 +92,7 @@ Point CameraSource::pointFromXY(int x, int y)
   QColor rgb = QColor::fromRgb(s.val[2], s.val[1], s.val[0]);
   QColor hsl = rgb.toHsl();
   
-  Point p;
-  p.resize(dimension());
+  Point p(dimension());
   p[0] = normalize(x, width());
   p[1] = normalize(y, height());
 

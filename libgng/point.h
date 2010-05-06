@@ -9,6 +9,11 @@ namespace GNG {
   class Point : public QVector<qreal> {
     
     public:
+      // Warning, use with care. To put any data in you must call resize()
+      Point();
+      
+      Point(int dimension);
+      
       qreal distanceTo(const Point &other) const; //TODO document
       qreal xyDistanceTo(const Point &other) const; //TODO document
       qreal colorDistanceTo(const Point &other) const;

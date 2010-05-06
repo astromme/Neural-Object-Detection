@@ -379,8 +379,7 @@ qreal GrowingNeuralGas::averageError()
 
 // returns a point object located at the midpoint between two points
 Point midpoint(const Point &p1, const Point &p2) {
-  Point p3;
-  p3.resize(p1.size());
+  Point p3(p1.size());
   
   for (int i=0; i<p1.size(); i++) {
     p3[i] = (p1.at(i) + p2.at(i))/2;
@@ -544,8 +543,7 @@ void GrowingNeuralGas::assignFollowSubgraph(QColor targetColor)
   qreal hue, saturation, lightness;
   targetColor.getHslF(&hue, &saturation, &lightness);
   
-  Point exemplar;
-  exemplar.resize(5);
+  Point exemplar(m_dimension);
   exemplar[0] = 0; exemplar[1] = 0;
   exemplar[2] = hue; exemplar[3] = saturation; exemplar[4] = lightness;
  

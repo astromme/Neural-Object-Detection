@@ -16,7 +16,7 @@ qreal realRand(qreal minimum, qreal maximum) {
   return rand;
 }
 
-Node::Node(Point location, int dimension, qreal min, qreal max)
+Node::Node(const Point &location, int dimension, qreal min, qreal max)
 {
   m_dimension = dimension;
   m_min = min;
@@ -25,7 +25,7 @@ Node::Node(Point location, int dimension, qreal min, qreal max)
   m_error = 0;
   
 
-  if (m_location.isEmpty()) {
+  if (m_location.isEmpty() || m_location.size() != dimension) {
     m_location.resize(dimension);
     for (int i=0; i<dimension; i++) {
       m_location[i] = realRand(min, max);

@@ -36,8 +36,7 @@ int ImageSource::dimension()
 
 Point ImageSource::pointFromXY(int x, int y)
 {
-  Point p;
-  p.resize(5);
+  Point p(dimension());
   p[0] = normalize(x, width());
   p[1] = normalize(y, height());
 

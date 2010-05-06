@@ -36,8 +36,7 @@ Point Subgraph::center()
   saturation /= size();
   lightness /= size();
   
-  Point avg;
-  avg.resize(5);
+  Point avg(5);
   avg[0] = x;
   avg[1] = y;
   avg[2] = hue;

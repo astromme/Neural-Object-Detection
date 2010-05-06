@@ -5,6 +5,17 @@
 
 using namespace GNG;
 
+Point::Point()
+{
+
+}
+
+Point::Point(int dimension)
+  : QVector<qreal>()
+{
+  resize(dimension);
+}
+
 qreal Point::distanceTo(const Point &other) const {
   qreal dist = 0;
   

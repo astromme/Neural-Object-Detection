@@ -25,8 +25,7 @@ Point AiboSource::generatePoint()
   m_dataAccess->lock();
   
   if (!isCameraRunning()) {
-    Point p;
-    p.resize(dimension());
+    Point p(dimension());
     p.fill(0);
     return p;
   }
@@ -36,8 +35,7 @@ Point AiboSource::generatePoint()
   QColor rgb = cameraImage().pixel(x, y);
   QColor hsl = rgb.toHsl();
   
-  Point p;
-  p.resize(dimension());
+  Point p(dimension());
   p[0] = normalize(x, cameraImage().width());
   p[1] = normalize(y, cameraImage().height());
   
