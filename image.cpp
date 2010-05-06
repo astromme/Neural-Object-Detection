@@ -35,15 +35,15 @@ typedef struct s_popts {
 bool parse_args(int argc, char* argv[], ProgOpts& popts);
 
 int main(int argc, char* argv[]) {
-  // get command-line arguments
-	ProgOpts popts;
-	if(!parse_args(argc, argv, popts))
-	  exit(1);
-
-  QString imagePath = QString::fromStdString(popts.imagePath);
-  
   // Create our QApplication object. Needed for the gui and for threading
   QApplication app(argc, argv);
+  
+  // get command-line arguments
+  ProgOpts popts;
+  if(!parse_args(argc, argv, popts))
+    exit(1);
+
+  QString imagePath = QString::fromStdString(popts.imagePath);
 
   // Create the GNG object with bounds of 0 and 1.
   GrowingNeuralGas gng(5);
