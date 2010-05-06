@@ -642,6 +642,22 @@ void GrowingNeuralGas::setPointGenerator(PointSource* pointGenerator)
 
 
 
+// Getters
+int GrowingNeuralGas::delay() const{ return m_delay; }
+int GrowingNeuralGas::updateInterval() const{ return m_updateInterval; }
+
+qreal GrowingNeuralGas::winnerLearnRate() const{ return m_winnerLearnRate; }
+qreal GrowingNeuralGas::neighborLearnRate() const{ return m_neighborLearnRate; }
+
+int GrowingNeuralGas::maxEdgeAge() const{ return m_maxEdgeAge; }
+qreal GrowingNeuralGas::maxEdgeColorDiff() const{ return m_maxEdgeColorDiff; }
+int GrowingNeuralGas::nodeInsertionDelay() const{ return m_minStepsBetweenInsertions; }
+qreal GrowingNeuralGas::targetError() const{ return m_targetError; }
+
+qreal GrowingNeuralGas::errorReduction() const{ return 1-m_reduceErrorMultiplier; }
+qreal GrowingNeuralGas::insertErrorReduction() const{ return 1-m_insertErrorMultiplier; }
+
+
 
 // Setting Parameters
 void GrowingNeuralGas::setDelay(int milliseconds) {

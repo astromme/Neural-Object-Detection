@@ -24,7 +24,16 @@ namespace GNG {
 
   class GrowingNeuralGas : public QObject {
     Q_OBJECT
-  
+    Q_PROPERTY(int delay READ delay WRITE setDelay);
+    Q_PROPERTY(int updateInterval READ updateInterval WRITE setUpdateInterval);
+    Q_PROPERTY(qreal winnerLearnRate READ winnerLearnRate WRITE setWinnerLearnRate);
+    Q_PROPERTY(qreal neighborLearnRate READ neighborLearnRate WRITE setNeighborLearnRate);
+    Q_PROPERTY(int maxEdgeAge READ maxEdgeAge WRITE setMaxEdgeAge);
+    Q_PROPERTY(int maxEdgeColorDiff READ maxEdgeColorDiff WRITE setMaxEdgeColorDiff);
+    Q_PROPERTY(int targetError READ targetError WRITE setTargetError);
+    Q_PROPERTY(qreal errorReduction READ errorReduction WRITE setErrorReduction);
+    Q_PROPERTY(qreal insertErrorReduction READ insertErrorReduction WRITE setInsertErrorReduction);
+    
     public:
       GrowingNeuralGas(int dimension, qreal minimum = 0, qreal maximum = 1);
       ~GrowingNeuralGas();
@@ -52,6 +61,22 @@ namespace GNG {
 
       Point focusPoint() const;
       bool focusing() const;
+      
+      
+      
+      int delay() const;
+      int updateInterval() const;
+      
+      qreal winnerLearnRate() const;
+      qreal neighborLearnRate() const;
+      
+      int maxEdgeAge() const;
+      qreal maxEdgeColorDiff() const;
+      int nodeInsertionDelay() const;
+      qreal targetError() const;
+      
+      qreal errorReduction() const;
+      qreal insertErrorReduction() const;
 
       void setDelay(int milliseconds);
       void setUpdateInterval(int steps); /**< Emit signal updated() once per this number of steps */
