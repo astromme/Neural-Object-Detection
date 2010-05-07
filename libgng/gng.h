@@ -97,8 +97,11 @@ namespace GNG {
       void updated();    
       
     public slots:
+      /** Start the GNG. It will run asynchronously, iterating during idle cpu time */
       void start();
+      /** Stop the GNG. It will no longer run asynchronously */
       void stop();
+      /** Starts or stops the GNG based on its current state */
       void togglePause();
       
     private slots:
