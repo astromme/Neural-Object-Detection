@@ -9,7 +9,6 @@ static QImage IplImageToQImage(const IplImage  *iplImage, uchar **data , bool mi
 
 CameraSource::CameraSource()
 {
-  m_dataAccess = new QMutex();
   m_nextFrameTimer.setInterval(40);
   connect(&m_nextFrameTimer, SIGNAL(timeout()), SLOT(processNextFrame()));
   m_frame = 0;
@@ -28,18 +27,21 @@ CameraSource::~CameraSource()
 //   delete m_frame;
 }
 
-void CameraSource::run()
+void CameraSource::start()
 {
   m_nextFrameTimer.start();
 }
+void CameraSource::stop()
+{
+  m_nextFrameTimer.stop();
+}
+
 
 void CameraSource::processNextFrame()
 {
-  m_dataAccess->lock();
   cvGrabFrame(m_device);
   m_frame = cvRetrieveFrame(m_device);
   convertFrameToImage();
-  m_dataAccess->unlock();
   emit imageUpdated();
 }
 
@@ -84,9 +86,7 @@ Point CameraSource::generatePoint()
 Point CameraSource::pointFromXY(int x, int y)
 {
   CvScalar s;
-  m_dataAccess->lock();
   s=cvGet2D(m_frame, y, x); // get the (row,col) pixel value 
-  m_dataAccess->unlock();
   
   // 2 1 0 because data is BGR not RGB
   QColor rgb = QColor::fromRgb(s.val[2], s.val[1], s.val[0]);

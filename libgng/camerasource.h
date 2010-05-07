@@ -1,8 +1,7 @@
 #ifndef GNG_CAMERASOURCE_H
 #define GNG_CAMERASOURCE_H
 
-#include <QThread>
-#include <QMutex>
+#include <QObject>
 #include <QImage>
 #include <QTimer>
 
@@ -13,7 +12,7 @@
 
 namespace GNG {
   
-  class CameraSource : public QThread, public PointSource {
+  class CameraSource : public QObject, public PointSource {
     Q_OBJECT
     public:
       CameraSource();
@@ -24,8 +23,9 @@ namespace GNG {
       
       int width();
       int height();
-    
-      virtual void run();
+      
+      void start();
+      void stop();
       
       QImage image() const;
     
@@ -38,7 +38,6 @@ namespace GNG {
     private:
       Point pointFromXY(int x, int y);
       void convertFrameToImage();
-      QMutex *m_dataAccess;
       QImage m_image;
       uchar* m_imageData;
       QTimer m_nextFrameTimer;

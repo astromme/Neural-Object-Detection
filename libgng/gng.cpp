@@ -641,7 +641,6 @@ void GrowingNeuralGas::setPointGenerator(PointSource* pointGenerator)
 }
 
 
-
 // Getters
 int GrowingNeuralGas::delay() const{ return m_delay; }
 int GrowingNeuralGas::updateInterval() const{ return m_updateInterval; }
