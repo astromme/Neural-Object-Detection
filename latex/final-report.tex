@@ -344,6 +344,8 @@ Our modified implementation of Growing Neural Gas is not without its limitations
 \section{Discussion}
 \label{sec:discussion}
 
+We have introduced an extension of the GNG algorithm, the Aging Growing Neural Gas (AGiNG), specifically aimed at  object detection and tracking. We can identify objects by sending color and distance information as input, keeping a close eye on two types of edge age, and using domain-specific knowledge to cull edges or disallow their creation. Our graph thus represents distinct objects represented as disjoint subgraphs. We can use efficient traversal algorithms to identify and track these subgraphs as objects move through the scene. We have described the changes we made to the original algorithm and have shown the effects of our modifications. Finally, we have detailed experiments showing where the AGiNG performed well and where there is room for improvement. Importantly, we have shown that one does not necessarily need to rely on edge detection heuristics to accurately identify objects. Using just color and distance information, we can accurately classify and track objects as they move through a scene.
+
 \section{Future Work}
 \label{sec:future}
 
