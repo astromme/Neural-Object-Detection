@@ -6,6 +6,9 @@
 \usepackage{url}
 \usepackage{graphicx}
 \usepackage{subfigure}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{tabularx}
 %\usepackage{paralist}
 %\usepackage{mdwlist}
 \newcommand{\comment}[1]{}
@@ -58,6 +61,10 @@ Using edge detection is one popular method used to track objects. Objects can be
 
 We now describe two viable methods of object detection very different from our own. In \citeA{viola}, a machine learning algorithm called AdaBoost is used to identify human faces in portraits and group pictures. AdaBoost takes as input selected details about an image. For example, sample input could be Haar-like features which provide local information about the image and can be computed efficiently. AdaBoost is trained on {\em positive} and {\em negative} examples which must be hand selected. The algorithm outputs an ordered set of classifiers that can be used to accurately split the positive examples from the negatives. \citeA{papageorgiou} discuss using Haar wavelet functions, which are similar to Haar-like features, to identify faces and to follow objects moving through a scene. The primary machine learning technique used is a support vector machine (SVM) which works to create a linear separator on mult-dimensional data that maximizes the margin of error. Using this technique the authors were able to implement viable motion detection but they note that their method ``does not totally rely on motion to accomplish detection'' (p~561). In both these cases we see an expensive initial training period that can be used to categorize a very specific class of objects. What we are proposing is a less powerful but also less expensive algorithm that requires no such training period.
 
+AGiNG is built on top of the Growing Neural Gas (GNG) algorithm as first introduced in \citeA{fritzke}. Growing Neural Gas is a vector quantization method in which many input vectors are reduced to a few key vectors that categorize parts of the input space. A GNG works by maintaining a set of nodes which correspond to categories (groups of similar vectors). The vectors representing these nodes are shifted as the GNG receives sample input vectors from the problem space. The GNG maintains a running average of the total error in classification that is reduced slightly each time step. When a new unit is added it acquires some percentage of this running average. New units are added on a periodic basis regardless of how well the GNG is classifying the input space. This leads to questions about when the GNG should be stopped because it will continuously add new units until stopped. The GNG works to calculate error by selecting units that are close in vector distance to the sample input point. The two closest points are the ones that are shifted towards the input and the distance between them and the input is considered the error. Edges are added between nodes that were selected as the closest two points and nodes can be removed when they no longer have edges connecting them to other nodes.
+
+The original Growing Neural Gas algorithm has significant limitations, some of which are addressed in \citeA{holmstrom}. The GNG is noted as poorly responding to changing inputs and two modifications are discussed. The first, GNG-U adds a utility to each node that quantifies the reduction in error that particular node provides. This utility factor is updated as sample input points are processed. The utility can be used to remove points that do not provide a significant reduction in error. However, this method is not without its caveat. There is a small domain and instance specific range of values that can be chosen for the threshold to remove units based on low utility. Setting the value too low results in no units being removed while setting the value too high results in all the units being removed. The second improvement to GNG is the addition of supervision known as SGNG. In this case the GNG provides the hidden layer for a neural network topology. In this case the set of possible input vectors is changed as the GNG develops because it is a feedback loop within the neural network. The SGNG used in \citeA{holmstrom} was successfully able to classify very specific input spaces using 12000-20000 iterations.
+
 \section{Growing Neural Gas}
 \label{sec:GNG}
 
@@ -89,7 +96,42 @@ Objects are defined as a combination of colors and distances between points in a
 
 It's important for similar colors to be represented by vectors that are close to each other. Because we are using euclidean distance this means that the 3 scalars representing each color need to be somewhat similar to those of other colors. The common color model Red Green Blue (RGB) creates each color by mixing various intensities of red, green and blue together. White is (255, 255, 255) and black is (0, 0, 0). The problem with this colorspace is that it is hard to express similar colors. For example, darkening a color is context specific. To darken a blue (0, 0, 255), you raise the green and red components but to darken a yellow (255, 255, 0) you raise only the blue component. This causes problems because we want a consistent numerical response for common human perceptions such as `lighter', `darker', `bluer', `more vivid' and so on.
 
-Our solution to this is to use the Hue Saturation Lightness (HSL) color model. In this model the hue describes what color the pixel is whereas saturation and value show how washed out the color is and how white/black it is. An image where each pixel's saturation was set to zero would be a grayscale interpretation of that image. Similarly, an image where each pixel's lightness was set to zero would be a completely white image. This color model has a number of benefits. Firstly colors that are similar to human perception tend to be similar in the HSL color model. Secondly it is surprisingly resilient to changes in lighting. As the image gets brighter or darker often only the lightness value changes.
+Our solution to this is to use the Hue Saturation Lightness (HSL) color model. In this model the hue describes what color the pixel is whereas saturation and value show how washed out the color is and how white/black it is. An image where each pixel's saturation was set to zero would be a grayscale interpretation of that image. Similarly, an image where each pixel's lightness was set to zero would be a completely white image. This color model has a number of benefits. Firstly colors that are similar to human perception tend to be similar in the HSL color model. Secondly it is surprisingly resilient to changes in lighting. As the image gets brighter or darker often only the lightness value changes. This resilisency makes it a better choice than the RGB and HSV\footnote{Hue Saturation Value (HSV) is a colorspace similar to HSL where the Value provides a black to saturation scale rather than a black to saturation to white scale (as Lightness does).}
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{colorspace_comparison_application.png}
+  \end{center}
+  \caption{Colorspace comparisons between a light purple and a dark purple. HSL has the advantage here, correctly indicating that these colors are similar.}
+  \label{fig:colorspaceComparison}
+\end{figure}
+
+{%
+\newcommand{\mc}[3]{\multicolumn{#1}{#2}{#3}}
+\definecolor{lightBlue}{rgb}{0,0,1}
+\definecolor{darkBlue}{rgb}{0,0,0.501961}
+\definecolor{darkRed}{rgb}{0.501961,0,0}
+\definecolor{lightRed}{rgb}{1,0,0}
+\definecolor{black}{rgb}{0,0,0}
+\definecolor{lightGreen}{rgb}{0,1,0}
+\definecolor{lightYellow}{rgb}{1,1,0}
+\begin{table*}
+\begin{center}
+\begin{tabular}{ccccc}
+% use packages: color,colortbl
+First Color & Second Color & RGB Dist & HSV Dist & HSL Dist\\
+\mc{1}{>{\columncolor{lightBlue}}c}{×} & \mc{1}{>{\columncolor{darkBlue}}c}{×} & 127 & 127 & 64\\
+\mc{1}{>{\columncolor{darkRed}}c}{×} & \mc{1}{>{\columncolor{darkBlue}}c}{×} & 181 & 240 & 240\\
+\mc{1}{>{\columncolor{lightRed}}c}{×} & \mc{1}{>{\columncolor{darkBlue}}c}{×} & 285 & 272 & 248\\
+× & \mc{1}{>{\columncolor{black}}c}{×} & 441 & 255 & 255\\
+\mc{1}{>{\columncolor{lightGreen}}c}{×} & \mc{1}{>{\columncolor{lightYellow}}c}{×} & 255 & 60 & 60\\
+\mc{1}{>{\columncolor{black}}c}{×} & \mc{1}{>{\columncolor{darkBlue}}c}{×} & 128 & 373 & 357
+\end{tabular}
+\end{center}
+\caption{Some examples of colors and their respective distances in the three colorspace models. {\bf I`m not so sure about this wording.. thoughts? } `Good' values are subjective, based on the authors' ideas on what colors are likely to be part of the same object in an image seen by the computer or robot.}
+\end{table*}
+}%
+
 
 
 \subsection{Distance Calculation}
@@ -368,8 +410,11 @@ We have introduced an extension of the GNG algorithm, the Aging Growing Neural G
 \section{Future Work}
 \label{sec:future}
 
+We realize that we are giving the GNG an enormous amount of input points. In a 1000x1000 pixel image, similar in size to the ones that were used in this paper, the GNG would have to perform one million iterations to visit every pixel. This is obviously not happening with 10000 iterations. Inputs are selected randomly which should help the GNG in classifying the entire image instead of just parts of it but because it is random there is a chance that it will not provide critical points as input vectors. One way to help this might be to simplify the images, reducing their resolution. A 100x100 pixel image can have much of the same large-scale detail and only requires ten thousand iterations to fully visit. This is much more within the realm of the speeds seen using the C++ implementation of libgng shown in this paper.
+
+The GNG was also seen to be very sensitive to changes in the distance function between two points. The different parts of color and distance need to be weighted properly to get valid results. One thought was to reduce the color information to a grayscale image. This would reduce the number of color inputs from 3 to 1, which would bring down the total number of inputs to the GNG down to only 3 (x, y, grayscale). This would intrinsically weight the physical distance more than the color distance and might render the artificially increased physical distance unnecessary. It might also allow us to run the GNG with a smaller error threshold and still perform the same number of iterations because fewer computations are needed. As shown above, { \bf RYAN, help with citing the section about 4 sheets of paper? } a smaller error threshold allows the GNG to detect and classify smaller objects.
+
 \begin{itemize}
-  \item Reduce resolution
   \item Black and white only
   \item make error more precise as time goes on if not enough subgraphs
   \item more robust AIBO object-following mechanisms
