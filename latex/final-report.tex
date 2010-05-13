@@ -132,7 +132,9 @@ First Color & Second Color & RGB Dist & HSV Dist & HSL Dist\\
 \end{table*}
 }%
 
+\subsection{gngviewer}
 
+Because of the incremental nature of our modifications to the GNG we needed a solid way of visualizing the results of the GNG. From this need the gngviewer emerged. The viewer is domain-specific, it assumes a GNG with inputs that contain pixel information. The viewer runs asynchronously from the GNG and provides a continuously updating view of how the GNG is changing. It provides layers that show the nodes along with their color information, the edges and the subgraphs that have been generated.
 
 \subsection{Distance Calculation}
 
@@ -158,11 +160,6 @@ In Figure \ref{fig:distModification} we see a clear effect of the distance modif
   \caption{GNG categorizing 2 sheets of paper with and without the distance modification.}
   \label{fig:distModification}
 \end{figure}
-
-\subsection{gngviewer}
-
-Because of the incremental nature of our modifications to the GNG we needed a solid way of visualizing the results of the GNG. From this need the gngviewer emerged. The viewer is domain-specific, it assumes a GNG with inputs that contain pixel information. The viewer runs asynchronously from the GNG and provides a continuously updating view of how the GNG is changing. It provides layers that show the nodes along with their color information, the edges and the subgraphs that have been generated.
-
 
 \section{Modifications to Growing Neural Gas}
 \label{sec:modificationsGNG}
@@ -199,7 +196,7 @@ Even with total edge age it is ambiguous how long an edge has been around for in
 
 \subsection{Edge History}
 
-One other value to track that is implemented in Aging but is currently not used for anything is a sense of edge history. This provides a per-edge counter that is incremented every time step when an edge is present between two nodes. If an edge is present for a while, then is removed but is subsequently re-added the counter remains intact. This is implemented using a hash table, hashing on the unique ids of the two nodes that the edge connects. A possible future use for this counter is to give a sense of how close nodes were throughout the history of the GNG. If nodes were close to each other there is a good chance that an edge would exist between them and thus the edge history would be high. This could be useful for objects that split apart and later reform.
+One other value to track that is implemented in AGiNG but is currently not used for anything is a sense of edge history. This provides a per-edge counter that is incremented every time step when an edge is present between two nodes. If an edge is present for a while, then is removed but is subsequently re-added the counter remains intact. This is implemented using a hash table, hashing on the unique ids of the two nodes that the edge connects. A possible future use for this counter is to give a sense of how close nodes were throughout the history of the GNG. If nodes were close to each other there is a good chance that an edge would exist between them and thus the edge history would be high. This could be useful for objects that split apart and later reform.
 
 \subsection{Color Barrier Across Object Boundaries}
 
