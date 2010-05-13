@@ -82,7 +82,7 @@ The GNG relies on randomly selected input vectors to create and arrange its node
 
 \subsection{libaibo}
 
-Libaibo is a small C++ library that is designed to be a simple and high level interface to the AIBO. It uses the remote control functionality of the Tekkotsu Framework \footnote{TODO: Complete \url{http://www.tekkotsu.org/}} and currently allows access to the camera data and head/body controls. The library also provides a PointSource that provides access to points points from the AIBO's camera. This is meant as a plug and play module to drop into a GNG instance. {\bf TODO: Say more?}
+Libaibo is a small C++ library that was written in tandem with libgng. It is designed to be a simple and high level interface to the AIBO. It uses the remote control functionality of the Tekkotsu Framework\footnote{Tekkotsu is a framework that runs on the AIBO. It provides a development environment for the AIBO as well as the network remote control that was used in libaibo. \url{http://www.tekkotsu.org/}} and currently allows access to the camera data and head/body controls. The library also provides a PointSource that provides access to points points from the AIBO's camera. This is meant as a plug and play module to drop into a GNG instance. To use the AIBO's camera no internal AGiNG code has to be changed; the existing PointSource is swapped out for the AIBO camera PointSource. Libaibo is used as a way to interface with a robot that is more real than static images and the noisy and low-resolution AIBO head camera provided good real-world tests for libgng and the AGiNG system. Additionally, the feedback loop provided by moving the AIBO's head in response to AGiNG's output allowed more thorough testing. 
 
 \section{Creating and Visualizing the Growing Neural Gas}
 \label{sec:creatingGNG}
@@ -128,7 +128,7 @@ First Color & Second Color & RGB Dist & HSV Dist & HSL Dist\\
 \mc{1}{>{\columncolor{black}}c}{×} & \mc{1}{>{\columncolor{darkBlue}}c}{×} & 128 & 373 & 357
 \end{tabular}
 \end{center}
-\caption{Some examples of colors and their respective distances in the three colorspace models. {\bf I`m not so sure about this wording.. thoughts? } `Good' values are subjective, based on the authors' ideas on what colors are likely to be part of the same object in an image seen by the computer or robot.}
+\caption{Some examples of colors and their respective distances in the three colorspace models. R, G, B, S, V, L all vary between [0, 255]. Hue varies between [0, 360]. {\bf I`m not so sure about this wording.. thoughts? } `Good' values are subjective, based on the authors' ideas on what colors are likely to be part of the same object in an image seen by the computer or robot.}
 \end{table*}
 }%
 
