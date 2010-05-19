@@ -120,14 +120,15 @@ void GrowingNeuralGas::runSingleStep()
   qreal first_hue = winners.first->location()[2];
   qreal second_hue = winners.second->location()[2];
 
-  if (averageError() > m_targetError || fabs(first_hue - second_hue) < m_maxEdgeColorDiff){
+  // color threshold
+//   if (averageError() > m_targetError || fabs(first_hue - second_hue) < m_maxEdgeColorDiff){
     if (winners.first->hasEdgeTo(winners.second)) {
       winners.first->getEdgeTo(winners.second)->resetAge();
       winners.second->getEdgeTo(winners.first)->resetAge();
     } else {
       connectNodes(winners.first, winners.second);
     }
-  }
+//   }
   
   // if GNG has not developed enough subgraphs, try lowering the target errorThreshold
   if (false && m_currentStep > 20000 && m_currentStep % 5000 == 0 && 

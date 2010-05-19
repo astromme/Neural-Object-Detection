@@ -162,9 +162,10 @@ void GngViewer::paintEvent(QPaintEvent* e)
     int edgeX = abs(x2 - x1)/2 + qMin(x1, x2);
     int edgeY = abs(y2 - y1)/2 + qMin(y1, y2);
    
-    if (edge->totalAge() < 2000)
-      drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->totalAge()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
+//    if (edge->totalAge() < 2000)
+//       drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->totalAge()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
     //drawTextInFrame(&painter, QPoint(edgeX, edgeY), QString::number(edge->lastUpdated()));// QString("%1 : %2").arg(age).arg(edge->totalAge()));
+
   }
   
   // Draw the nodes
